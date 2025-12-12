@@ -1,0 +1,15 @@
+# Python bytecode files
+*__pycache__/
+*.py[cod]
+*$py.class
+
+# Tex files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
