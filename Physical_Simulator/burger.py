@@ -329,20 +329,25 @@ def visualize_random_sample(out_dir="generated_1d_burgers/test", cmap="seismic",
 
 
 if __name__ == "__main__":
+    dir = "saved_dataset/generated_1d_burgers"
+    dir = "test/"
+
     generate_dataset_burgers(
-        out_dir="NFTM_for_Physic/generated_1d_burgers",
+        out_dir= dir,
         nbx=128,
         x_min=[-5, -2],
         x_max=[5, 2],
         dt=5e-3,
         n_steps=[256],
-        nu=np.linspace(0.01, 0.5, 30),
+        # nu=np.linspace(0.01, 0.5, 30),
+        nu = 0.5,
         speed=[1.0, 5.0],
         speed_random=True,  # Active la génération aléatoire entre 1.0 et 5.0
         boundary_condition=bc_neumann_zero,
-        ic_kinds=["sine","smooth"], # ["shock","rarefaction","sine","smooth"]
-        n_train=0, n_test=50,
+        # ic_kinds=["shock","rarefaction","sine","smooth"],
+        ic_kinds=["smooth"],
+        n_train=1, n_test=0,
         cfl_safety=1
     )
 
-    # visualize_random_sample("NFTM_for_Physic/generated_1d_burgers/train")
+    visualize_random_sample(os.path.join(dir, "train"))
