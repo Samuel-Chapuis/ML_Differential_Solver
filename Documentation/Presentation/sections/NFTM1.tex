@@ -1,0 +1,137 @@
+\section{NFTM on 1D Thermal Diffusion}
+
+% % ===== Slide 1 =====
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large Thermal Model}
+
+\vspace{0.6em}
+
+\begin{alertblock}{1D Heat Equation}
+
+\begin{equation*}
+   u_t = \alpha u_{xx} \Rightarrow
+   \begin{cases}
+      \partial_{xx} u(x_i,t^n) \approx \dfrac{u_{i+1}^n - 2u_i^n + u_{i-1}^n}{\Delta x^2} \\[1em]
+      \partial_t u(x_i,t^n) \approx \dfrac{u_i^{n+1} - u_i^n}{\Delta t}
+   \end{cases}
+\end{equation*}
+
+\end{alertblock}
+
+\begin{block}{Format}
+    Note that the equation is 1D, therefore, the plot shows a 2D grid (space x time) later on the slides.
+\end{block}
+
+\end{secframe}
+
+
+% ===== Slide 2 =====
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large Dataset Preparation}
+
+\vspace{0.6em}
+
+\begin{alertblock}{Boundary Conditions}
+\[
+d^2u/dx^2\big|_{i=0}=\frac{u_1-2u_0+u_0}{\Delta x^2}=\frac{u_1-u_0}{\Delta x^2}
+\]
+\end{alertblock}
+
+\begin{alertblock}{Initial Conditions}
+\begin{align*}
+    u_0(x)&=\exp\!\Big(-\frac{(x-\mu)^2}{2\sigma^2}\Big)\\
+    u_0(x)&=\mathbf{1}_{[a,b]}(x) \\
+    u_0(x)&=\tfrac12\big(1+\sin(2\pi k\,x/x_{\max}+\varphi)\big) \\
+    \tilde u(x)&\sim\text{Unif}(0,1)
+\end{align*}
+
+\end{alertblock}
+
+
+\end{secframe}
+
+% ===== Slide 3 =====
+\begin{secframe}
+\small
+% \textcolor{red_unipd}{\Large Dataset Preparation}
+
+\centering
+\begin{minipage}[b]{0.80\linewidth}
+    \includegraphics[width=\linewidth,keepaspectratio]{images/1DThemal/initial/gauss.png}
+    \includegraphics[width=\linewidth,keepaspectratio]{images/1DThemal/initial/box.png}
+    \includegraphics[width=\linewidth,keepaspectratio]{images/1DThemal/initial/sine.png}
+    \includegraphics[width=\linewidth,keepaspectratio]{images/1DThemal/initial/random.png}
+\end{minipage}
+
+\end{secframe}
+
+
+% ===== Slide 4 =====
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large Numerical Simulation}
+\vspace{0.6em}
+
+\centering
+\begin{minipage}[b]{0.80\linewidth}
+    \includegraphics[width=\linewidth,keepaspectratio]{images/1DThemal/init.png}
+    \includegraphics[width=\linewidth,keepaspectratio]{images/1DThemal/diffusion.png}
+\end{minipage}
+
+\end{secframe}
+
+
+% ===== Slide 5 =====
+
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large NFTM1D — Fixed Diffusion Coefficient}
+\vspace{0.6em}
+
+\begin{alertblock}{Fixed Parameter}
+    In this case the diffusion coefficient $\alpha$ is constant (not trainable).
+
+    The model applies a deterministic rule analogous to an explicit integration step:
+    \[
+      U_{t+1}(x) \;=\; U_t(x) + \alpha\,\Delta t\,\frac{\partial^2 U_t(x)}{\partial x^2}.
+    \]
+\end{alertblock}
+
+\begin{block}{Read/Write head}
+\begin{align*}
+    Read : & \quad \nabla^2 U(x_i) \approx U_{i-1} - 2U_i + U_{i+1} \\
+    Write : & \quad \Delta U = \alpha \, (\text{laplacian})
+\end{align*}
+\end{block}
+
+
+\end{secframe}
+
+% ===== Slide 6 =====
+
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large NFTM1D — Learned Coefficient}
+\vspace{0.6em}
+
+\begin{alertblock}{Learnable Parameter}
+    This extends NFTM1DBase by making the diffusion coefficient $\alpha$ a learnable parameter. Where, heteroscedastic loss used is:
+    \[
+        \mathcal{L}_{\text{hetero}} =
+        \frac{1}{2}\frac{(\Delta U_{\text{pred}} - \alpha \, \text{lap})^2}{\sigma^2}
+        + \frac{1}{2}\beta \log(\sigma^2)
+    \]
+
+\end{alertblock}
+
+\begin{block}{Read/Write head}
+\begin{align*}
+    Read : & r_t = \sum_i w_t(i) M_t(i) \quad become \quad \text{lap}_t(i) = U_{i-1} - 2U_i + U_{i+1} \\
+    Write : & \Delta U_t(i) = \alpha \cdot \text{lap}_t(i) \quad become \quad U_{t+1}(i) = U_t(i) + \Delta U_t(i)
+\end{align*}
+\end{block}
+
+
+\end{secframe}
