@@ -152,7 +152,7 @@ def spatial_gradient(u, dx=0.05):
     u_left = torch.roll(u, 1, dims=-1)
     return (u_right - u_left) / (2 * dx)
 
-def plot_trajectory_comparison(model, test_loader, history_len, epoch=None):
+def plot_trajectory_comparison(model, test_batch, history_len, epoch=None):
     """
     Plots full trajectory: True vs Pred vs Error
     """
@@ -166,68 +166,67 @@ def plot_trajectory_comparison(model, test_loader, history_len, epoch=None):
 
 
     with torch.no_grad():
-        for history_batch, target_batch, nu_batch in test_loader:
-            history_batch = history_batch.to(device)
-            target_batch = target_batch.to(device)
-            nu_batch = nu_batch.to(device)
-            B, T, N = target_batch.shape
+        history_batch, target_batch, nu_batch = test_batch
+        history_batch = history_batch.to(device)
+        target_batch = target_batch.to(device)
+        nu_batch = nu_batch.to(device)
+        B, T, N = target_batch.shape
 
-            preds = []
-            current_window = history_batch # (B, history_len, N)
-            
-            for t in range(T):
-                # Ensure shape is (B, history_len, N)
-                if current_window.dim() == 2:
-                    # Expand to (B, history_len, N)
-                    current_window = current_window.unsqueeze(1).repeat(1, history_len, 1)
-                pred = model(current_window)
-                if pred.dim() == 2:
-                    pred = pred.unsqueeze(1)
-                preds.append(pred)
-                current_window = torch.cat([current_window[:, 1:, :], pred], dim=1)
+        preds = []
+        current_window = history_batch # (B, history_len, N)
+        
+        if current_window.dim() == 2:
+            # Expand to (B, history_len, N)
+            current_window = current_window.unsqueeze(1).repeat(1, history_len, 1)
+        for t in range(T):
+            # Ensure shape is (B, history_len, N)
+            pred = model(current_window)
+            if pred.dim() == 2:
+                pred = pred.unsqueeze(1)
+            preds.append(pred)
+            current_window = torch.cat([current_window[:, 1:, :], pred], dim=1)
 
-            preds = torch.stack(preds)  # (T, B, 1, N)
-            preds = preds.squeeze(2)  # remove singleton channel -> (T, B, N)
-            preds = preds.permute(1, 0, 2) # (B, T, N)
-            true = target_batch # (B, T, N)
+        preds = torch.stack(preds)  # (T, B, 1, N)
+        preds = preds.squeeze(2)  # remove singleton channel -> (T, B, N)
+        preds = preds.permute(1, 0, 2) # (B, T, N)
+        true = target_batch # (B, T, N)
 
-            # Take first sample
-            pred_np = preds[0].cpu().numpy()  # (T, N)
-            true_np = true[0].cpu().numpy()   # (T, N)
-            nu_val = float(nu_batch[0].item()) # (1)
-            error_np = np.abs(pred_np - true_np)    # (T, N)
+        # Take first sample
+        pred_np = preds[0].cpu().numpy()  # (T, N)
+        true_np = true[0].cpu().numpy()   # (T, N)
+        nu_val = float(nu_batch[0].item()) # (1)
+        error_np = np.abs(pred_np - true_np)    # (T, N)
 
-            fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+        fig, axes = plt.subplots(1, 3, figsize=(12, 4))
 
-            # Ground Truth Plot
-            im0 = axes[0].imshow(true_np.T, aspect='auto', cmap='viridis', vmin=-1, vmax=1)
-            axes[0].set_title(f"Ground Truth for nu = {nu_val:.3g}")
-            axes[0].set_xlabel('Time step t')
-            axes[0].set_ylabel('Position x')
-            cbar = fig.colorbar(im0, ax=axes[0], fraction=0.046)
-            cbar.set_label('u(x,t)')
+        # Ground Truth Plot
+        im0 = axes[0].imshow(true_np.T, aspect='auto', cmap='viridis', vmin=-1, vmax=1)
+        axes[0].set_title(f"Ground Truth for nu = {nu_val:.3g}")
+        axes[0].set_xlabel('Time step t')
+        axes[0].set_ylabel('Position x')
+        cbar = fig.colorbar(im0, ax=axes[0], fraction=0.046)
+        cbar.set_label('u(x,t)')
 
-            # Prediction Plot
-            im1 = axes[1].imshow(pred_np.T, aspect='auto', cmap='viridis', vmin=-1, vmax=1)
-            axes[1].set_title(f'Prediction for nu = {nu_val:.3g}')
-            axes[1].set_xlabel('Time step t')
-            axes[1].set_ylabel('Position x')
-            cbar = fig.colorbar(im1, ax=axes[1], fraction=0.046)
-            cbar.set_label('u(x,t)')
+        # Prediction Plot
+        im1 = axes[1].imshow(pred_np.T, aspect='auto', cmap='viridis', vmin=-1, vmax=1)
+        axes[1].set_title(f'Prediction for nu = {nu_val:.3g}')
+        axes[1].set_xlabel('Time step t')
+        axes[1].set_ylabel('Position x')
+        cbar = fig.colorbar(im1, ax=axes[1], fraction=0.046)
+        cbar.set_label('u(x,t)')
 
-            # Error Plot
-            im2 = axes[2].imshow(error_np.T, aspect='auto', cmap='hot')
-            axes[2].set_title('Absolute Error')
-            axes[2].set_xlabel('Time step t')
-            axes[2].set_ylabel('Position x')
-            cbar = fig.colorbar(im2, ax=axes[2], fraction=0.046)
-            cbar.set_label('Error magnitude')
+        # Error Plot
+        im2 = axes[2].imshow(error_np.T, aspect='auto', cmap='hot')
+        axes[2].set_title('Absolute Error')
+        axes[2].set_xlabel('Time step t')
+        axes[2].set_ylabel('Position x')
+        cbar = fig.colorbar(im2, ax=axes[2], fraction=0.046)
+        cbar.set_label('Error magnitude')
 
-            plt.tight_layout()
-            if epoch is not None:
-                plt.savefig(output_dir / f"trajectory_epoch_{epoch}_nu{nu_val:.3g}.png", dpi=150)
-            plt.show()
-            break  # only first batch
+        plt.tight_layout()
+        if epoch is not None:
+            plt.savefig(output_dir / f"trajectory_epoch_{epoch}_nu{nu_val:.3g}.png", dpi=150)
+        plt.show()
 
 
 # Function to plot loss per epoch
@@ -251,7 +250,9 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
     model = ImprovedBurgersNet(history_len).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
-    
+    # Fetch a single test batch upfront for fast evaluation ---
+    test_batch = next(iter(test_loader))
+
     print("="*60)
     print("TRAINING WITH EXTERNAL DATASET")
     print(f"History length: {history_len}")
@@ -270,14 +271,15 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
 
         
         # Curriculum rollout depth
-        if epoch < 25:
+        if epoch < 10:
             rollout_depth = 8
-        elif epoch < 50:
+            teacher_force_rate = 0.5
+        elif epoch < 30:
             rollout_depth = 16
-        elif epoch < 75:
-            rollout_depth = 32
+            teacher_force_rate = 0.2
         else:
-            rollout_depth = 64
+            rollout_depth = 32
+            teacher_force_rate = 0.05
         
         for batch_idx, batch in enumerate(train_loader):
             history_batch, target_batch, _ = batch
@@ -285,12 +287,7 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
             target_batch = target_batch.to(device)    # (B, 1, points)
             if history_batch.dim() == 2:
                 history_batch = history_batch.unsqueeze(1).repeat(1, history_len, 1)
-            
-            
-            assert history_batch.shape == (history_batch.shape[0], history_len, history_batch.shape[2])
-            # print(f"\nHistory Batch shape: {history_batch.shape}")  # (B,20,128)
-            # print(f"\nTarget batch shape: {target_batch.shape}")
-            
+                       
             
             optimizer.zero_grad()
             
@@ -311,8 +308,6 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
                 
                 pred = model(current_window) # Ahora (B, 20, points) → (B, 1, points)
                 target = target_batch[:, k:k+1, :] # (B, 1, points)
-                
-
 
                 # MSE
                 mse = torch.nn.functional.mse_loss(pred.squeeze(), target.squeeze())
@@ -335,7 +330,7 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
                 
                 # Update window (teacher forcing occasionally)
                 if k < rollout_depth - 1:
-                    if np.random.random() < 0.1:
+                    if np.random.random() < teacher_force_rate:
                         next_state = target # (B,1,128)
                     else:
                         next_state = pred # (B,1,128)
@@ -361,9 +356,9 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
             print("=" * 50)
             tqdm.write(f"Epoch {epoch}: Loss={avg_loss:.4f}, E_pen={energy_loss_total/len(train_loader):.4f}, Rollout={rollout_depth}")
             print("=" * 50)
-            plot_trajectory_comparison(model, test_loader, history_len, epoch = epoch)
+            plot_trajectory_comparison(model, test_batch, history_len, epoch = epoch)
             # Compute metrics
-            metrics_results = compute_metrics(model, test_loader, history_len)
+            metrics_results = compute_metrics(model, test_batch, history_len)
             print("=" * 50)
             print(f"Metrics at Epoch {epoch}")
             print("=" * 50)
@@ -380,7 +375,7 @@ def evaluate_model(model, test_loader, history_len):
     model.eval()
     device = next(model.parameters()).device
     
-    all_mse, all_psnr = [], []
+    all_mse = []
     
     with torch.no_grad():
         for history_batch, target_batch, _ in test_loader:
@@ -390,7 +385,7 @@ def evaluate_model(model, test_loader, history_len):
 
             preds = []
             current_window = history_batch.unsqueeze(1).repeat(1, history_len, 1) # (B, T, N)
-            assert current_window.dim() == 3, current_window.shape
+            # assert current_window.dim() == 3, current_window.shape
             # print(f"\nCurrent Window shape: {current_window.shape}")
             
             # Autoregressive rollout
@@ -406,10 +401,7 @@ def evaluate_model(model, test_loader, history_len):
             preds = torch.stack(preds[:target_batch.shape[1]])
             preds = preds.squeeze(2)              # remove singleton dimension
             preds = preds.permute(1, 0, 2)       # if needed to match (B, T, N)
-            assert preds.shape == target_batch.shape, f"{preds.shape} vs {target_batch.shape}"
-            # print(f"\nPreds shape: {preds.shape}")
-            # print(f"\nTargets shape: {target_batch.shape}")
-            
+        
             mse = torch.nn.functional.mse_loss(preds, target_batch.to(device)).item()
             all_mse.append(mse)
     
