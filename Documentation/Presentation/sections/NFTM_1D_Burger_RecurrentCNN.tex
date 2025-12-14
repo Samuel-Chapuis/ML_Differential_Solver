@@ -6,41 +6,6 @@
 \begin{figure}[h]
 \centering
 
-% \begin{tikzpicture}[
-%   scale=0.6, every node/.style={transform shape},
-%   node distance=8mm,
-%   layer/.style={rectangle,draw,rounded corners,
-%                 minimum width=16mm,minimum height=6mm,align=center}
-% ]
-
-% \node[layer] (field) {$f_t \in \mathbb{R}^{N}$};
-% \node[layer, right=of field] (nu) {$\nu$};
-
-% \node[layer, below=of field] (cat) {concat \\ $(B,2,N)$};
-
-% \node[layer, below=of cat] (c1) {Conv1d 2$\to$32 \\ + ReLU};
-% \node[layer, below=of c1] (c2) {Conv1d 32$\to$64 \\ + ReLU};
-% \node[layer, below=of c2] (c3) {Conv1d 64$\to$32 \\ + ReLU};
-% \node[layer, below=of c3] (cout) {Conv1d 32$\to$1};
-
-% \node[layer, below=of cout] (delta) {$\Delta f_t$};
-% \node[layer, right=of delta] (sum) {$f_{t+1} = f_t + \Delta f_t$};
-
-% \draw[->] (field) -- (cat);
-% \draw[->] (nu.south) |- (cat.east);
-
-% \draw[->] (cat) -- (c1);
-% \draw[->] (c1) -- (c2);
-% \draw[->] (c2) -- (c3);
-% \draw[->] (c3) -- (cout);
-% \draw[->] (cout) -- (delta);
-
-% \draw[->] (field.east) |- (sum.north);
-% \draw[->] (delta.east) -- (sum.west);
-
-% \end{tikzpicture}
-
-
 \begin{tikzpicture}[
   scale=0.6, every node/.style={transform shape},
   node distance=8mm,
