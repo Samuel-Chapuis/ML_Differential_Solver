@@ -259,9 +259,7 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
     print("="*60)
     
     history = {'loss': [], 'energy_loss': []}
-    history_batch, target_batch, _ = next(iter(train_loader))
-    # print(f"\nHistory Batch shape: {history_batch.shape}")  # (B,20,128)
-    # print(f"\nTarget Batch shape: {target_batch.shape}")   # (B,256,128)
+
 
     for epoch in tqdm(range(num_epochs), desc="Training"):
         model.train()
@@ -385,8 +383,6 @@ def evaluate_model(model, test_loader, history_len):
 
             preds = []
             current_window = history_batch.unsqueeze(1).repeat(1, history_len, 1) # (B, T, N)
-            # assert current_window.dim() == 3, current_window.shape
-            # print(f"\nCurrent Window shape: {current_window.shape}")
             
             # Autoregressive rollout
             for _ in range(T):  # Fixed evaluation horizon
@@ -590,7 +586,7 @@ class BurgersMetrics:
 
 
 
-def compute_metrics(model, data_loader, history_len):
+def compute_metrics(model, test_batch, history_len):
     """Compute BurgersMetrics on the first batch of test data."""
     model.eval()
     device = next(model.parameters()).device
@@ -598,53 +594,53 @@ def compute_metrics(model, data_loader, history_len):
     mse_list, rel_l2_list, psnr_list, ssim_list, corr_list = [], [], [], [], []
 
     with torch.no_grad():
-        for history_batch, target_batch, nu_batch in data_loader:
-            history_batch = history_batch.to(device)
-            target_batch = target_batch.to(device)
-            nu_batch = nu_batch.to(device)
-            
-            B, T, N = target_batch.shape
+        history_batch, target_batch, nu_batch = test_batch
+        history_batch = history_batch.to(device)
+        target_batch = target_batch.to(device)
+        nu_batch = nu_batch.to(device)
+        
+        B, T, N = target_batch.shape
 
-            if history_batch.dim() == 2:  # (B, N) -> (B, history_len, N)
-                history_batch = history_batch.unsqueeze(1).repeat(1, history_len, 1)
-            B, H, N = history_batch.shape
+        if history_batch.dim() == 2:  # (B, N) -> (B, history_len, N)
+            history_batch = history_batch.unsqueeze(1).repeat(1, history_len, 1)
+        B, H, N = history_batch.shape
 
-            # Rollout predictions
-            preds = []
-            current_window = history_batch
-            # Ensure current_window has 3 dimensions: (B, history_len, N)
-            if current_window.dim() == 2:
-                current_window = current_window.unsqueeze(1).repeat(1, history_len, 1)
-            for t in range(T):
-                pred = model(current_window)
-                if pred.dim() == 2:       # (B, N) -> (B, 1, N)
-                    pred = pred.unsqueeze(1)
-                elif pred.shape[1] != 1:  # emergency check
-                    pred = pred[:, :1, :]
-                preds.append(pred)
-                current_window = torch.cat([current_window[:, 1:, :], pred], dim = 1)
-            
-            preds = torch.stack(preds, dim=1) # (B, T, N)
-            
-            preds_np = preds.numpy()
-            targets_np = target_batch.cpu().numpy() # (B, T, N)
-            
-            # Compute metrics for each sample in the batch
-            for b in range(B):
-                nu_val = nu_batch[b].item() if isinstance(nu_batch, torch.Tensor) else nu_batch[b]
-                metrics_obj = BurgersMetrics(nu=nu_val)
+        # Rollout predictions
+        preds = []
+        current_window = history_batch
+        # Ensure current_window has 3 dimensions: (B, history_len, N)
+        if current_window.dim() == 2:
+            current_window = current_window.unsqueeze(1).repeat(1, history_len, 1)
+        for t in range(T):
+            pred = model(current_window)
+            if pred.dim() == 2:       # (B, N) -> (B, 1, N)
+                pred = pred.unsqueeze(1)
+            elif pred.shape[1] != 1:  # emergency check
+                pred = pred[:, :1, :]
+            preds.append(pred)
+            current_window = torch.cat([current_window[:, 1:, :], pred], dim = 1)
+        
+        preds = torch.stack(preds, dim=1).cpu() # (B, T, N)
+        
+        preds_np = preds.numpy()
+        targets_np = target_batch.cpu().numpy() # (B, T, N)
+        
+        # Compute metrics for each sample in the batch
+        for b in range(B):
+            nu_val = nu_batch[b].item() if isinstance(nu_batch, torch.Tensor) else nu_batch[b]
+            metrics_obj = BurgersMetrics(nu=nu_val)
 
-                pred_b = preds_np[b]
-                true_b = targets_np[b]
-                pred_b = np.squeeze(pred_b)
-                true_b = np.squeeze(true_b)
-                assert pred_b.shape == true_b.shape, f"{pred_b.shape} vs {true_b.shape}"
+            pred_b = preds_np[b]
+            true_b = targets_np[b]
+            pred_b = np.squeeze(pred_b)
+            true_b = np.squeeze(true_b)
+            assert pred_b.shape == true_b.shape, f"{pred_b.shape} vs {true_b.shape}"
 
-                mse_list.append(metrics_obj.mse(pred_b, true_b))
-                rel_l2_list.append(metrics_obj.relative_l2(pred_b, true_b))
-                psnr_list.append(metrics_obj.psnr(pred_b, true_b))
-                ssim_list.append(metrics_obj.ssim_score(pred_b, true_b))
-                corr_list.append(np.mean(metrics_obj.correlation_per_timestep(pred_b, true_b)))
+            mse_list.append(metrics_obj.mse(pred_b, true_b))
+            rel_l2_list.append(metrics_obj.relative_l2(pred_b, true_b))
+            psnr_list.append(metrics_obj.psnr(pred_b, true_b))
+            ssim_list.append(metrics_obj.ssim_score(pred_b, true_b))
+            corr_list.append(np.mean(metrics_obj.correlation_per_timestep(pred_b, true_b)))
 
     # Average across all samples
     results = {
@@ -678,8 +674,10 @@ if __name__ == "__main__":
     # Train
     model, history, history_len = train_model(train_loader, test_loader, history_len)
     
+    # Fetch a single test batch upfront for fast evaluation ---
+    test_batch = next(iter(test_loader))
     # Evaluate
-    test_mse = evaluate_model(model, test_loader, history_len)
+    test_mse = evaluate_model(model, test_batch, history_len)
     print(f"Final Test MSE: {test_mse:.4e}")
     plot_epoch_losses(history, project_root/"saved_results/losses_over_epochs.png")
     # Final evaluation on test set
