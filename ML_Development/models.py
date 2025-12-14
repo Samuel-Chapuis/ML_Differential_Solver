@@ -1,55 +1,166 @@
 # models.py
 import torch
+# models.py
+import torch
 import torch.nn as nn
 
 
 
 # CNN Controller for NFTM
-class CNNController(nn.Module):
-    def __init__(self, field_size):
-        super().__init__()
-        self.field_size = field_size
+# class CNNController(nn.Module):
+#     def __init__(self, field_size):
+#         super().__init__()
+#         self.field_size = field_size
 
-        self.conv1 = nn.Conv1d(1, 32, kernel_size=5, padding=2)
-        self.bn1   = nn.BatchNorm1d(32)
-        # self.dropout1 = nn.Dropout(0.1)
+#         self.conv1 = nn.Conv1d(1, 32, kernel_size=5, padding=2)
+#         self.bn1   = nn.BatchNorm1d(32)
+#         # self.dropout1 = nn.Dropout(0.1)
 
-        self.conv2 = nn.Conv1d(32, 64, kernel_size=5, padding=2)
-        self.bn2   = nn.BatchNorm1d(64)
-        # self.dropout2 = nn.Dropout(0.1)
+#         self.conv2 = nn.Conv1d(32, 64, kernel_size=5, padding=2)
+#         self.bn2   = nn.BatchNorm1d(64)
+#         # self.dropout2 = nn.Dropout(0.1)
 
-        self.conv3 = nn.Conv1d(64, 32, kernel_size=5, padding=2)
-        self.bn3   = nn.BatchNorm1d(32)
-        # self.dropout3 = nn.Dropout(0.1)
+#         self.conv3 = nn.Conv1d(64, 32, kernel_size=5, padding=2)
+#         self.bn3   = nn.BatchNorm1d(32)
+#         # self.dropout3 = nn.Dropout(0.1)
 
-        self.conv_out = nn.Conv1d(32, 1, kernel_size=5, padding=2)
+#         self.conv_out = nn.Conv1d(32, 1, kernel_size=5, padding=2)
 
 
-        self._init_weights()
+#         self._init_weights()
 
-    def _init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv1d):
-                nn.init.xavier_uniform_(m.weight, gain=0.1)
-                if m.bias is not None:
-                    nn.init.zeros_(m.bias)
+#     def _init_weights(self):
+#         for m in self.modules():
+#             if isinstance(m, nn.Conv1d):
+#                 nn.init.xavier_uniform_(m.weight, gain=0.1)
+#                 if m.bias is not None:
+#                     nn.init.zeros_(m.bias)
 
-    def forward(self, field):
-        B, N = field.shape
-        x = field.unsqueeze(1)  # (B,1,N)
+#     def forward(self, field):
+#         B, N = field.shape
+#         x = field.unsqueeze(1)  # (B,1,N)
          
-        x = torch.relu(self.bn1(self.conv1(x)))
-        # x = self.dropout1(x)
+#         x = torch.relu(self.bn1(self.conv1(x)))
+#         # x = self.dropout1(x)
 
-        x = torch.relu(self.bn2(self.conv2(x)))
-        # x = self.dropout2(x)
+#         x = torch.relu(self.bn2(self.conv2(x)))
+#         # x = self.dropout2(x)
 
-        x = torch.relu(self.bn3(self.conv3(x)))
-        # x = self.dropout3(x)
+#         x = torch.relu(self.bn3(self.conv3(x)))
+#         # x = self.dropout3(x)
 
-        delta = self.conv_out(x).squeeze(1)  # (B, N)
-        pred_next_field = field + delta
-        return pred_next_field
+#         delta = self.conv_out(x).squeeze(1)  # (B, N)
+#         pred_next_field = field + delta
+#         return pred_next_field
+
+
+
+class TemporalCNNAttention(nn.Module):
+    """
+    Computes attention over the history window (time dimension W) for every 
+    spatial point (P). This layer uses CNNs to extract features and then 
+    determines which past field states are most relevant to the current prediction.
+    """
+    def __init__(self, window_size, embed_dim, n_points):
+        super().__init__()
+        self.embed_dim = embed_dim
+        
+        # Initial 1D CNN to map the single input channel to the embedding dimension (E) 
+        # and extract local spatial features (across P).
+        self.embedding = nn.Sequential(
+            nn.Conv1d(1, embed_dim, 3, padding=1),
+            nn.GELU()
+        )
+        
+        # Linear projections (1x1 Convs) for Attention components (Query, Key, Value)
+        self.query_proj = nn.Conv1d(embed_dim, embed_dim, 1)
+        self.key_proj = nn.Conv1d(embed_dim, embed_dim, 1)
+        self.val_proj = nn.Conv1d(embed_dim, embed_dim, 1)
+        self.out_proj = nn.Conv1d(embed_dim, embed_dim, 1)
+        
+        # Normalization layer after the attention operation
+        self.norm = nn.GroupNorm(4, embed_dim)
+
+    def forward(self, u_history):
+        # u_history shape: (B, W, P) -> (Batch, Window_Size, Points)
+        B, W, P = u_history.shape
+        # Flatten B and W dimensions to apply Conv1D over all W frames simultaneously
+        flat_hist = u_history.contiguous().view(B * W, 1, P)
+        
+        # 1. Feature Extraction (CNN Embedding): Embeds the spatial information of all frames
+        # Output shape after embedding: (B*W, E, P)
+        features_flat = self.embedding(flat_hist)
+        # Output shape: (B, W, E, P)
+        features = features_flat.reshape(B, W, self.embed_dim, P)
+
+
+        # 2. Attention Setup
+        # Query (Q): Generated ONLY from the last frame $u_t$ (causality)
+        last_frame_feat = features[:, -1, :, :] # (B, E, P)
+        Q = self.query_proj(last_frame_feat)
+
+        # Key (K) and Value (V): Generated from all frames in the window ($u_{t-W+1}$ to $u_t$)
+        K = self.key_proj(features_flat).reshape(B, W, self.embed_dim, P) 
+        V = self.val_proj(features_flat).reshape(B, W, self.embed_dim, P)
+
+        # 3. Compute Attention Scores (Dot product Q * K^T)
+        # Calculates relevance of each historical frame (W) for every spatial point (P)
+        scores = torch.einsum('bep,bwe p->bwp', Q, K) / (self.embed_dim ** 0.5)
+        attn_weights = torch.softmax(scores, dim=1) # Softmax ensures weights sum to 1 across the W dimension
+
+        # 4. Context Vector: Weighted sum of V using attention weights
+        # This is the aggregated history feature map (B, E, P)
+        context = torch.einsum('bwp,bwep->bep', attn_weights, V)
+        
+        out = self.out_proj(context)
+        
+        # Residual connection: Add the processed context back to the original last frame features
+        return self.norm(out + last_frame_feat)
+
+
+class CNNController(nn.Module):
+    """
+    The main Recurrent CNN Cell. Takes a history window (W) and predicts the 
+    correction ($\Delta$) to the last state ($u_t$) to get the next state ($u_{t+1}$).
+    This class combines the Temporal CNN Attention mechanism with a CNN decoder.
+    """
+    def __init__(self, field_size, window_size, corr_clip=0.15):
+        super().__init__()
+        self.corr_clip = corr_clip
+        embed_dim = 32
+        
+        # 1. Temporal Attention mechanism to fuse history features extracted by CNNs
+        self.attn = TemporalCNNAttention(window_size, embed_dim, field_size)
+        
+        # 2. CNN Decoder: Stack of 1D Convs to map the high-level context features 
+        # (E channels) back down to the single-channel correction ($\Delta$).
+        self.decoder = nn.Sequential(
+            nn.Conv1d(embed_dim, 32, 5, padding=2),
+            nn.GroupNorm(4, 32),
+            nn.GELU(),
+            nn.Conv1d(32, 1, 5, padding=2) # Final layer output is the correction $\Delta$
+        )
+        
+        # Stability initialization: Initialize the last layer to output near-zero
+        nn.init.zeros_(self.decoder[-1].weight)
+        nn.init.zeros_(self.decoder[-1].bias)
+
+    def forward(self, u_history):
+        # u_history shape: (B, W, P)
+        u_last = u_history[:, -1:, :] # (B, 1, P) - The current state, $u_t$
+        
+        # Get context-aware features from the attention block (B, E, P)
+        context_features = self.attn(u_history)
+        
+        # Decode features into the raw correction $\Delta$ (B, 1, P)
+        raw_correction = self.decoder(context_features) 
+        
+        # Tanh clipping: Limits the magnitude of the correction $\Delta$ for numerical stability
+        correction = torch.tanh(raw_correction) * self.corr_clip
+        
+        # Final Recurrent Prediction: $u_{t+1} = u_t + \Delta$
+        u_next = u_last.squeeze(1) + correction.squeeze(1) # Resulting shape: (B, P)
+        return u_next # Returns the predicted next state $u_{t+1}$
 
 
 class RNNControllerPatch(nn.Module):

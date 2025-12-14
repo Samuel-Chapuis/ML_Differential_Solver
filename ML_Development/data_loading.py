@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 import random
-
+import glob
 # -------- BurgersViscosityDataset --------
 # Alex use
 class BurgersDataset(Dataset):
@@ -14,7 +14,7 @@ class BurgersDataset(Dataset):
         # files_burger: dict {nu: path}
         self.trajs = [] # list of (T,N)
         self.nu_values = []   # scalar viscosities, one per traj
-
+        npz_files = list(folder_path.glob("*.npz"))
         for nu, path in files_burger.items():
             data = np.load(str(path.resolve()))['u'] # (100, T, N)
             data_t = torch.tensor(data, dtype = torch.float32) # (100, T, N)

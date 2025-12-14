@@ -1,6 +1,7 @@
 import os, random, collections.abc
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 
 class Grid1D:
@@ -329,8 +330,10 @@ def visualize_random_sample(out_dir="generated_1d_burgers/test", cmap="seismic",
 
 
 if __name__ == "__main__":
-    dir = "saved_dataset/generated_1d_burgers"
-    dir = "test/"
+    # Your data loading
+    project_root = Path(__file__).parent.parent
+    dir = project_root / "saved_dataset/generated_1d_burgers"
+    # dir = "test/"
 
     generate_dataset_burgers(
         out_dir= dir,
@@ -340,13 +343,13 @@ if __name__ == "__main__":
         dt=5e-3,
         n_steps=[256],
         # nu=np.linspace(0.01, 0.5, 30),
-        nu = 0.5,
+        nu = 0.05,
         speed=[1.0, 5.0],
         speed_random=True,  # Active la génération aléatoire entre 1.0 et 5.0
         boundary_condition=bc_neumann_zero,
         # ic_kinds=["shock","rarefaction","sine","smooth"],
         ic_kinds=["smooth"],
-        n_train=1, n_test=0,
+        n_train=30, n_test=0,
         cfl_safety=1
     )
 

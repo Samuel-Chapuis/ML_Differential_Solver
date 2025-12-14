@@ -4,6 +4,17 @@ import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from training import extract_spatial_patches
+import numpy as np
+import math
+from scipy import stats
+from visualization import plot_learning_progress
+
+
+DT = 0.0025        # Time step size (dt) - common for Burgers'
+DX = 2 * np.pi / 128 # Spatial step size (dx) - common for Burgers' 
+# Since N = 128
+
+
 
 def psnr(true: torch.Tensor, pred: torch.Tensor, max_val: float = 1.0) -> float:
     """
@@ -628,3 +639,131 @@ def error_evolution_on_loader(
         plt.show()
 
     return mean_error_per_time
+
+
+
+# ==========================================
+# 4. Evaluation Metrics
+# ==========================================
+
+class Metrics:
+    def __init__(self, dx=DX, dt=DT, nu=0.0):
+        self.dx = dx
+        self.dt = dt
+        self.nu = nu
+        self.zero_tolerance = 0.1 
+    
+    def mse(self, pred, gt):
+        return np.mean((pred - gt)**2)
+    
+    def relative_l2(self, pred, gt):
+        return np.linalg.norm(pred - gt) / (np.linalg.norm(gt) + 1e-10)
+    
+    def correlation_per_timestep(self, pred, gt):
+        correlations = []
+        for t in range(len(pred)):
+            if np.std(pred[t]) < 1e-10 or np.std(gt[t]) < 1e-10:
+                correlations.append(0.0)
+            else:
+                corr, _ = stats.pearsonr(pred[t].flatten(), gt[t].flatten())
+                correlations.append(corr)
+        return np.array(correlations)
+    
+    def mass(self, u):
+        return np.sum(u, axis=-1) * self.dx
+    
+    def mass_conservation_error(self, trajectory):
+        mass_t = self.mass(trajectory)
+        initial_mass = mass_t[0]
+        
+        if np.abs(initial_mass) < self.zero_tolerance:
+            return np.max(np.abs(mass_t - initial_mass))
+        else:
+            return np.max(np.abs(mass_t - initial_mass) / np.abs(initial_mass))
+    
+    def energy(self, u):
+        return 0.5 * np.sum(u**2, axis=-1) * self.dx
+    
+    def check_energy_monotonicity(self, trajectory):
+        energy_t = self.energy(trajectory)
+        energy_diff = np.diff(energy_t)
+        # Check percentage of steps where energy does not increase
+        return np.mean(energy_diff <= 1e-6)
+    
+
+
+# ==========================================
+# 5. Evaluation & Main Execution
+# ==========================================
+
+def evaluate_model(model, test_loader, window_size, T_test):
+    model.eval()
+    device = next(model.parameters()).device
+    all_metrics = {}
+
+    print("\n" + "="*80)
+    print("EVALUATION")
+    print("="*80)
+
+    with torch.no_grad():
+        for sample_idx, (initial_field, true_trajectory, viscosity_val) in enumerate(test_loader):
+            true_trajectory = true_trajectory.to(device).squeeze(0) # (T, N)
+            
+            nu = viscosity_val.item()
+            metrics = Metrics(nu=nu)
+            
+            init_window_gt = true_trajectory[:window_size, :].unsqueeze(0) # (1, W, N)
+            
+            pred_trajectory = []
+            current_window = init_window_gt
+            
+            # --- Rollout Prediction ---
+            for t in range(T_test - window_size):
+                pred = model(current_window) # (1, N)
+                pred_trajectory.append(pred)
+                
+                # Recurrent update: shift and append
+                current_window = torch.cat([current_window[:, 1:, :], pred.unsqueeze(1)], dim=1)
+            
+            pred_trajectory_2d = torch.stack(pred_trajectory, dim=0).squeeze(1) # (T-W, N)
+            
+            gt_aligned = true_trajectory[window_size:].cpu().numpy()
+            pred_aligned = pred_trajectory_2d.cpu().numpy()
+            
+            # --- Compute Metrics ---
+            mse_val = metrics.mse(pred_aligned, gt_aligned)
+            rel_l2 = metrics.relative_l2(pred_aligned, gt_aligned)
+            mass_err = metrics.mass_conservation_error(pred_aligned)
+            e_mono_pct = metrics.check_energy_monotonicity(pred_aligned) * 100
+            
+            correlations = metrics.correlation_per_timestep(pred_aligned, gt_aligned)
+            t_steps = len(correlations)
+            t_corr_9 = np.where(correlations < 0.9)[0]
+            t_corr_09 = t_corr_9[0] if len(t_corr_9) > 0 else t_steps
+
+            all_metrics[f'Sample_{sample_idx}_nu{nu:.3f}'] = {
+                'MSE': mse_val,
+                'Rel L2': rel_l2,
+                'Mass Abs Error': mass_err,
+                'E Mono %': e_mono_pct,
+                'T_corr<0.9': t_corr_09,
+            }
+            
+            if sample_idx == 0:
+                print(f"Sample {sample_idx} (nu={nu:.3f}) Results:")
+                print(f"  MSE: {mse_val:.4e} | Rel L2: {rel_l2:.4f}")
+                print(f"  Max Mass Abs Error (Corrected): {mass_err:.4e}")
+                print(f"  Energy Monotonicity: {e_mono_pct:.1f}%")
+                print(f"  Time to Corr < 0.9: {t_corr_09} steps")
+                
+                full_gt = true_trajectory.cpu().numpy()
+                full_pred = np.concatenate((full_gt[:window_size], pred_aligned), axis=0)
+
+                plot_learning_progress(
+                    torch.from_numpy(full_gt), 
+                    torch.from_numpy(full_pred), 
+                    'Final', sample_idx
+                )
+    
+    print("\nEvaluation Complete.")
+    return all_metrics
