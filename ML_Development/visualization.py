@@ -156,3 +156,37 @@ def plot_space_time_kernel(
     plt.title(title)
     plt.tight_layout()
     plt.show()
+
+
+
+
+def plot_learning_progress(true_traj, pred_traj, epoch, sample_idx=0):
+    true_np = true_traj.cpu().numpy().T  # (space, time)
+    pred_np = pred_traj.cpu().numpy().T
+    # error_np = (true_np - pred_np) ** 2
+    error_np = abs(true_np - pred_np)
+    plt.figure(figsize=(15, 4))
+
+    plt.subplot(1, 3, 1)
+    plt.imshow(true_np, aspect='auto', cmap='viridis')
+    plt.colorbar(label='u(x,t)')
+    plt.xlabel('Time t')
+    plt.ylabel('Position x')
+    plt.title(f'True Trajectory (Sample {sample_idx})')
+
+    plt.subplot(1, 3, 2)
+    plt.imshow(pred_np, aspect='auto', cmap='viridis')
+    plt.colorbar(label='u(x,t)')
+    plt.xlabel('Time t')
+    plt.ylabel('Position x')
+    plt.title(f'Predicted Trajectory (Epoch {epoch})')
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(error_np, aspect='auto', cmap='inferno')
+    plt.colorbar(label='error')
+    plt.xlabel('Time t')
+    plt.ylabel('Position x')
+    plt.title('Absolute Error')
+
+    plt.tight_layout()
+    plt.show()
