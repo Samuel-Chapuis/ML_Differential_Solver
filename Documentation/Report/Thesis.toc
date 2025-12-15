@@ -15,13 +15,13 @@
 \contentsline {subsection}{\numberline {4.1.2}}{9}{subsection.4.1.2}%
 \contentsline {section}{\numberline {4.2}Approach 2: TCAN based Model}{9}{section.4.2}%
 \contentsline {subsection}{\numberline {4.2.1}Model Architecture}{9}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Temporal Attention Encoder}{11}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Decoder and Residual Correction}{12}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}Autoregressive Training Procedure}{12}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {4.2.5}Evaluation Metrics}{12}{subsection.4.2.5}%
-\contentsline {chapter}{\numberline {5}Next Steps}{13}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Conclusion and Perspectives }{15}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Gl remarks}{15}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Gl remarks about the presentation}{15}{section.6.2}%
-\contentsline {chapter}{\numberline {A}Appendix}{17}{appendix.A}%
-\contentsline {chapter}{Bibliography}{19}{appendix*.5}%
+\contentsline {subsection}{\numberline {4.2.2}Temporal Attention Encoder}{13}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Decoder and Residual Correction}{13}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Autoregressive Training Procedure}{14}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Evaluation Metrics}{14}{subsection.4.2.5}%
+\contentsline {chapter}{\numberline {5}Next Steps}{15}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Conclusion and Perspectives }{17}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Gl remarks}{17}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Gl remarks about the presentation}{17}{section.6.2}%
+\contentsline {chapter}{\numberline {A}Appendix}{19}{appendix.A}%
+\contentsline {chapter}{Bibliography}{21}{appendix*.6}%

@@ -2,8 +2,49 @@
 \chapter{Approaches for Neural PDE Simulators}
 \label{chap:approaches}
 
-In this chapter, we present two distinct Neural Field Turing Machine (NFTM) models, developed as simulators for the 1D Burger's equation. Currently, these approaches are defined for the simulation of Burger's dynamics. The first model \textbf{................EXPLAIN SAMUEL'S MODEL: TRANSFORMER ................}. The second approach, corresponds to a Causal Temporal Convolutional Attention Network (TCAN) that enhances temporal modeling capabilities. While focused on the 1D Burgers' equation, the underlying frameworks are designed for future extension to general partial differential equations (PDEs).\\
-We detail the architecture, training procedures, and evaluation metrics for both models, highlighting their respective strengths and limitations. 
+In this chapter, we present two distinct Neural Field Turing Machine (NFTM) model architectures, developed as data-driven simulators for the 1D Burger's equation. Currently, these are defined for the simulation of Burger's dynamics and both approaches utilize the dataset described in Table~\ref{tab:dataset_Burger_statistics}, which consits of 724 training trajectories across 13 different viscosity values (from 0.001 to 0.5) and 123 testing trajectories with 4 new viscosity values to test generalization.\\
+The first model \textbf{........ EXPLAIN TRANSFORMER MODEL ........}.\\
+The second approach, corresponds to a \textbf{Causal Temporal Convolutional Attention Network (TCAN)} that combines attention with convolutional feature extraction, by restricting attention to past timesteps only and using 1D convolutions for spatial processing.\\
+Both approaches enforce physics-informed constraints. We detail their architectures, training procedures, and comprehensive evaluation metrics, highlighting respective strengths and limitations.
+
+% TABLE OF BURGER'S DATASET STATISTICS
+\begin{table}[htbp]
+\centering
+\caption{Burger's Equation Dataset: Number of Trajectories by Viscosity.}
+\label{tab:dataset_Burger_statistics}
+\resizebox{0.75\textwidth}{!}{
+\begin{tabular}{c c c c}
+\toprule
+\multicolumn{4}{c}{\textbf{Training (724 samples)}} \\
+\midrule
+\textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Percentage} & \\
+\midrule
+0.0010 & 60 & 8.3\% & \\
+0.0020 & 40 & 5.5\% & \\
+0.0065 & 40 & 5.5\% & \\
+0.0080 & 40 & 5.5\% & \\
+0.0400 & 40 & 5.5\% & \\
+0.0500 & 60 & 8.3\% & \\
+0.0700 & 60 & 8.3\% & \\
+0.1000 & 60 & 8.3\% & \\
+0.1500 & 60 & 8.3\% & \\
+0.2500 & 60 & 8.3\% & \\
+0.3500 & 60 & 8.3\% & \\
+0.4000 & 60 & 8.3\% & \\
+0.5000 & 84 & 11.6\% & \\
+\midrule
+\multicolumn{4}{c}{\textbf{Testing (123 samples)}} \\
+\midrule
+0.0100 & 50 & 40.7\% & \\
+0.0269 & 13 & 10.6\% & \\
+0.2000 & 30 & 24.4\% & \\
+0.3000 & 30 & 24.4\% & \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+% ----------------------------------------------------------- SAMUEL MODEL -------------------------------------------------------------------------------
 \section{Approach 1: Transformer based Model}
 \subsection{Model Architecture}
 \subsection{}
@@ -82,12 +123,12 @@ The full data flow for a single prediction step is illustrated in Figure~\ref{fi
 
 % Fila superior: flujo principal
 \node[input] (input) {INPUT\\$f_{\text{history}}$};
-\node[op, right=of input] (embed) {Conv1d + GELU\\(frame wise)};
-\node[box, right=of embed] (features) {Features\\$(B, W, C, P)$};
-\node[box, right=3.2cm of features] (context) {Context\\$(B, C, P)$};
+\node[op, right=of input] (embed) {Embedding \\ Conv1d + GELU\\(frame wise)};
+\node[box, right=of embed] (features) {Features\\$(B, W, C, N)$};
+\node[box, right=3.2cm of features] (context) {Context\\$(B, C, N)$};
 \node[op, right=of context] (decoder) {Decoder\\Conv1d stack};
 \node[box, right=of decoder] (corr) {Correction\\$\tanh(\cdot)\times 0.1$};
-\node[output, right=of corr] (output) {$u_{\text{next}}$\\$(B, 1, P)$};
+\node[output, right=of corr] (output) {$f_{\text{next}}$\\$(B, 1, N)$};
 
 % Fila inferior: atención temporal
 \node[box, below=2.0cm of features] (query) {Last frame $\rightarrow$ Query $Q$};
@@ -125,6 +166,34 @@ The full data flow for a single prediction step is illustrated in Figure~\ref{fi
 \caption{Data flow through the Causal Temporal Attention Network during one prediction step.}
 \label{fig:tcn-flow}
 \end{figure}
+
+\noindent Figure~\ref{fig:tcn-flow} illustrates the complete data flow through the Causal Temporal Convolutional Attention Network during a single prediction step. Each node performs a specific transformation:
+
+\begin{itemize}
+    \item \textbf{$f_{\text{history}}$ (Input)}: Window of $W=20$ previous fields of shape $(B, W, N)$, containing the most recent spatiotemporal snapshots $f_{t-W+1}, \dots, f_t \in \mathbb{R}^N$.
+    
+    \item \textbf{Conv1d + GELU (frame-wise)}: Applies 1D convolution (kernel size 3) to each of the $W$ fields individually, expanding from 1 to $C=32$ feature channels per field. Output shape: $(B \cdot W, 32, N)$.
+    
+    \item \textbf{Features $(B, W, C, N)$}: Reshaped embedded representation exposing the temporal dimension, with each of the $W$ fields now containing 32 spatial feature maps.
+    
+    \item \textbf{Last frame $\to$ Query $Q$}: Extracts features from the most recent field $f_t$ and applies $1\times1$ convolution to generate query vectors $Q \in \mathbb{R}^{B \times 32 \times N}$.
+    
+    \item \textbf{All frames $\to$ Keys $K$, Values $V$}: Projects all $W$ embedded fields through separate $1\times1$ convolutions to produce keys $K$ and values $V$, both of shape $(B, W, 32, N)$.
+    
+    \item \textbf{Attention $\mathrm{softmax}\big(\frac{QK^{T}}{\sqrt{C}}\big)$}: Computes causal attention scores between the query (last frame) and all previous frames, producing temporal attention weights $\alpha_{w,p} = \mathrm{softmax}_w(QK^T/\sqrt{32})$ for each spatial position $p$.
+    
+    \item \textbf{Context $(B, C, N)$}: Aggregates temporal context via weighted sum $\sum_w \alpha_{w,p} V_w$, adds residual connection from last-frame features, and applies GroupNorm. Shape: $(B, 32, N)$.
+    
+    \item \textbf{Decoder Conv1d stack}: Two-layer convolutional decoder (32$\to$32$\to$1 channels, kernel size 5) that maps rich temporal-spatial context to a scalar correction field. Final layer zero-initialized for training stability.
+    
+    \item \textbf{Correction $\tanh(\cdot)\times 0.1$}: Applies hyperbolic tangent nonlinearity scaled by 0.1 to bound corrections $|\Delta u| \leq 0.1$, ensuring numerical stability during long rollouts.
+    
+    \item \textbf{$u_{\text{next}}$ (Output)}: Residual update combining the last input field $u_{\text{history}}[:, -1, :]$ with the predicted correction: $f_{t+1} = f_t + \Delta u$. Shape: $(B, 1, N)$.
+\end{itemize}
+
+The two residual connections---from Features to Context (within attention encoder) and from input last frame to output---preserve critical spatiotemporal information while enabling stable incremental updates.
+
+
 
 
 \subsection{Temporal Attention Encoder}
