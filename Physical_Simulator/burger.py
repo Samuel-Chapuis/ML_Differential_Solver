@@ -343,13 +343,13 @@ if __name__ == "__main__":
         dt=5e-3,
         n_steps=[256],
         # nu=np.linspace(0.01, 0.5, 30),
-        nu = 0.05,
+        nu = 0.0065,
         speed=[1.0, 5.0],
         speed_random=True,  # Active la génération aléatoire entre 1.0 et 5.0
         boundary_condition=bc_neumann_zero,
         # ic_kinds=["shock","rarefaction","sine","smooth"],
         ic_kinds=["smooth"],
-        n_train=30, n_test=0,
+        n_train=20, n_test=0,
         cfl_safety=1
     )
 

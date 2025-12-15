@@ -34,45 +34,9 @@ except ImportError:
     HAS_SKIMAGE = False
 
 
-# ==========================================
-# 1. Improved Physics Generator
-# ==========================================
-def solve_burgers_batch(n_samples, n_steps, dt, dx, nu_range, n_points=128):
-    """
-    Solve 1D Burgers equation with stable numerics.
-    Uses conservation form for better mass conservation.
-    """
-    trajectories = []
-    nus = []
-    x = np.linspace(0, 2 * np.pi, n_points, endpoint=False)
-
-    for _ in range(n_samples):
-        nu = np.random.uniform(nu_range[0], nu_range[1])
-        nus.append(nu)
-        u = np.sin(x)
-        traj = [u.copy()]
-
-        for _ in range(n_steps - 1):
-            u_left = np.roll(u, 1)
-            u_right = np.roll(u, -1)
-            
-            # Diffusion (central difference)
-            d2_u = (u_right - 2*u + u_left) / dx**2
-            
-            # Advection (upwind for stability)
-            du_dx = np.where(u > 0, (u - u_left) / dx, (u_right - u) / dx)
-            
-            # Forward Euler update
-            u = u - dt * u * du_dx + dt * nu * d2_u
-            traj.append(u.copy())
-            
-        trajectories.append(np.array(traj))
-
-    return torch.tensor(np.array(trajectories), dtype=torch.float32), np.array(nus), x
-
 
 # ==========================================
-# 2. Model with Stability Improvements
+# Model with Stability Improvements
 # ==========================================
 class CausalTemporalAttention(nn.Module):
     def __init__(self, window_size, embed_dim):
@@ -146,7 +110,7 @@ def compute_energy(u, dx=2 * np.pi / 128):
     """Compute energy: E = 0.5 * ∫u² dx"""
     return 0.5 * torch.sum(u**2, dim=-1) * dx
 
-def spatial_gradient(u, dx=0.05):
+def spatial_gradient(u, dx=2 * np.pi / 128):
     """Central difference gradient"""
     u_right = torch.roll(u, -1, dims=-1)
     u_left = torch.roll(u, 1, dims=-1)
@@ -245,7 +209,7 @@ def plot_epoch_losses(history, save_path):
 
 
 
-def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
+def train_model(train_loader, test_loader, history_len=20, num_epochs=100):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = ImprovedBurgersNet(history_len).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
@@ -260,7 +224,7 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
     
     history = {'loss': [], 'energy_loss': []}
 
-
+    
     for epoch in tqdm(range(num_epochs), desc="Training"):
         model.train()
         total_loss = 0
@@ -269,10 +233,10 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
 
         
         # Curriculum rollout depth
-        if epoch < 10:
+        if epoch < 20:
             rollout_depth = 8
             teacher_force_rate = 0.5
-        elif epoch < 30:
+        elif epoch < 40:
             rollout_depth = 16
             teacher_force_rate = 0.2
         else:
@@ -323,7 +287,7 @@ def train_model(train_loader, test_loader, history_len=20, num_epochs=50):
                 energy_penalty = torch.relu(pred_energy - prev_energy)
                 energy_penalty = (energy_penalty / (prev_energy + 1e-6)).mean()
                 # Combined loss
-                loss = mse + 0.1 * grad_loss + 0.05 * energy_penalty
+                loss = mse + 0.5 * grad_loss + 0.05 * energy_penalty
                 step_loss += loss
                 
                 # Update window (teacher forcing occasionally)
@@ -677,11 +641,11 @@ if __name__ == "__main__":
     # Fetch a single test batch upfront for fast evaluation ---
     test_batch = next(iter(test_loader))
     # Evaluate
-    test_mse = evaluate_model(model, test_batch, history_len)
+    test_mse = evaluate_model(model, test_loader, history_len)
     print(f"Final Test MSE: {test_mse:.4e}")
     plot_epoch_losses(history, project_root/"saved_results/losses_over_epochs.png")
     # Final evaluation on test set
-    final_metrics = compute_metrics(model, test_loader, history_len)
+    final_metrics = compute_metrics(model, test_batch, history_len)
     print("=" * 50)
     print("Final Test Metrics:")
     print("=" * 50)
