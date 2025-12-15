@@ -86,3 +86,16 @@ The viscous Burger's equation in 1D is given by:
 \begin{equation}
     \dfrac{\partial u}{\partial t} + u \dfrac{\partial u}{\partial x} = \nu \dfrac{\partial^2 u}{\partial x^2}, \quad x \in [0,L],\; t>0,
 \end{equation}
+
+The hypothesis behind this equation are very strong, we assume a single spatial dimension, no pressure grandiant, and constant viscosity. This can be written in a non-dimensional form as:
+
+\begin{align*}
+    \text{1D spatial domain}:& \quad
+    \begin{cases}
+    \mathbf{u} = u(x,t),\\[4pt]
+    x \in [0,L]
+    \end{cases}
+    \\[16pt]
+    \text{No pressure gradient}:& \quad
+    \nabla p=\mathbf{0}
+\end{align*}
