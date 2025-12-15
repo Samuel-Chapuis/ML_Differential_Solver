@@ -2,9 +2,13 @@
 
 \begin{secframe}
 
+\small
+\textcolor{red_unipd}{\Large CNN Controller Architecture}
+
 % CNN Controller of NFTM
 \begin{figure}[h]
 \centering
+
 
 \begin{tikzpicture}[
   scale=0.6, every node/.style={transform shape},
@@ -44,7 +48,7 @@
 \draw[->] (delta.east) -- (sum.west);
 
 \end{tikzpicture}
-\caption{CNN Controller Architecture.}
+% \caption{CNN Controller Architecture.}
 \end{figure}
 \end{secframe}
 
@@ -55,6 +59,9 @@
 
 % NFTM using Recurrent CNN architecture
 \begin{secframe}
+
+  \small
+\textcolor{red_unipd}{\Large NFTM with recurrent CNN architecture}
 \begin{figure}[h]
 \centering
 % \begin{tikzpicture}[
@@ -156,7 +163,6 @@
 
 % \end{tikzpicture}
 
-
 \begin{tikzpicture}[
   scale=0.5, every node/.style={transform shape},
   node distance=7mm,
@@ -203,10 +209,10 @@
 \draw[->] (truefk) -- (loss);
 
 % Flecha de la loss de vuelta al primer CNN (backprop / siguiente rollout)
-\draw[->] (loss.east) -- ++(10mm,0) -- ++(0,52mm) -- (cnn1.east);
+\draw[->] (loss.east) -- ++(20mm,0) -- ++(0,109mm) -- (cnn1.east);
 
 \end{tikzpicture}
 
-\caption{NFTM with recurrent CNN architecture}
+% \caption{NFTM with recurrent CNN architecture}
 \end{figure}
 \end{secframe}
