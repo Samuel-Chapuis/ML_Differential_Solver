@@ -38,7 +38,9 @@ Both approaches enforce physics-informed constraints. We detail their architectu
 % ----------------------------------------------------------- SAMUEL MODEL -------------------------------------------------------------------------------
 \section{Approach 1: Transformer based Model}
 \subsection{Model Architecture}
-\subsection{}
+% \subsection{}
+% \subsection{}
+% \subsection{}
 
 
 % ----------------------------------------------------------- AKASH MODEL -------------------------------------------------------------------------------
@@ -48,12 +50,13 @@ The Temporal Convolutional Attention Network (TCAN) is a feed-forward autoregres
 The TCAN serves as the \textit{controller} in the Neural Field Turing Machine model framework, where it learns a discrete-time update rule for continuous spatiotemporal fields.\\
 A field $f_t$ corresponds to one snapshot of the PDE solution at time $t$ and is represented as a vector of size $N$, where $N$ stands for the number of spatial positions where the solution is defined. Therefore, the continuous field at time $t$ is given by: $$f_t = [u(x_1, t), u(x_2, t),..., u(x_N,t)] \in \mathbb{R}^{1 \times N}.$$
 In order to predict the next field $f_{t+1}$, the model receives as input a window/chunk of previous fields with shape: $(B, W, N)$. This is defined as: $$\text{window} = [f_{t - W + 1}, f_{t - W + 2}, ..., f_{t}],$$ where $B$ is the batch size, $W$ is the history length (number of previous fields in the window), and $N$ is the number of spatial points.\\
-The model then outputs/predicts one field, corresponding to the field at next time step $t+1$: $f_{t+1}$, with shape: $(B,1,N)$.\\\\
+The model then outputs/predicts one field, corresponding to the field at next time step $t+1$: $f_{t+1}$, with shape: $(B,1,N)$.\\
 Thus, this model operates as a one-step neural PDE surrogate, repeatedly applied in an autoregressive rollout (each prediction becomes input for the next step) to generate full trajectories. Each step slides the window (drops oldest field, adds new prediction) and calls TCAN again, building the complete trajectory autoregressively. Figure~\ref{fig:autoregressive-rollout} illustrates this process.
-\vspace{0.3cm}
-\begin{figure}[htbp]
+
+% ---------------------------- AUTOREGRESSIVE ROLLOUT FIGURE ----------------------------
+\begin{figure}[h!]
 \centering
-\resizebox{0.5\textwidth}{!}{%
+\resizebox{0.28\textwidth}{!}{%
 \begin{tikzpicture}[
     box/.style={draw, rectangle, rounded corners, minimum width=2.2cm, minimum height=0.8cm, align=center, fill=orange!20, font=\small},
     pred/.style={draw, rectangle, rounded corners, minimum width=1.6cm, minimum height=0.8cm, align=center, fill=green!20, font=\small},
@@ -68,13 +71,13 @@ Thus, this model operates as a one-step neural PDE surrogate, repeatedly applied
 \draw[arrow] (w1.east) -- (p21.west);
 
 % Step 2
-\node[box, below=of w1] (w2) {Window\\$[f_2,\dots,f_{20},f_{21}]$};
+\node[box, below=of w1] (w2) {Window\\$[f_2,\dots,f_{20},\hat{f}_{21}]$};
 \node[pred, right=of w2] (p22) {$\hat{f}_{22}$};
 \node[font=\scriptsize, above=-0.55cm of $(w2)!0.55!(p22)$] {TCAN};
 \draw[arrow] (w2.east) -- (p22.west);
 
 % Step 3
-\node[box, below=of w2] (w3) {Window\\$[f_3,\dots,f_{21},f_{22}]$};
+\node[box, below=of w2] (w3) {Window\\$[f_3,\dots,f_{21},\hat{f}_{22}]$};
 \node[pred, right=of w3] (p23) {$\hat{f}_{23}$};
 \node[font=\scriptsize, above=-0.45cm of $(w3)!0.55!(p23)$] {TCAN};
 \draw[arrow] (w3.east) -- (p23.west);
@@ -83,74 +86,140 @@ Thus, this model operates as a one-step neural PDE surrogate, repeatedly applied
 \draw[arrow] (p21.south) to[out=-60,in=20] (w2.north);
 \draw[arrow] (p22.south) to[out=-60,in=20] (w3.north);
 
-
 % Continuation dots
 \node[font=\large] (dots) at ($(w3.south)!0.5!(p23.south) + (0,-1.2)$) {$\dots$};
 
 \end{tikzpicture}%
 }
-\vspace{0.4cm}
-\caption{Autoregressive rollout process: each TCAN call maps a window of previous fields to one predicted field. The prediction is inserted into the next window, replacing the oldest field, to generate the full trajectory. In this example, the model first predicts $f_{21}$ from the window $[f_1,\dots,f_{20}]$, then uses the updated window $[f_2,\dots,f_{20},f_{21}]$ to predict $f_{22}$, and so on.}
+\caption{Autoregressive rollout process: each TCAN call maps a window of previous fields to one predicted field. In this example, the model first predicts $f_{21}$ from the window $[f_1,\dots,f_{20}]$, then uses the updated window $[f_2,\dots,f_{20},f_{21}]$ to predict $f_{22}$, and so on.}
 \label{fig:autoregressive-rollout}
 \end{figure}
+
+\vspace{0.3cm}
+
+% ----------------------------- TCAN ARCHITECTURE DESCRIPTION -----------------------------
 
 \noindent The architecture of this TCAN model consists of \textbf{three main components}:\\
 \textbf{1.} A temporal attention encoder that aggregates information across the history window.\\
 \textbf{2.} A convolutional decoder that produces a bounded correction.\\
 \textbf{3.} A residual update that adds the correction to the last frame.\\\\
-The full data flow for a single prediction step is illustrated in Figure~\ref{fig:tcn-flow}.
 
-\begin{figure}[htbp]
+% ADD MORE DESCRIPTION OF EACH BLOCK HERE !!!!!
+
+
+
+
+
+
+% ----------------------------- TCAN ARCHITECTURE FIGURE -----------------------------
+% \begin{figure}[h!]
+% \centering
+% \resizebox{1.0\textwidth}{!}{%
+% \begin{tikzpicture}[
+%     box/.style={rectangle, draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center, fill=blue!10},
+%     op/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, fill=green!10},
+%     arrow/.style={->, thick, >=stealth},
+%     input/.style={rectangle, draw, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, fill=orange!20},
+%     output/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, fill=red!20},
+%     node distance=2.0cm
+% ]
+
+% % Fila superior: flujo principal
+% \node[input] (input) {INPUT\\$f_{\text{history}}$};
+% \node[op, right=of input] (embed) {Embedding \\ Conv1d + GELU\\(frame wise)};
+% \node[box, right=of embed] (features) {Features\\$(B, W, C, N)$};
+% \node[box, right=3.2cm of features] (context) {Context\\$(B, C, N)$};
+% \node[op, right=of context] (decoder) {Decoder\\Conv1d stack};
+% \node[box, right=of decoder] (corr) {Correction\\$\tanh(\cdot)\times 0.1$};
+% \node[output, right=of corr] (output) {$f_{\text{next}}$\\$(B, 1, N)$};
+
+% % Fila inferior: atención temporal
+% \node[box, below=2.0cm of features] (query) {Last frame $\rightarrow$ Query $Q$};
+% \node[box, right=of query] (kv) {All frames $\rightarrow$ Keys $K$, Values $V$};
+% \node[op, right=of kv] (attn) {Attention\\$\mathrm{softmax}\!\big(\frac{QK^{T}}{\sqrt{C}}\big)$};
+
+% % Flechas flujo principal (superior)
+% \draw[arrow] (input) -- (embed);
+% \draw[arrow] (embed) -- (features);
+% \draw[arrow] (context) -- (decoder);
+% \draw[arrow] (decoder) -- (corr);
+% \draw[arrow] (corr) -- (output);
+
+% % Flecha a Query: igual que antes
+% \draw[arrow] (features.south) |- (query.north);
+
+% % Flecha a Keys/Values: menos baja, gira antes a la derecha
+% \draw[arrow] (features.east) to[out=-45,in=100] (kv.north);
+
+% % Flechas dentro de la rama de atención
+% \draw[arrow] (query) -- (kv);
+% \draw[arrow] (kv) -- (attn);
+
+% % De atención a contexto: giro bajo
+% \draw[arrow] (attn.north) to[out=70,in=-80] (context.south);
+
+% % Residual de features a context (por arriba)
+% \draw[arrow] (features.north) to[out=30,in=140] node[above]{residual} (context.north);
+
+% % Residual de u_history a u_next (sin texto, menos alto)
+% \draw[arrow] (input.south) to[out=-45,in=-145] (output.south);
+
+% \end{tikzpicture}%
+% }
+% \caption{Data flow through the Causal Temporal Attention Network during one prediction step.}
+% \label{fig:tcn-flow}
+% \end{figure}
+
+\begin{figure}[h!]
 \centering
-\resizebox{0.95\textwidth}{!}{%
+\resizebox{0.55\textwidth}{!}{%
 \begin{tikzpicture}[
-    box/.style={rectangle, draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center, fill=blue!10},
-    op/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, fill=green!10},
+    box/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=blue!10},
+    op/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=green!10},
     arrow/.style={->, thick, >=stealth},
-    input/.style={rectangle, draw, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, fill=orange!20},
-    output/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, fill=red!20},
-    node distance=2.0cm
+    input/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=orange!20},
+    output/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=red!20},
+    node distance=2.0cm and 1.6cm
 ]
 
-% Fila superior: flujo principal
+% Main flow - left column
 \node[input] (input) {INPUT\\$f_{\text{history}}$};
-\node[op, right=of input] (embed) {Embedding \\ Conv1d + GELU\\(frame wise)};
-\node[box, right=of embed] (features) {Features\\$(B, W, C, N)$};
-\node[box, right=3.2cm of features] (context) {Context\\$(B, C, N)$};
-\node[op, right=of context] (decoder) {Decoder\\Conv1d stack};
-\node[box, right=of decoder] (corr) {Correction\\$\tanh(\cdot)\times 0.1$};
-\node[output, right=of corr] (output) {$f_{\text{next}}$\\$(B, 1, N)$};
+\node[op, below=of input] (embed) {Embedding\\Conv1d+GELU};
+\node[box, below=of embed] (features) {Features\\$(B,W,C,N)$};
 
-% Fila inferior: atención temporal
-\node[box, below=2.0cm of features] (query) {Last frame $\rightarrow$ Query $Q$};
-\node[box, right=of query] (kv) {All frames $\rightarrow$ Keys $K$, Values $V$};
-\node[op, right=of kv] (attn) {Attention\\$\mathrm{softmax}\!\big(\frac{QK^{T}}{\sqrt{C}}\big)$};
+% Attention column - center-right
+\node[box, right=1.8cm of features] (query) {Query $Q$\\(last frame)};
+\node[op, below=of query] (attn) {Causal\\Attention};
+\node[box, below=of attn] (context) {Context\\$(B,C,N)$};
 
-% Flechas flujo principal (superior)
+% Decoder/output column - right
+\node[op, right=1.8cm of context] (decoder) {Decoder\\Conv1d};
+\node[box, below=of decoder] (corr) {Correction\\$\tanh(\times0.1)$};
+\node[output, below=of corr] (output) {$f_{\text{next}}$};
+
+% CLEAN ARROWS - NO CROSSING
 \draw[arrow] (input) -- (embed);
 \draw[arrow] (embed) -- (features);
+\draw[arrow] (features) -| ([xshift=-0.3cm]query.west) -- (query);
+\draw[arrow] (query) -- (attn);
+\draw[arrow] (attn) -- (context);
 \draw[arrow] (context) -- (decoder);
 \draw[arrow] (decoder) -- (corr);
 \draw[arrow] (corr) -- (output);
 
-% Flecha a Query: igual que antes
-\draw[arrow] (features.south) |- (query.north);
+% Residual from features to context (ABOVE)
+\draw[arrow, dashed, blue] ([yshift=0.4cm]features.north east) 
+    to[out=30,in=150] node[above, font=\footnotesize, black]{residual} 
+    ([yshift=0.4cm]context.north west);
 
-% Flecha a Keys/Values: menos baja, gira antes a la derecha
-\draw[arrow] (features.east) to[out=-45,in=100] (kv.north);
+% FIXED: LEFT→DOWN→RIGHT path from input to output
+\draw[arrow, dashed, orange, thick] ([xshift=-0.8cm]input.south west) 
+    |- ++(0,-0.8) 
+    -| ([xshift=-0.8cm]output.south west)
+    node[below, font=\footnotesize, pos=0.7]{$u_t$};
 
-% Flechas dentro de la rama de atención
-\draw[arrow] (query) -- (kv);
-\draw[arrow] (kv) -- (attn);
-
-% De atención a contexto: giro bajo
-\draw[arrow] (attn.north) to[out=70,in=-80] (context.south);
-
-% Residual de features a context (por arriba)
-\draw[arrow] (features.north) to[out=30,in=140] node[above]{residual} (context.north);
-
-% Residual de u_history a u_next (sin texto, menos alto)
-\draw[arrow] (input.south) to[out=-45,in=-145] (output.south);
+% KV note
+\node[font=\footnotesize, align=center, right=0.2cm of query, anchor=west] (kv) {$K,V$\\all frames};
 
 \end{tikzpicture}%
 }
@@ -160,6 +229,7 @@ The full data flow for a single prediction step is illustrated in Figure~\ref{fi
 
 \noindent Figure~\ref{fig:tcn-flow} illustrates the complete data flow through the Causal Temporal Convolutional Attention Network during a single prediction step. Each node performs a specific transformation:
 
+% ---------------------- TCAN ARCHITECTURE STEPS -----------------------------
 \begin{itemize}
     \item \textbf{$f_{\text{history}}$ (Input)}: Window of $W=20$ previous fields of shape $(B, W, N)$, containing the most recent spatiotemporal snapshots $f_{t-W+1}, \dots, f_t \in \mathbb{R}^N$.
     
@@ -184,6 +254,46 @@ The full data flow for a single prediction step is illustrated in Figure~\ref{fi
 
 The two residual connections---from Features to Context (within attention encoder) and from input last frame to output---preserve critical spatiotemporal information while enabling stable incremental updates.
 
+% ------------- NFTM ARCHITECTURE WITH TCAN CONTROLLER FIGURE -------------
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[node distance=1.5cm and 1cm, auto,
+    block/.style={rectangle, draw, thick, text width=2.5cm, 
+                  text centered, minimum height=1cm, font=\small},
+    arrow/.style={thick,->,>=stealth}]
+
+% Input History
+\node[block] (input) {History $u_{t-W:t}$ \\ $(B,W,P)$};
+
+% Attention Block
+\node[block, right=of input] (attn) {CausalTemporalAttention \\ Embed → QKV → Causal Attn \\ + GroupNorm};
+
+% Decoder
+\node[block, right=of attn] (decoder) {Decoder \\ Conv1D(32) → BN → GELU \\ Conv1D(1)};
+
+% Output
+\node[block, right=of decoder] (output) {$u_{t+1} = u_t + \tanh(\delta u)$};
+
+% Window update (dashed)
+\node[block, below=0.5cm of attn] (window) {Shift Window: \\ $[u_{t-W+1:t}, u_{t+1}]$};
+
+% Arrows
+\draw[arrow] (input) -- (attn);
+\draw[arrow] (attn) -- (decoder);
+\draw[arrow] (decoder) -- (output);
+\draw[arrow, dashed] (output) |- (window);
+\draw[arrow, dashed] (window) -| ([yshift=-0.5cm]input.south east);
+
+% Loss feedback (curved)
+\draw[arrow, red, thick] ([xshift=0.5cm]output.north east) 
+    to[bend right=30] node[above, font=\tiny] {MSE + Physics} 
+    ([yshift=0.3cm]input.north west);
+
+\end{tikzpicture}
+\caption{NFTM Architecture: Causal autoregressive prediction with physics-informed training.}
+\label{fig:nftm_arch}
+\end{figure}
+\noindent Figure~\ref{fig:nftm_arch} summarizes the overall architecture of the NFTM model using the TCAN as controller. The model processes a sliding window of past fields to predict the next field, employing causal attention and convolutional decoding. The autoregressive rollout is indicated by dashed arrows, while the red feedback loop represents the physics-informed loss used during training.
 
 
 
@@ -270,7 +380,7 @@ Full-trajectory predictions are evaluated using:
 \end{itemize}
 This comprehensive evaluation ensures both accuracy and physical fidelity across long rollouts.
 
-\begin{table}[htbp]
+\begin{table}[h!]
 \centering
 \resizebox{1.1\textwidth}{!}{
 \begin{tabular}{@{\extracolsep{14pt}}l@{\extracolsep{14pt}}c@{\extracolsep{14pt}}l@{\extracolsep{14pt}}c@{\extracolsep{14pt}}c}
