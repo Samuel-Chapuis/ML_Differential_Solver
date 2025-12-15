@@ -139,10 +139,10 @@
 \contentsline {subsection}{\numberline {5.1.2}}{29}{subsection.5.1.2}%
 \contentsline {section}{\numberline {5.2}Approach 2: Causal Temporal Convolutional Attention Network}{29}{section.5.2}%
 \contentsline {subsection}{\numberline {5.2.1}Model Architecture}{29}{subsection.5.2.1}%
-\contentsline {section}{\numberline {5.3}Temporal Attention Encoder}{29}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Decoder and Residual Correction}{30}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Autoregressive Training Procedure}{31}{section.5.5}%
-\contentsline {section}{\numberline {5.6}Evaluation Metrics}{31}{section.5.6}%
+\contentsline {subsection}{\numberline {5.2.2}Temporal Attention Encoder}{29}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Decoder and Residual Correction}{30}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Autoregressive Training Procedure}{31}{subsection.5.2.4}%
+\contentsline {subsection}{\numberline {5.2.5}Evaluation Metrics}{31}{subsection.5.2.5}%
 \contentsline {chapter}{\numberline {6}Conclusion and Perspectives }{33}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Gl remarks}{33}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Gl remarks about the presentation}{33}{section.6.2}%

@@ -77,9 +77,7 @@ The full data flow for a single prediction step is illustrated in Figure~\ref{fi
 \end{figure}
 
 
-
-
-\section{Temporal Attention Encoder}
+\subsection{Temporal Attention Encoder}
 
 The \texttt{CausalTemporalAttention} module processes the history window through the following steps:
 
@@ -107,7 +105,7 @@ The \texttt{CausalTemporalAttention} module processes the history window through
 
 This mechanism allows the last frame to dynamically query relevant past frames at each spatial location, producing spatially-aware temporal context features.
 
-\section{Decoder and Residual Correction}
+\subsection{Decoder and Residual Correction}
 
 The \texttt{ImprovedBurgersNet} decoder processes the attention output $\text{context} \in \mathbb{R}^{B \times C \times P}$ as follows:
 
@@ -132,7 +130,7 @@ The \texttt{ImprovedBurgersNet} decoder processes the attention output $\text{co
 
 This design enforces incremental updates, preventing instability during long autoregressive rollouts.
 
-\section{Autoregressive Training Procedure}
+\subsection{Autoregressive Training Procedure}
 
 Training employs curriculum learning with multi-step rollouts:
 
@@ -153,7 +151,7 @@ Training employs curriculum learning with multi-step rollouts:
     \item Average loss over rollout, backpropagate through unrolled computation graph, apply gradient clipping, and optimize with AdamW + cosine annealing.
 \end{enumerate}
 
-\section{Evaluation Metrics}
+\subsection{Evaluation Metrics}
 
 Full-trajectory predictions are evaluated using:
 \begin{itemize}
