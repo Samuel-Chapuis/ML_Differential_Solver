@@ -13,3 +13,12 @@
 *.toc
 *.fmt
 *.fot
+*.blg
+*.brf
+*.fdb_latexmk
+*.maf
+*.mtc
+*.mtc0
+*.nlo
+*.gz
+*.bbl
