@@ -6,10 +6,161 @@
 \@writefile{lof}{\contentsline {xchapter}{Introduction}{1}{chapter.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {xchapter}{Introduction}{1}{chapter.1}\protected@file@percent }
 \newlabel{chap:intro}{{1}{1}{Introduction}{chapter.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.1}General Context: Partial Differential Equations in Science and Engineering}{1}{section.1.1}\protected@file@percent }
+\newlabel{sec:general_context}{{1.1}{1}{General Context: Partial Differential Equations in Science and Engineering}{section.1.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.1}Mathematical Framework of PDEs}{1}{subsection.1.1.1}\protected@file@percent }
+\newlabel{subsec:pde_framework}{{1.1.1}{1}{Mathematical Framework of PDEs}{subsection.1.1.1}{}}
+\newlabel{eq:general_pde}{{1.1}{1}{Mathematical Framework of PDEs}{equation.1.1.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Classification by Order.}{1}{section*.3}\protected@file@percent }
+\newlabel{eq:second_order_pde}{{1.2}{1}{Classification by Order}{equation.1.1.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.2}Fundamental PDEs in Physics}{2}{subsection.1.1.2}\protected@file@percent }
+\newlabel{subsec:fundamental_pdes}{{1.1.2}{2}{Fundamental PDEs in Physics}{subsection.1.1.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{1. Conservation of Mass (Continuity Equation).}{2}{section*.4}\protected@file@percent }
+\newlabel{eq:continuity}{{1.3}{2}{1. Conservation of Mass (Continuity Equation)}{equation.1.1.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{2. Conservation of Momentum (Navier-Stokes Equations).}{2}{section*.5}\protected@file@percent }
+\newlabel{eq:navier_stokes}{{1.4}{2}{2. Conservation of Momentum (Navier-Stokes Equations)}{equation.1.1.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{3. Conservation of Energy (Heat Equation).}{2}{section*.6}\protected@file@percent }
+\newlabel{eq:heat_equation}{{1.5}{2}{3. Conservation of Energy (Heat Equation)}{equation.1.1.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{4. Wave Propagation.}{2}{section*.7}\protected@file@percent }
+\newlabel{eq:wave_equation}{{1.6}{2}{4. Wave Propagation}{equation.1.1.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.3}Challenges in Classical PDE Solving}{2}{subsection.1.1.3}\protected@file@percent }
+\newlabel{subsec:classical_challenges}{{1.1.3}{2}{Challenges in Classical PDE Solving}{subsection.1.1.3}{}}
+\citation{kovachki2023neural}
+\@writefile{toc}{\contentsline {paragraph}{Computational Complexity.}{3}{section*.8}\protected@file@percent }
+\newlabel{eq:computational_cost}{{1.7}{3}{Computational Complexity}{equation.1.1.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Curse of Dimensionality.}{3}{section*.9}\protected@file@percent }
+\newlabel{eq:curse_dimensionality}{{1.8}{3}{Curse of Dimensionality}{equation.1.1.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stability Constraints.}{3}{section*.10}\protected@file@percent }
+\newlabel{eq:cfl_condition}{{1.9}{3}{Stability Constraints}{equation.1.1.9}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stiffness.}{3}{section*.11}\protected@file@percent }
+\newlabel{eq:stiffness_ratio}{{1.10}{3}{Stiffness}{equation.1.1.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.2}The Promise of Neural PDE Solvers}{3}{section.1.2}\protected@file@percent }
+\newlabel{sec:neural_pde_solvers}{{1.2}{3}{The Promise of Neural PDE Solvers}{section.1.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.1}Mathematical Framework for Learning Solution Operators}{3}{subsection.1.2.1}\protected@file@percent }
+\newlabel{subsec:operator_learning}{{1.2.1}{3}{Mathematical Framework for Learning Solution Operators}{subsection.1.2.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Operator Learning Formulation.}{3}{section*.12}\protected@file@percent }
+\newlabel{eq:pde_operator_form}{{1.11}{3}{Operator Learning Formulation}{equation.1.2.11}{}}
+\newlabel{eq:solution_operator}{{1.12}{3}{Operator Learning Formulation}{equation.1.2.12}{}}
+\citation{raissi2019physics}
+\citation{li2021fourier}
+\@writefile{toc}{\contentsline {paragraph}{Universal Approximation for Operators.}{4}{section*.13}\protected@file@percent }
+\@writefile{brf}{\backcite{kovachki2023neural}{{4}{1.2.1}{section*.13}}}
+\newlabel{eq:universal_approximation}{{1.13}{4}{Universal Approximation for Operators}{equation.1.2.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.2}Three Paradigms for Neural PDE Solving}{4}{subsection.1.2.2}\protected@file@percent }
+\newlabel{subsec:neural_paradigms}{{1.2.2}{4}{Three Paradigms for Neural PDE Solving}{subsection.1.2.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Paradigm 1: Physics-Informed Neural Networks (PINNs).}{4}{section*.14}\protected@file@percent }
+\@writefile{brf}{\backcite{raissi2019physics}{{4}{1.2.2}{section*.14}}}
+\newlabel{eq:pinn_loss}{{1.14}{4}{Paradigm 1: Physics-Informed Neural Networks (PINNs)}{equation.1.2.14}{}}
+\newlabel{eq:pinn_pde_loss}{{1.15}{4}{Paradigm 1: Physics-Informed Neural Networks (PINNs)}{equation.1.2.15}{}}
+\newlabel{eq:pinn_ic_loss}{{1.16}{4}{Paradigm 1: Physics-Informed Neural Networks (PINNs)}{equation.1.2.16}{}}
+\newlabel{eq:pinn_bc_loss}{{1.17}{4}{Paradigm 1: Physics-Informed Neural Networks (PINNs)}{equation.1.2.17}{}}
+\@writefile{toc}{\contentsline {paragraph}{Automatic Differentiation for PDE Residuals.}{4}{section*.15}\protected@file@percent }
+\newlabel{eq:autodiff_residual}{{1.18}{4}{Automatic Differentiation for PDE Residuals}{equation.1.2.18}{}}
+\@writefile{toc}{\contentsline {paragraph}{Paradigm 2: Fourier Neural Operators (FNOs).}{4}{section*.16}\protected@file@percent }
+\@writefile{brf}{\backcite{li2021fourier}{{4}{1.2.2}{section*.16}}}
+\newlabel{eq:fno_layer}{{1.19}{4}{Paradigm 2: Fourier Neural Operators (FNOs)}{equation.1.2.19}{}}
+\@writefile{toc}{\contentsline {paragraph}{Resolution Invariance.}{5}{section*.17}\protected@file@percent }
+\newlabel{eq:resolution_invariance}{{1.20}{5}{Resolution Invariance}{equation.1.2.20}{}}
+\@writefile{toc}{\contentsline {paragraph}{Paradigm 3: Neural Field Turing Machines (NFTMs).}{5}{section*.18}\protected@file@percent }
+\newlabel{eq:nftm_update}{{1.21}{5}{Paradigm 3: Neural Field Turing Machines (NFTMs)}{equation.1.2.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Classical Jacobi Iteration:}{5}{section*.19}\protected@file@percent }
+\newlabel{eq:jacobi_iteration}{{1.22}{5}{Classical Jacobi Iteration:}{equation.1.2.22}{}}
+\@writefile{toc}{\contentsline {paragraph}{NFTM Analog:}{5}{section*.20}\protected@file@percent }
+\newlabel{eq:nftm_analog}{{1.23}{5}{NFTM Analog:}{equation.1.2.23}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.3}The Problem: Burgers Equation as a Test Case}{5}{section.1.3}\protected@file@percent }
+\newlabel{sec:burgers_equation}{{1.3}{5}{The Problem: Burgers Equation as a Test Case}{section.1.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.1}Mathematical Formulation}{5}{subsection.1.3.1}\protected@file@percent }
+\newlabel{subsec:burgers_formulation}{{1.3.1}{5}{Mathematical Formulation}{subsection.1.3.1}{}}
+\newlabel{eq:burgers_equation}{{1.24}{5}{Mathematical Formulation}{equation.1.3.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.2}Physical Interpretation}{6}{subsection.1.3.2}\protected@file@percent }
+\newlabel{subsec:physical_interpretation}{{1.3.2}{6}{Physical Interpretation}{subsection.1.3.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Advection Term (\(u\frac  {\partial u}{\partial x}\)).}{6}{section*.21}\protected@file@percent }
+\newlabel{eq:characteristics}{{1.25}{6}{Advection Term (\(u\frac {\partial u}{\partial x}\))}{equation.1.3.25}{}}
+\@writefile{toc}{\contentsline {paragraph}{Diffusion Term (\(\nu \frac  {\partial ^2 u}{\partial x^2}\)).}{6}{section*.22}\protected@file@percent }
+\newlabel{eq:pure_diffusion}{{1.26}{6}{Diffusion Term (\(\nu \frac {\partial ^2 u}{\partial x^2}\))}{equation.1.3.26}{}}
+\newlabel{eq:greens_function}{{1.27}{6}{Diffusion Term (\(\nu \frac {\partial ^2 u}{\partial x^2}\))}{equation.1.3.27}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.3}Dimensionless Analysis and Reynolds Number}{6}{subsection.1.3.3}\protected@file@percent }
+\newlabel{subsec:reynolds_number}{{1.3.3}{6}{Dimensionless Analysis and Reynolds Number}{subsection.1.3.3}{}}
+\newlabel{eq:dimensionless_vars}{{1.28}{6}{Dimensionless Analysis and Reynolds Number}{equation.1.3.28}{}}
+\newlabel{eq:burgers_dimensional}{{1.29}{6}{Dimensionless Analysis and Reynolds Number}{equation.1.3.29}{}}
+\newlabel{eq:burgers_dimensionless}{{1.30}{6}{Dimensionless Analysis and Reynolds Number}{equation.1.3.30}{}}
+\newlabel{eq:reynolds_number}{{1.31}{6}{Dimensionless Analysis and Reynolds Number}{equation.1.3.31}{}}
+\@writefile{toc}{\contentsline {paragraph}{Physical Regimes.}{7}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.4}Shock Formation and the Inviscid Limit}{7}{subsection.1.3.4}\protected@file@percent }
+\newlabel{subsec:shock_formation}{{1.3.4}{7}{Shock Formation and the Inviscid Limit}{subsection.1.3.4}{}}
+\newlabel{eq:inviscid_burgers}{{1.32}{7}{Shock Formation and the Inviscid Limit}{equation.1.3.32}{}}
+\newlabel{eq:method_characteristics}{{1.33}{7}{Shock Formation and the Inviscid Limit}{equation.1.3.33}{}}
+\@writefile{toc}{\contentsline {paragraph}{Shock Formation Time.}{7}{section*.24}\protected@file@percent }
+\newlabel{eq:characteristics_linear}{{1.34}{7}{Shock Formation Time}{equation.1.3.34}{}}
+\newlabel{eq:shock_time}{{1.35}{7}{Shock Formation Time}{equation.1.3.35}{}}
+\citation{cole1951quasi}
+\citation{hopf1950partial}
+\@writefile{toc}{\contentsline {paragraph}{Rankine-Hugoniot Jump Condition.}{8}{section*.25}\protected@file@percent }
+\newlabel{eq:rankine_hugoniot}{{1.36}{8}{Rankine-Hugoniot Jump Condition}{equation.1.3.36}{}}
+\newlabel{eq:shock_width}{{1.37}{8}{Rankine-Hugoniot Jump Condition}{equation.1.3.37}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.5}Cole-Hopf Transformation and Exact Solutions}{8}{subsection.1.3.5}\protected@file@percent }
+\newlabel{subsec:cole_hopf}{{1.3.5}{8}{Cole-Hopf Transformation and Exact Solutions}{subsection.1.3.5}{}}
+\@writefile{brf}{\backcite{cole1951quasi,hopf1950partial}{{8}{1.3.5}{subsection.1.3.5}}}
+\newlabel{eq:cole_hopf_transform}{{1.38}{8}{Cole-Hopf Transformation and Exact Solutions}{equation.1.3.38}{}}
+\newlabel{eq:heat_from_burgers}{{1.39}{8}{Cole-Hopf Transformation and Exact Solutions}{equation.1.3.39}{}}
+\@writefile{toc}{\contentsline {paragraph}{Solution Procedure.}{8}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Example: Gaussian Initial Condition.}{8}{section*.27}\protected@file@percent }
+\newlabel{eq:exact_gaussian_solution}{{1.40}{8}{Example: Gaussian Initial Condition}{equation.1.3.40}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.6}Why Burgers Equation for Neural PDE Research?}{8}{subsection.1.3.6}\protected@file@percent }
+\newlabel{subsec:why_burgers}{{1.3.6}{8}{Why Burgers Equation for Neural PDE Research?}{subsection.1.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.4}Challenges in Neural PDE Solving}{9}{section.1.4}\protected@file@percent }
+\newlabel{sec:challenges}{{1.4}{9}{Challenges in Neural PDE Solving}{section.1.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.1}Accuracy vs. Computational Efficiency Trade-off}{9}{subsection.1.4.1}\protected@file@percent }
+\newlabel{subsec:accuracy_efficiency}{{1.4.1}{9}{Accuracy vs. Computational Efficiency Trade-off}{subsection.1.4.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Quantitative Analysis.}{9}{section*.28}\protected@file@percent }
+\newlabel{eq:fd_accuracy}{{1.41}{9}{Quantitative Analysis}{equation.1.4.41}{}}
+\newlabel{eq:neural_accuracy}{{1.42}{9}{Quantitative Analysis}{equation.1.4.42}{}}
+\@writefile{toc}{\contentsline {paragraph}{Computational Cost Comparison.}{9}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Speedup Potential.}{9}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.2}Generalization to Unseen Parameter Regimes}{10}{subsection.1.4.2}\protected@file@percent }
+\newlabel{subsec:generalization}{{1.4.2}{10}{Generalization to Unseen Parameter Regimes}{subsection.1.4.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Statistical Learning Perspective.}{10}{section*.31}\protected@file@percent }
+\newlabel{eq:parameter_mapping}{{1.43}{10}{Statistical Learning Perspective}{equation.1.4.43}{}}
+\@writefile{toc}{\contentsline {paragraph}{Generalization Error.}{10}{section*.32}\protected@file@percent }
+\newlabel{eq:generalization_error}{{1.44}{10}{Generalization Error}{equation.1.4.44}{}}
+\newlabel{eq:error_extrapolation}{{1.45}{10}{Generalization Error}{equation.1.4.45}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.3}Long-Time Stability and Error Accumulation}{10}{subsection.1.4.3}\protected@file@percent }
+\newlabel{subsec:long_time_stability}{{1.4.3}{10}{Long-Time Stability and Error Accumulation}{subsection.1.4.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Autoregressive Rollout.}{10}{section*.33}\protected@file@percent }
+\newlabel{eq:autoregressive}{{1.46}{10}{Autoregressive Rollout}{equation.1.4.46}{}}
+\@writefile{toc}{\contentsline {paragraph}{Error Propagation Analysis.}{10}{section*.34}\protected@file@percent }
+\newlabel{eq:error_propagation}{{1.47}{10}{Error Propagation Analysis}{equation.1.4.47}{}}
+\@writefile{toc}{\contentsline {paragraph}{Spectral Stability.}{10}{section*.35}\protected@file@percent }
+\newlabel{eq:spectral_stability}{{1.48}{10}{Spectral Stability}{equation.1.4.48}{}}
+\newlabel{eq:error_growth_example}{{1.49}{10}{Spectral Stability}{equation.1.4.49}{}}
+\@writefile{toc}{\contentsline {paragraph}{Current State-of-the-Art.}{10}{section*.36}\protected@file@percent }
+\newlabel{eq:stability_horizon}{{1.50}{10}{Current State-of-the-Art}{equation.1.4.50}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.4}Physical Consistency and Conservation Laws}{11}{subsection.1.4.4}\protected@file@percent }
+\newlabel{subsec:conservation_laws}{{1.4.4}{11}{Physical Consistency and Conservation Laws}{subsection.1.4.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Conservation Law Violation.}{11}{section*.37}\protected@file@percent }
+\newlabel{eq:mass_integral}{{1.51}{11}{Conservation Law Violation}{equation.1.4.51}{}}
+\newlabel{eq:mass_conservation}{{1.52}{11}{Conservation Law Violation}{equation.1.4.52}{}}
+\newlabel{eq:mass_violation}{{1.53}{11}{Conservation Law Violation}{equation.1.4.53}{}}
+\@writefile{toc}{\contentsline {paragraph}{Energy Dissipation.}{11}{section*.38}\protected@file@percent }
+\newlabel{eq:kinetic_energy}{{1.54}{11}{Energy Dissipation}{equation.1.4.54}{}}
+\newlabel{eq:energy_dissipation}{{1.55}{11}{Energy Dissipation}{equation.1.4.55}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.5}Project Objectives}{11}{section.1.5}\protected@file@percent }
+\newlabel{sec:objectives}{{1.5}{11}{Project Objectives}{section.1.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5.1}Primary Research Questions}{11}{subsection.1.5.1}\protected@file@percent }
+\newlabel{subsec:research_questions}{{1.5.1}{11}{Primary Research Questions}{subsection.1.5.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{RQ1: Architecture Design.}{11}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Mathematical Formulation.}{11}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{RQ2: Parameter Generalization.}{12}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Protocol.}{12}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{RQ3: Long-Time Stability.}{12}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Stability Metric.}{12}{section*.44}\protected@file@percent }
+\newlabel{eq:stability_metric}{{1.56}{12}{Stability Metric}{equation.1.5.56}{}}
+\@writefile{toc}{\contentsline {paragraph}{RQ4: Computational Efficiency.}{12}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Metrics.}{12}{section*.46}\protected@file@percent }
 \@setckpt{Chapter1}{
-\setcounter{page}{2}
-\setcounter{equation}{0}
-\setcounter{enumi}{0}
+\setcounter{page}{13}
+\setcounter{equation}{56}
+\setcounter{enumi}{5}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
 \setcounter{enumiv}{0}
@@ -17,8 +168,8 @@
 \setcounter{mpfootnote}{0}
 \setcounter{part}{0}
 \setcounter{chapter}{1}
-\setcounter{section}{0}
-\setcounter{subsection}{0}
+\setcounter{section}{5}
+\setcounter{subsection}{1}
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
@@ -39,10 +190,10 @@
 \setcounter{minitocdepth}{2}
 \setcounter{ptc}{0}
 \setcounter{parttocdepth}{2}
-\setcounter{section@level}{0}
-\setcounter{Item}{0}
+\setcounter{section@level}{4}
+\setcounter{Item}{11}
 \setcounter{Hfootnote}{0}
-\setcounter{bookmark@seq@number}{1}
+\setcounter{bookmark@seq@number}{22}
 \setcounter{r@tfl@t}{0}
 \setcounter{float@type}{16}
 \setcounter{algorithm}{0}

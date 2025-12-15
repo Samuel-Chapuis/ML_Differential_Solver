@@ -1,23 +1,171 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Our Methodology and Approach}{7}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Our Methodology and Approach}{17}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{lof}{\contentsline {xchapter}{Our Methodology and Approach}{7}{chapter.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {xchapter}{Our Methodology and Approach}{7}{chapter.4}\protected@file@percent }
-\newlabel{chap:intro}{{4}{7}{Our Methodology and Approach}{chapter.4}{}}
+\@writefile{lof}{\contentsline {xchapter}{Our Methodology and Approach}{17}{chapter.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {xchapter}{Our Methodology and Approach}{17}{chapter.4}\protected@file@percent }
+\newlabel{chap:methodology}{{4}{17}{Our Methodology and Approach}{chapter.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Overview of the Proposed Pipeline}{17}{section.4.1}\protected@file@percent }
+\newlabel{sec:pipeline_overview}{{4.1}{17}{Overview of the Proposed Pipeline}{section.4.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Data Generation: Stable Numerical Solver}{17}{section.4.2}\protected@file@percent }
+\newlabel{sec:data_generation}{{4.2}{17}{Data Generation: Stable Numerical Solver}{section.4.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Finite Difference Scheme}{17}{subsection.4.2.1}\protected@file@percent }
+\newlabel{subsec:finite_difference}{{4.2.1}{17}{Finite Difference Scheme}{subsection.4.2.1}{}}
+\newlabel{eq:burgers_data_gen}{{4.1}{17}{Finite Difference Scheme}{equation.4.2.1}{}}
+\newlabel{eq:spatial_discretization}{{4.2}{18}{Finite Difference Scheme}{equation.4.2.2}{}}
+\newlabel{eq:dx}{{4.3}{18}{Finite Difference Scheme}{equation.4.2.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Diffusion Term.}{18}{section*.47}\protected@file@percent }
+\newlabel{eq:diffusion_discrete}{{4.4}{18}{Diffusion Term}{equation.4.2.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Advection Term.}{18}{section*.48}\protected@file@percent }
+\newlabel{eq:upwind_scheme}{{4.5}{18}{Advection Term}{equation.4.2.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Time Integration.}{18}{section*.49}\protected@file@percent }
+\newlabel{eq:forward_euler}{{4.6}{18}{Time Integration}{equation.4.2.6}{}}
+\newlabel{eq:cfl_condition_data}{{4.7}{18}{Time Integration}{equation.4.2.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Dataset Construction}{18}{subsection.4.2.2}\protected@file@percent }
+\newlabel{subsec:dataset_construction}{{4.2.2}{18}{Dataset Construction}{subsection.4.2.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Sampling Strategy.}{18}{section*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Trajectory Length.}{19}{section*.51}\protected@file@percent }
+\newlabel{eq:trajectory}{{4.8}{19}{Trajectory Length}{equation.4.2.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Dataset Split.}{19}{section*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.3}Quality Assurance}{19}{subsection.4.2.3}\protected@file@percent }
+\newlabel{subsec:quality_assurance}{{4.2.3}{19}{Quality Assurance}{subsection.4.2.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Mass Conservation.}{19}{section*.53}\protected@file@percent }
+\newlabel{eq:mass_discrete}{{4.9}{19}{Mass Conservation}{equation.4.2.9}{}}
+\newlabel{eq:mass_conservation_check}{{4.10}{19}{Mass Conservation}{equation.4.2.10}{}}
+\@writefile{toc}{\contentsline {paragraph}{Energy Dissipation.}{19}{section*.54}\protected@file@percent }
+\newlabel{eq:energy_discrete}{{4.11}{19}{Energy Dissipation}{equation.4.2.11}{}}
+\newlabel{eq:energy_monotonicity}{{4.12}{19}{Energy Dissipation}{equation.4.2.12}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stability Check.}{20}{section*.55}\protected@file@percent }
+\newlabel{eq:stability_check}{{4.13}{20}{Stability Check}{equation.4.2.13}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Neural Architecture: Improved NFTM with Temporal Attention}{20}{section.4.3}\protected@file@percent }
+\newlabel{sec:architecture}{{4.3}{20}{Neural Architecture: Improved NFTM with Temporal Attention}{section.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Input Representation and Window-Based Prediction}{20}{subsection.4.3.1}\protected@file@percent }
+\newlabel{subsec:input_representation}{{4.3.1}{20}{Input Representation and Window-Based Prediction}{subsection.4.3.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Historical Window.}{20}{section*.56}\protected@file@percent }
+\newlabel{eq:history_window}{{4.14}{20}{Historical Window}{equation.4.3.14}{}}
+\@writefile{toc}{\contentsline {paragraph}{Prediction Task.}{20}{section*.57}\protected@file@percent }
+\newlabel{eq:prediction_task}{{4.15}{20}{Prediction Task}{equation.4.3.15}{}}
+\newlabel{eq:autoregressive_rollout}{{4.16}{20}{Prediction Task}{equation.4.3.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Causal Temporal Attention Mechanism}{20}{subsection.4.3.2}\protected@file@percent }
+\newlabel{subsec:temporal_attention}{{4.3.2}{20}{Causal Temporal Attention Mechanism}{subsection.4.3.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Motivation.}{20}{section*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Architecture Overview.}{21}{section*.59}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Feature Embedding.}{21}{section*.60}\protected@file@percent }
+\newlabel{eq:embedding}{{4.17}{21}{Feature Embedding}{equation.4.3.17}{}}
+\newlabel{eq:embedded_history}{{4.18}{21}{Feature Embedding}{equation.4.3.18}{}}
+\@writefile{toc}{\contentsline {paragraph}{Query-Key-Value Projections.}{21}{section*.61}\protected@file@percent }
+\newlabel{eq:query}{{4.19}{21}{Query-Key-Value Projections}{equation.4.3.19}{}}
+\newlabel{eq:key}{{4.20}{21}{Query-Key-Value Projections}{equation.4.3.20}{}}
+\newlabel{eq:value}{{4.21}{21}{Query-Key-Value Projections}{equation.4.3.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Attention Scores.}{21}{section*.62}\protected@file@percent }
+\newlabel{eq:attention_scores}{{4.22}{21}{Attention Scores}{equation.4.3.22}{}}
+\newlabel{eq:attention_weights}{{4.23}{21}{Attention Scores}{equation.4.3.23}{}}
+\newlabel{eq:attention_normalization}{{4.24}{21}{Attention Scores}{equation.4.3.24}{}}
+\@writefile{toc}{\contentsline {paragraph}{Context Aggregation.}{21}{section*.63}\protected@file@percent }
+\newlabel{eq:context}{{4.25}{21}{Context Aggregation}{equation.4.3.25}{}}
+\@writefile{toc}{\contentsline {paragraph}{Output Projection and Residual Connection.}{22}{section*.64}\protected@file@percent }
+\newlabel{eq:attention_output}{{4.26}{22}{Output Projection and Residual Connection}{equation.4.3.26}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.3}Convolutional Decoder}{22}{subsection.4.3.3}\protected@file@percent }
+\newlabel{subsec:decoder}{{4.3.3}{22}{Convolutional Decoder}{subsection.4.3.3}{}}
+\newlabel{eq:decoder}{{4.27}{22}{Convolutional Decoder}{equation.4.3.27}{}}
+\@writefile{toc}{\contentsline {paragraph}{Multi-Scale Receptive Field.}{22}{section*.65}\protected@file@percent }
+\newlabel{eq:receptive_field_decoder}{{4.28}{22}{Multi-Scale Receptive Field}{equation.4.3.28}{}}
+\@writefile{toc}{\contentsline {paragraph}{Bounded Correction via Tanh.}{22}{section*.66}\protected@file@percent }
+\newlabel{eq:tanh_clipping}{{4.29}{22}{Bounded Correction via Tanh}{equation.4.3.29}{}}
+\newlabel{eq:correction_bound}{{4.30}{22}{Bounded Correction via Tanh}{equation.4.3.30}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.4}Final Prediction}{22}{subsection.4.3.4}\protected@file@percent }
+\newlabel{subsec:final_prediction}{{4.3.4}{22}{Final Prediction}{subsection.4.3.4}{}}
+\newlabel{eq:residual_update}{{4.31}{22}{Final Prediction}{equation.4.3.31}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Training Strategy}{22}{section.4.4}\protected@file@percent }
+\newlabel{sec:training_strategy}{{4.4}{22}{Training Strategy}{section.4.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}Loss Function Design}{22}{subsection.4.4.1}\protected@file@percent }
+\newlabel{subsec:loss_function}{{4.4.1}{22}{Loss Function Design}{subsection.4.4.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Mean Squared Error (MSE).}{23}{section*.67}\protected@file@percent }
+\newlabel{eq:mse_loss}{{4.32}{23}{Mean Squared Error (MSE)}{equation.4.4.32}{}}
+\@writefile{toc}{\contentsline {paragraph}{Gradient Matching Loss.}{23}{section*.68}\protected@file@percent }
+\newlabel{eq:gradient_loss}{{4.33}{23}{Gradient Matching Loss}{equation.4.4.33}{}}
+\newlabel{eq:gradient_computation}{{4.34}{23}{Gradient Matching Loss}{equation.4.4.34}{}}
+\@writefile{toc}{\contentsline {paragraph}{Energy Dissipation Constraint.}{23}{section*.69}\protected@file@percent }
+\newlabel{eq:energy_physics}{{4.35}{23}{Energy Dissipation Constraint}{equation.4.4.35}{}}
+\newlabel{eq:energy_loss}{{4.36}{23}{Energy Dissipation Constraint}{equation.4.4.36}{}}
+\newlabel{eq:energy_formula}{{4.37}{23}{Energy Dissipation Constraint}{equation.4.4.37}{}}
+\@writefile{toc}{\contentsline {paragraph}{Combined Loss.}{23}{section*.70}\protected@file@percent }
+\newlabel{eq:total_loss}{{4.38}{23}{Combined Loss}{equation.4.4.38}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Curriculum Learning Strategy}{23}{subsection.4.4.2}\protected@file@percent }
+\newlabel{subsec:curriculum_learning}{{4.4.2}{23}{Curriculum Learning Strategy}{subsection.4.4.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Rollout Depth Scheduling.}{23}{section*.71}\protected@file@percent }
+\newlabel{eq:rollout_schedule}{{4.39}{23}{Rollout Depth Scheduling}{equation.4.4.39}{}}
+\newlabel{eq:rollout_loss}{{4.40}{24}{Rollout Depth Scheduling}{equation.4.4.40}{}}
+\@writefile{toc}{\contentsline {paragraph}{Teacher Forcing.}{24}{section*.72}\protected@file@percent }
+\newlabel{eq:teacher_forcing}{{4.41}{24}{Teacher Forcing}{equation.4.4.41}{}}
+\newlabel{eq:teacher_forcing_schedule}{{4.42}{24}{Teacher Forcing}{equation.4.4.42}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.3}Noise Injection for Robustness}{24}{subsection.4.4.3}\protected@file@percent }
+\newlabel{subsec:noise_injection}{{4.4.3}{24}{Noise Injection for Robustness}{subsection.4.4.3}{}}
+\newlabel{eq:noise_injection}{{4.43}{24}{Noise Injection for Robustness}{equation.4.4.43}{}}
+\newlabel{eq:noise_scale}{{4.44}{24}{Noise Injection for Robustness}{equation.4.4.44}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.4}Optimization Details}{24}{subsection.4.4.4}\protected@file@percent }
+\newlabel{subsec:optimization}{{4.4.4}{24}{Optimization Details}{subsection.4.4.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Optimizer.}{24}{section*.73}\protected@file@percent }
+\newlabel{eq:adamw}{{4.45}{24}{Optimizer}{equation.4.4.45}{}}
+\@writefile{toc}{\contentsline {paragraph}{Learning Rate Schedule.}{25}{section*.74}\protected@file@percent }
+\newlabel{eq:cosine_annealing}{{4.46}{25}{Learning Rate Schedule}{equation.4.4.46}{}}
+\@writefile{toc}{\contentsline {paragraph}{Gradient Clipping.}{25}{section*.75}\protected@file@percent }
+\newlabel{eq:gradient_clipping}{{4.47}{25}{Gradient Clipping}{equation.4.4.47}{}}
+\@writefile{toc}{\contentsline {paragraph}{Batch Size and Epochs.}{25}{section*.76}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}Evaluation Metrics}{25}{section.4.5}\protected@file@percent }
+\newlabel{sec:evaluation_metrics}{{4.5}{25}{Evaluation Metrics}{section.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.1}Accuracy Metrics}{25}{subsection.4.5.1}\protected@file@percent }
+\newlabel{subsec:accuracy_metrics}{{4.5.1}{25}{Accuracy Metrics}{subsection.4.5.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Mean Squared Error (MSE).}{25}{section*.77}\protected@file@percent }
+\newlabel{eq:mse_metric}{{4.48}{25}{Mean Squared Error (MSE)}{equation.4.5.48}{}}
+\@writefile{toc}{\contentsline {paragraph}{Relative L2 Error.}{25}{section*.78}\protected@file@percent }
+\newlabel{eq:relative_l2}{{4.49}{25}{Relative L2 Error}{equation.4.5.49}{}}
+\@writefile{toc}{\contentsline {paragraph}{Per-Timestep Relative L2.}{25}{section*.79}\protected@file@percent }
+\newlabel{eq:timestep_relative_l2}{{4.50}{25}{Per-Timestep Relative L2}{equation.4.5.50}{}}
+\@writefile{toc}{\contentsline {paragraph}{Peak Signal-to-Noise Ratio (PSNR).}{25}{section*.80}\protected@file@percent }
+\newlabel{eq:psnr}{{4.51}{25}{Peak Signal-to-Noise Ratio (PSNR)}{equation.4.5.51}{}}
+\@writefile{toc}{\contentsline {paragraph}{Structural Similarity Index (SSIM).}{26}{section*.81}\protected@file@percent }
+\newlabel{eq:ssim}{{4.52}{26}{Structural Similarity Index (SSIM)}{equation.4.5.52}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.2}Physical Consistency Metrics}{26}{subsection.4.5.2}\protected@file@percent }
+\newlabel{subsec:physical_metrics}{{4.5.2}{26}{Physical Consistency Metrics}{subsection.4.5.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Mass Conservation Error.}{26}{section*.82}\protected@file@percent }
+\newlabel{eq:mass_error}{{4.53}{26}{Mass Conservation Error}{equation.4.5.53}{}}
+\newlabel{eq:mass_error_relative}{{4.54}{26}{Mass Conservation Error}{equation.4.5.54}{}}
+\@writefile{toc}{\contentsline {paragraph}{Energy Dissipation Consistency.}{26}{section*.83}\protected@file@percent }
+\newlabel{eq:energy_monotonicity_metric}{{4.55}{26}{Energy Dissipation Consistency}{equation.4.5.55}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.3}Correlation and Spectral Metrics}{26}{subsection.4.5.3}\protected@file@percent }
+\newlabel{subsec:correlation_metrics}{{4.5.3}{26}{Correlation and Spectral Metrics}{subsection.4.5.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Pearson Correlation per Timestep.}{26}{section*.84}\protected@file@percent }
+\newlabel{eq:pearson_correlation}{{4.56}{26}{Pearson Correlation per Timestep}{equation.4.5.56}{}}
+\@writefile{toc}{\contentsline {paragraph}{Energy Spectrum Error.}{26}{section*.85}\protected@file@percent }
+\newlabel{eq:spectrum}{{4.57}{26}{Energy Spectrum Error}{equation.4.5.57}{}}
+\newlabel{eq:spectrum_error}{{4.58}{26}{Energy Spectrum Error}{equation.4.5.58}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}Implementation Details}{26}{section.4.6}\protected@file@percent }
+\newlabel{sec:implementation}{{4.6}{26}{Implementation Details}{section.4.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.1}Software and Hardware}{26}{subsection.4.6.1}\protected@file@percent }
+\newlabel{subsec:software_hardware}{{4.6.1}{26}{Software and Hardware}{subsection.4.6.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Framework.}{26}{section*.86}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hardware.}{27}{section*.87}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.2}Reproducibility}{27}{subsection.4.6.2}\protected@file@percent }
+\newlabel{subsec:reproducibility}{{4.6.2}{27}{Reproducibility}{subsection.4.6.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.3}Code Organization}{27}{subsection.4.6.3}\protected@file@percent }
+\newlabel{subsec:code_organization}{{4.6.3}{27}{Code Organization}{subsection.4.6.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}Summary}{27}{section.4.7}\protected@file@percent }
+\newlabel{sec:methodology_summary}{{4.7}{27}{Summary}{section.4.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Transition to Chapter 5.}{28}{section*.88}\protected@file@percent }
 \@setckpt{Chapter4}{
-\setcounter{page}{8}
-\setcounter{equation}{0}
-\setcounter{enumi}{0}
+\setcounter{page}{29}
+\setcounter{equation}{58}
+\setcounter{enumi}{5}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
 \setcounter{enumiv}{0}
-\setcounter{footnote}{0}
+\setcounter{footnote}{1}
 \setcounter{mpfootnote}{0}
 \setcounter{part}{0}
 \setcounter{chapter}{4}
-\setcounter{section}{0}
+\setcounter{section}{7}
 \setcounter{subsection}{0}
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
@@ -39,10 +187,10 @@
 \setcounter{minitocdepth}{2}
 \setcounter{ptc}{0}
 \setcounter{parttocdepth}{2}
-\setcounter{section@level}{0}
-\setcounter{Item}{0}
-\setcounter{Hfootnote}{0}
-\setcounter{bookmark@seq@number}{4}
+\setcounter{section@level}{4}
+\setcounter{Item}{29}
+\setcounter{Hfootnote}{1}
+\setcounter{bookmark@seq@number}{49}
 \setcounter{r@tfl@t}{0}
 \setcounter{float@type}{16}
 \setcounter{algorithm}{0}
