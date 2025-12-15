@@ -1,0 +1,88 @@
+\chapter{Introduction}
+\section{Context and motivation}
+
+\subsection{Project goals}
+Our objective is to build a generic neural architecture that can internalize the governing rules of physical systems and then advance their fields over time. The model is trained on challenging PDEs with a focus on fluid mechanics (Navier--Stokes) to stress-test its ability to learn complex, multi-scale, nonlinear dynamics. Beyond matching the training horizon, the same architecture should simulate and extrapolate trajectories past the seen time window, remaining stable and accurate while generalizing across PDE families. Comparing these predictions to reference simulations allows us to identify which ingredients are essential for robustness and transfer.
+
+\subsection{Minimal mathematical frame}
+Many PDEs of interest can be written in a (semi-)invariant form:
+\begin{equation}
+	\partial_t u(x,t) = \mathcal{F}\big(u(x,t), \nabla u(x,t), \nabla^2 u(x,t); \theta\big), \quad x \in \Omega,\; t>0,
+\end{equation}
+with initial/boundary conditions. Here $u$ is a scalar or vector field; $\mathcal{F}$ encodes advection, diffusion, reaction, constraints; and $\theta$ collects physical parameters (viscosity $\nu$, conductivity $\alpha$, permeability $a(x)$, etc.). Our network seeks to learn a local time-advance operator that approximates $\mathcal{F}$ across multiple PDE families.
+
+\subsection{Historical milestones: AI and PDEs}
+\begin{itemize}
+	\item \textbf{1990s--2000s}: early universal approximators for simple PDEs; occasional RBF/MLP surrogates.
+	\item \textbf{2017--2019}: \textit{Physics-Informed Neural Networks} (PINNs) enforce PDE residuals in the loss; good on simple geometries, sensitive to stiffness and turbulent regimes.
+	\item \textbf{2020}: \textit{Fourier Neural Operator} (FNO) and \textit{Neural Operators} learn the operator between function spaces; reference benchmarks on Burgers, incompressible Navier--Stokes, Darcy.
+	\item \textbf{2021--2024}: rise of spatio-temporal architectures (Transformers, ConvNeXt) for continuous fields; work on numerical stability, spectral regularization, and conservation of physical quantities.
+	\item \textbf{NFTM (2025)}: Neural Field Turing Machine (Malhotra \& Seghouani) combines \textbf{continuous spatial memory + read/write heads + a neural controller} (CNN/RNN/Transformer). It resembles an explicit scheme: local read, compute an update, local write. Our work builds on this idea to generalize across PDEs.
+\end{itemize}
+
+\section{Fluid Mechanics Overview}
+
+\subsection{Why Navier--Stokes?}
+	Navier--Stokes models is a canonical set of nonlinear PDEs governing fluid flow, encompassing a wide range of phenomena from laminar to turbulent regimes. Their complexity and multi-scale nature make them an ideal testbed for evaluating the capabilities of neural architectures in learning physical dynamics. Successfully modeling Navier--Stokes would demonstrate the potential of AI-driven approaches in computational fluid dynamics (CFD) and beyond.
+
+\subsection{Governing equations}
+The Navier--Stokes equations describe the motion of fluid substances and are derived from fundamental conservation laws: mass, momentum, and energy. They can be expressed as follows:
+
+\begin{align}
+	\text{Mass Conervation}:& \quad
+    \dfrac{\partial \rho}{\partial t} + \nabla\!\cdot\!(\rho \mathbf{u}) = 0
+    \\[16pt]
+    \text{Momentum Conervation}:& \quad
+    \dfrac{\partial (\rho \mathbf{u})}{\partial t}
+    + \nabla\!\cdot\!(\rho \mathbf{u}\otimes\mathbf{u})
+    = -\nabla p + \nabla\!\cdot\!\boldsymbol{\Sigma} + \rho \mathbf{g}
+    \\[16pt]
+    \text{Energy Conervation}:& \quad
+    \dfrac{\partial E}{\partial t}
+    + \nabla\!\cdot\!((E+p)\mathbf{u})
+    = \nabla\!\cdot\!(\boldsymbol{\tau}\!\cdot\!\mathbf{u})
+    - \nabla\!\cdot\!\mathbf{q}
+    + \rho \mathbf{u}\!\cdot\!\mathbf{g}
+\end{align}
+\\[8pt]
+
+Where all the variables are defined as:
+\begin{itemize}
+  \item \(\rho\): fluid density \([\text{kg·m}^{-3}]\)
+  \item \(\mathbf{u} = (u,v,w)\): velocity field \([\text{m·s}^{-1}]\)
+  \item \(\nabla\!\cdot\!(\rho \mathbf{u})\): divergence of mass flux
+  \item \(\partial \rho / \partial t\): local time rate of change of density
+  \item \(\rho \mathbf{u}\): momentum density \([\text{kg·m}^{-2}\text{·s}^{-1}]\)
+  \item \(\nabla\!\cdot\!(\rho \mathbf{u}\otimes\mathbf{u})\): convective momentum transport
+  \item \(-\nabla p\): pressure gradient force per unit volume
+  \item \(\boldsymbol{\Sigma}\): viscous stress tensor \([\text{Pa}]\)
+  \item \(\rho \mathbf{g}\): body force density (e.g. gravity) \([\text{N·m}^{-3}]\)
+  \item \(E = \rho\!\left(e + \tfrac{1}{2}|\mathbf{u}|^2\right)\): total energy density (internal + kinetic)
+  \item \(p\): pressure \([\text{Pa}]\)
+  \item \(\boldsymbol{\tau}\): stress tensor (viscous + pressure)
+  \item \(\mathbf{q}\): heat flux vector \([\text{W·m}^{-2}]\)
+  \item \(\rho \mathbf{u}\!\cdot\!\mathbf{g}\): work done by body forces
+\end{itemize}
+
+These equations require a viscosity model (e.g., Newtonian fluid) and an equation of state (e.g., ideal gas law or van der Waals equation) to close the system. They form the foundation for simulating fluid dynamics in various applications, from aerodynamics to weather forecasting.
+
+\begin{align}
+    \text{Newtonian fluid model}:& \quad
+    \begin{cases}
+    \boldsymbol{\Sigma} = \mu\left(\nabla \mathbf{u} + (\nabla \mathbf{u})^T\right) + \lambda (\nabla\!\cdot\!\mathbf{u}) \mathbf{I},\\[4pt]
+    \boldsymbol{\tau} = \boldsymbol{\Sigma} - p \mathbf{I}
+    \end{cases}
+    \\[16pt]
+    \text{Ideal gas}:& \quad
+    p = \rho R T
+    \\[16pt]
+    \text{van der Waals}:& \quad
+    \left(p + a\left(\dfrac{n}{V}\right)^2\right)(V - nb) = nRT
+\end{align}
+
+\subsection{Burger's equation as a starting point}
+As the project starts, we focus the goal was to use a model simple enough to be learned with limited data and computational resources, yet rich enough to exhibit complex dynamics. Thus, we begin with the burger s equation, a simplified 1D version of the Navier--Stokes equations that captures some features of fluid dynamics, such as shock formation and nonlinear advection.
+The viscous Burger's equation in 1D is given by:
+\begin{equation}
+    \dfrac{\partial u}{\partial t} + u \dfrac{\partial u}{\partial x} = \nu \dfrac{\partial^2 u}{\partial x^2}, \quad x \in [0,L],\; t>0,
+\end{equation}
