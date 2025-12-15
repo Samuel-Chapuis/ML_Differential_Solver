@@ -11,6 +11,13 @@
 \end{itemize}
 \end{block}
 
+\begin{alertblock}{Personal Simluator}
+\begin{itemize}
+    \item The datasets were generated using a custom simulator implemented in Python.
+    \item The simulator uses more diffrent types of initial conditions to create a diverse set of trajectories.
+\end{itemize}
+\end{alertblock}
+
 \end{secframe}
 
 \begin{frame}{1D Burger Equation Datasets}
@@ -18,94 +25,21 @@
     % Row 1
     \begin{minipage}{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{images/burger/Heatmap_1DBurgers_visc_001.png} % viscosity = 0.01
+        \includegraphics[width=\textwidth]{images/burger/WebDataset_InitialConditions.png}
     \end{minipage}\hfill
     \begin{minipage}{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{images/burger/Heatmap_1DBurgers_visc_0001.png} % viscosity = 0.001
+        \includegraphics[width=\textwidth]{images/burger/OwnSimulator_InitialConditions.png}
+
     \end{minipage}
 
     % Row 2
     \begin{minipage}{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{images/burger/Heatmap_1DBurgers_visc_01.png} % viscosity = 0.1
+        \includegraphics[width=\textwidth*5/4]{images/burger/WebDataset_Sim.png} 
     \end{minipage}\hfill
     \begin{minipage}{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{images/burger/Heatmap_1DBurgers_visc_05.png} % viscosity = 0.5
+        \includegraphics[width=\textwidth*5/4]{images/burger/OwnSimulator_Sim.png}
     \end{minipage}
 \end{frame}
-
-% % ===== Dataset ε = 0.001 =====
-% \begin{secframe}
-% \begin{block}{Dataset 2: $\epsilon = 0.001$}
-% \begin{itemize}
-%   \item \small Get steeper gradients more quickly.
-%   \item \small Almost discontinuities forming in the solution.
-%   \item \small Minimal diffusion patterns.
-% \end{itemize}
-% \end{block}
-
-% \begin{figure}[h!]
-%     \centering
-%     \begin{minipage}[t]{0.48\linewidth}
-%         \centering
-%         \includegraphics[height=3.8cm]{images/burger/graphical_visualization_1DBurgers_visc_0001.png}
-%     \end{minipage}\hfill
-%     \begin{minipage}[t]{0.48\linewidth}
-%         \centering
-%         \includegraphics[height=3.8cm]{images/burger/Heatmap_1DBurgers_visc_0001.png}
-%     \end{minipage}
-%     \caption{\scriptsize Left: solution $u(x,t)$ for 10 different time snapshots; Right: heatmap of $u(x,t)$ evolution.}
-% \end{figure}
-% \end{secframe}
-
-% % ===== Dataset ε = 0.1 =====
-% \begin{secframe}
-
-% \begin{block}{Dataset 3: $\epsilon = 0.1$}
-% \begin{itemize}
-%   \item \small Higher viscosity leads to smoother solutions.
-%   \item \small Solutions behave more like a gradually varying wave.
-% \end{itemize}
-% \end{block}
-
-% \begin{figure}[h!]
-%     \centering
-%     \begin{minipage}[t]{0.48\linewidth}
-%         \centering
-%         \includegraphics[height=3.8cm]{images/burger/graphical_visualization_1DBurgers_visc_01.png}
-%     \end{minipage}\hfill
-%     \begin{minipage}[t]{0.48\linewidth}
-%         \centering
-%         \includegraphics[height=3.8cm]{images/burger/Heatmap_1DBurgers_visc_01.png}
-%     \end{minipage}
-%     \caption{\scriptsize Left: solution $u(x,t)$ for 10 different time snapshots; Right: heatmap of $u(x,t)$ evolution.}
-% \end{figure}
-
-% \end{secframe}
-
-% % ===== Dataset ε = 0.5 =====
-% \begin{secframe}
-
-% \begin{block}{Dataset 4: $\epsilon = 0.5$}
-% \begin{itemize}
-%   \item \small The solution remains smoother over longer times.
-%   \item \small The solution changes in a smooth way.
-%   \item \small More diffused patterns. 
-% \end{itemize}
-% \end{block}
-
-% \begin{figure}[h!]
-%     \centering
-%     \begin{minipage}[t]{0.48\linewidth}
-%         \centering
-%         \includegraphics[height=3.8cm]{images/burger/graphical_visualization_1DBurgers_visc_05.png}
-%     \end{minipage}\hfill
-%     \begin{minipage}[t]{0.48\linewidth}
-%         \centering
-%         \includegraphics[height=3.8cm]{images/burger/Heatmap_1DBurgers_visc_05.png}
-%     \end{minipage}
-%     \caption{\scriptsize Left: solution $u(x,t)$ for 10 different time snapshots; Right: heatmap of $u(x,t)$ evolution.}
-% \end{figure}
-% \end{secframe}
