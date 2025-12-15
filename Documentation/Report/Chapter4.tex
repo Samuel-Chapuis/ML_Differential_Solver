@@ -8,40 +8,31 @@ The second approach, corresponds to a \textbf{Causal Temporal Convolutional Atte
 Both approaches enforce physics-informed constraints. We detail their architectures, training procedures, and comprehensive evaluation metrics, highlighting respective strengths and limitations.
 
 % TABLE OF BURGER'S DATASET STATISTICS
-\begin{table}[htbp]
+\begin{table}[h!]
 \centering
-\caption{Burger's Equation Dataset: Number of Trajectories by Viscosity.}
-\label{tab:dataset_Burger_statistics}
-\resizebox{0.75\textwidth}{!}{
-\begin{tabular}{c c c c}
+\begin{tabular}{cccc|ccc}
 \toprule
-\multicolumn{4}{c}{\textbf{Training (724 samples)}} \\
+\multicolumn{4}{c|}{\textbf{Training (724 samples)}} & \multicolumn{3}{c}{\textbf{Testing (123 samples)}} \\
 \midrule
-\textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Percentage} & \\
+\textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Pct.} & & \textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Pct.} \\
 \midrule
-0.0010 & 60 & 8.3\% & \\
-0.0020 & 40 & 5.5\% & \\
-0.0065 & 40 & 5.5\% & \\
-0.0080 & 40 & 5.5\% & \\
-0.0400 & 40 & 5.5\% & \\
-0.0500 & 60 & 8.3\% & \\
-0.0700 & 60 & 8.3\% & \\
-0.1000 & 60 & 8.3\% & \\
-0.1500 & 60 & 8.3\% & \\
-0.2500 & 60 & 8.3\% & \\
-0.3500 & 60 & 8.3\% & \\
-0.4000 & 60 & 8.3\% & \\
-0.5000 & 84 & 11.6\% & \\
-\midrule
-\multicolumn{4}{c}{\textbf{Testing (123 samples)}} \\
-\midrule
-0.0100 & 50 & 40.7\% & \\
-0.0269 & 13 & 10.6\% & \\
-0.2000 & 30 & 24.4\% & \\
-0.3000 & 30 & 24.4\% & \\
+0.0010 & 60 & 8.3 & & 0.0100 & 50 & 40.7 \\
+0.0020 & 40 & 5.5 & & 0.0269 & 13 & 10.6 \\
+0.0065 & 40 & 5.5 & & 0.2000 & 30 & 24.4 \\
+0.0080 & 40 & 5.5 & & 0.3000 & 30 & 24.4 \\
+0.0400 & 40 & 5.5 & & & & \\
+0.0500 & 60 & 8.3 & & & & \\
+0.0700 & 60 & 8.3 & & & & \\
+0.1000 & 60 & 8.3 & & & & \\
+0.1500 & 60 & 8.3 & & & & \\
+0.2500 & 60 & 8.3 & & & & \\
+0.3500 & 60 & 8.3 & & & & \\
+0.4000 & 60 & 8.3 & & & & \\
+0.5000 & 84 & 11.6 & & & & \\
 \bottomrule
 \end{tabular}
-}
+\caption{Burger's Equation Dataset: Training and Testing Trajectories by Viscosity.}
+\label{tab:dataset_Burger_statistics}
 \end{table}
 
 % ----------------------------------------------------------- SAMUEL MODEL -------------------------------------------------------------------------------
@@ -271,11 +262,39 @@ Training employs curriculum learning with multi-step rollouts:
 \end{enumerate}
 
 \subsection{Evaluation Metrics}
-
+% ---------- EVALUATION METRICS TABLE --------------------
 Full-trajectory predictions are evaluated using:
 \begin{itemize}
     \item Standard: MSE, relative $L^2$, PSNR, SSIM, temporal correlation.
     \item Physics-informed: mass conservation error, energy monotonicity fraction, mean PDE residual, spectral error, max gradient error.
 \end{itemize}
-
 This comprehensive evaluation ensures both accuracy and physical fidelity across long rollouts.
+
+\begin{table}[htbp]
+\centering
+\resizebox{1.1\textwidth}{!}{
+\begin{tabular}{@{\extracolsep{14pt}}l@{\extracolsep{14pt}}c@{\extracolsep{14pt}}l@{\extracolsep{14pt}}c@{\extracolsep{14pt}}c}
+\toprule
+\textbf{Metric} & & \textbf{Purpose} & \textbf{Good} & \textbf{Failure} \\
+\midrule[1pt]
+MSE & $\frac{1}{NP}\sum(u_\text{pred}-u_\text{gt})^2$ & Pixel accuracy & $<10^{-4}$ & $>10^{-3}$ \\
+Rel. L2 & $\|u_\text{pred}-u_\text{gt}\|_2/\|u_\text{gt}\|_2$ & Scale-invariant & $<0.05$ & $>0.2$ \\
+PSNR & $20\log(\text{range}/\sqrt{\text{MSE}})$ & Image quality & $>30$dB & $<20$dB \\
+SSIM & Struct. similarity & Structure & $>0.9$ & $<0.7$ \\
+Corr. & Pearson $r$/step & Phase alignment & $>0.95$ & $<0.8$ \\
+\hline[0.8pt]
+Mass Err. & $|\int u\,dx-M_0|$ & Conservation & $<0.01$ & $>0.1$ \\
+Energy Mono. & $E(t+1)\leq E(t)$ & Dissipation & $>0.95$ & $<0.8$ \\
+PDE Res. & PDE residual & PDE satisfaction & $<0.01$ & $>0.1$ \\
+Max Grad. & $\max|\partial_xu|$ & Shock preserv. & $\pm10\%$GT & Diverges \\
+Grad. Err. & Grad. difference & Shock sharpness & $<0.05$ & $>0.2$ \\
+\bottomrule[1pt]
+\end{tabular}
+}
+\caption{Evaluation Metrics for NFTM Performance Assessment}
+\label{tab:nftm_metrics}
+\end{table}
+
+Table~\ref{tab:nftm_metrics} summarizes the evaluation metrics used to assess NFTM performance, detailing formulas, purposes, and thresholds for good vs. failure cases. This suite ensures comprehensive assessment of both numerical accuracy and physical fidelity.
+
+

@@ -10,12 +10,12 @@
 \contentsline {chapter}{\numberline {2}Related Work}{5}{chapter.2}%
 \contentsline {chapter}{\numberline {3}Background}{7}{chapter.3}%
 \contentsline {chapter}{\numberline {4}Approaches for Neural PDE Simulators}{9}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Approach 1: Transformer based Model}{9}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Model Architecture}{9}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}}{9}{subsection.4.1.2}%
-\contentsline {section}{\numberline {4.2}Approach 2: TCAN based Model}{9}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Model Architecture}{9}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Temporal Attention Encoder}{13}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.1}Approach 1: Transformer based Model}{10}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Model Architecture}{10}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}}{10}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}Approach 2: TCAN based Model}{10}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Model Architecture}{10}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Temporal Attention Encoder}{12}{subsection.4.2.2}%
 \contentsline {subsection}{\numberline {4.2.3}Decoder and Residual Correction}{13}{subsection.4.2.3}%
 \contentsline {subsection}{\numberline {4.2.4}Autoregressive Training Procedure}{14}{subsection.4.2.4}%
 \contentsline {subsection}{\numberline {4.2.5}Evaluation Metrics}{14}{subsection.4.2.5}%
@@ -24,4 +24,4 @@
 \contentsline {section}{\numberline {6.1}Gl remarks}{17}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Gl remarks about the presentation}{17}{section.6.2}%
 \contentsline {chapter}{\numberline {A}Appendix}{19}{appendix.A}%
-\contentsline {chapter}{Bibliography}{21}{appendix*.6}%
+\contentsline {chapter}{Bibliography}{21}{appendix*.7}%
