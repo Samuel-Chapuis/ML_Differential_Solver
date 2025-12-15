@@ -1,150 +1,27 @@
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
-\contentsline {section}{\numberline {1.1}General Context: Partial Differential Equations in Science and Engineering}{1}{section.1.1}%
-\contentsline {subsection}{\numberline {1.1.1}Mathematical Framework of PDEs}{1}{subsection.1.1.1}%
-\contentsline {paragraph}{Classification by Order.}{1}{section*.3}%
-\contentsline {subsection}{\numberline {1.1.2}Fundamental PDEs in Physics}{2}{subsection.1.1.2}%
-\contentsline {paragraph}{1. Conservation of Mass (Continuity Equation).}{2}{section*.4}%
-\contentsline {paragraph}{2. Conservation of Momentum (Navier-Stokes Equations).}{2}{section*.5}%
-\contentsline {paragraph}{3. Conservation of Energy (Heat Equation).}{2}{section*.6}%
-\contentsline {paragraph}{4. Wave Propagation.}{2}{section*.7}%
-\contentsline {subsection}{\numberline {1.1.3}Challenges in Classical PDE Solving}{2}{subsection.1.1.3}%
-\contentsline {paragraph}{Computational Complexity.}{3}{section*.8}%
-\contentsline {paragraph}{Curse of Dimensionality.}{3}{section*.9}%
-\contentsline {paragraph}{Stability Constraints.}{3}{section*.10}%
-\contentsline {paragraph}{Stiffness.}{3}{section*.11}%
-\contentsline {section}{\numberline {1.2}The Promise of Neural PDE Solvers}{3}{section.1.2}%
-\contentsline {subsection}{\numberline {1.2.1}Mathematical Framework for Learning Solution Operators}{3}{subsection.1.2.1}%
-\contentsline {paragraph}{Operator Learning Formulation.}{3}{section*.12}%
-\contentsline {paragraph}{Universal Approximation for Operators.}{4}{section*.13}%
-\contentsline {subsection}{\numberline {1.2.2}Three Paradigms for Neural PDE Solving}{4}{subsection.1.2.2}%
-\contentsline {paragraph}{Paradigm 1: Physics-Informed Neural Networks (PINNs).}{4}{section*.14}%
-\contentsline {paragraph}{Automatic Differentiation for PDE Residuals.}{4}{section*.15}%
-\contentsline {paragraph}{Paradigm 2: Fourier Neural Operators (FNOs).}{4}{section*.16}%
-\contentsline {paragraph}{Resolution Invariance.}{5}{section*.17}%
-\contentsline {paragraph}{Paradigm 3: Neural Field Turing Machines (NFTMs).}{5}{section*.18}%
-\contentsline {paragraph}{Classical Jacobi Iteration:}{5}{section*.19}%
-\contentsline {paragraph}{NFTM Analog:}{5}{section*.20}%
-\contentsline {section}{\numberline {1.3}The Problem: Burgers Equation as a Test Case}{5}{section.1.3}%
-\contentsline {subsection}{\numberline {1.3.1}Mathematical Formulation}{5}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}Physical Interpretation}{6}{subsection.1.3.2}%
-\contentsline {paragraph}{Advection Term (\(u\frac {\partial u}{\partial x}\)).}{6}{section*.21}%
-\contentsline {paragraph}{Diffusion Term (\(\nu \frac {\partial ^2 u}{\partial x^2}\)).}{6}{section*.22}%
-\contentsline {subsection}{\numberline {1.3.3}Dimensionless Analysis and Reynolds Number}{6}{subsection.1.3.3}%
-\contentsline {paragraph}{Physical Regimes.}{7}{section*.23}%
-\contentsline {subsection}{\numberline {1.3.4}Shock Formation and the Inviscid Limit}{7}{subsection.1.3.4}%
-\contentsline {paragraph}{Shock Formation Time.}{7}{section*.24}%
-\contentsline {paragraph}{Rankine-Hugoniot Jump Condition.}{8}{section*.25}%
-\contentsline {subsection}{\numberline {1.3.5}Cole-Hopf Transformation and Exact Solutions}{8}{subsection.1.3.5}%
-\contentsline {paragraph}{Solution Procedure.}{8}{section*.26}%
-\contentsline {paragraph}{Example: Gaussian Initial Condition.}{8}{section*.27}%
-\contentsline {subsection}{\numberline {1.3.6}Why Burgers Equation for Neural PDE Research?}{8}{subsection.1.3.6}%
-\contentsline {section}{\numberline {1.4}Challenges in Neural PDE Solving}{9}{section.1.4}%
-\contentsline {subsection}{\numberline {1.4.1}Accuracy vs. Computational Efficiency Trade-off}{9}{subsection.1.4.1}%
-\contentsline {paragraph}{Quantitative Analysis.}{9}{section*.28}%
-\contentsline {paragraph}{Computational Cost Comparison.}{9}{section*.29}%
-\contentsline {paragraph}{Speedup Potential.}{9}{section*.30}%
-\contentsline {subsection}{\numberline {1.4.2}Generalization to Unseen Parameter Regimes}{10}{subsection.1.4.2}%
-\contentsline {paragraph}{Statistical Learning Perspective.}{10}{section*.31}%
-\contentsline {paragraph}{Generalization Error.}{10}{section*.32}%
-\contentsline {subsection}{\numberline {1.4.3}Long-Time Stability and Error Accumulation}{10}{subsection.1.4.3}%
-\contentsline {paragraph}{Autoregressive Rollout.}{10}{section*.33}%
-\contentsline {paragraph}{Error Propagation Analysis.}{10}{section*.34}%
-\contentsline {paragraph}{Spectral Stability.}{10}{section*.35}%
-\contentsline {paragraph}{Current State-of-the-Art.}{10}{section*.36}%
-\contentsline {subsection}{\numberline {1.4.4}Physical Consistency and Conservation Laws}{11}{subsection.1.4.4}%
-\contentsline {paragraph}{Conservation Law Violation.}{11}{section*.37}%
-\contentsline {paragraph}{Energy Dissipation.}{11}{section*.38}%
-\contentsline {section}{\numberline {1.5}Project Objectives}{11}{section.1.5}%
-\contentsline {subsection}{\numberline {1.5.1}Primary Research Questions}{11}{subsection.1.5.1}%
-\contentsline {paragraph}{RQ1: Architecture Design.}{11}{section*.39}%
-\contentsline {paragraph}{Mathematical Formulation.}{11}{section*.40}%
-\contentsline {paragraph}{RQ2: Parameter Generalization.}{12}{section*.41}%
-\contentsline {paragraph}{Experimental Protocol.}{12}{section*.42}%
-\contentsline {paragraph}{RQ3: Long-Time Stability.}{12}{section*.43}%
-\contentsline {paragraph}{Stability Metric.}{12}{section*.44}%
-\contentsline {paragraph}{RQ4: Computational Efficiency.}{12}{section*.45}%
-\contentsline {paragraph}{Metrics.}{12}{section*.46}%
-\contentsline {chapter}{\numberline {2}Related Work}{13}{chapter.2}%
-\contentsline {chapter}{\numberline {3}Background}{15}{chapter.3}%
-\contentsline {chapter}{\numberline {4}Our Methodology and Approach}{17}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Overview of the Proposed Pipeline}{17}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Data Generation: Stable Numerical Solver}{17}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Finite Difference Scheme}{17}{subsection.4.2.1}%
-\contentsline {paragraph}{Diffusion Term.}{18}{section*.47}%
-\contentsline {paragraph}{Advection Term.}{18}{section*.48}%
-\contentsline {paragraph}{Time Integration.}{18}{section*.49}%
-\contentsline {subsection}{\numberline {4.2.2}Dataset Construction}{18}{subsection.4.2.2}%
-\contentsline {paragraph}{Sampling Strategy.}{18}{section*.50}%
-\contentsline {paragraph}{Trajectory Length.}{19}{section*.51}%
-\contentsline {paragraph}{Dataset Split.}{19}{section*.52}%
-\contentsline {subsection}{\numberline {4.2.3}Quality Assurance}{19}{subsection.4.2.3}%
-\contentsline {paragraph}{Mass Conservation.}{19}{section*.53}%
-\contentsline {paragraph}{Energy Dissipation.}{19}{section*.54}%
-\contentsline {paragraph}{Stability Check.}{20}{section*.55}%
-\contentsline {section}{\numberline {4.3}Neural Architecture: Improved NFTM with Temporal Attention}{20}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Input Representation and Window-Based Prediction}{20}{subsection.4.3.1}%
-\contentsline {paragraph}{Historical Window.}{20}{section*.56}%
-\contentsline {paragraph}{Prediction Task.}{20}{section*.57}%
-\contentsline {subsection}{\numberline {4.3.2}Causal Temporal Attention Mechanism}{20}{subsection.4.3.2}%
-\contentsline {paragraph}{Motivation.}{20}{section*.58}%
-\contentsline {paragraph}{Architecture Overview.}{21}{section*.59}%
-\contentsline {paragraph}{Feature Embedding.}{21}{section*.60}%
-\contentsline {paragraph}{Query-Key-Value Projections.}{21}{section*.61}%
-\contentsline {paragraph}{Attention Scores.}{21}{section*.62}%
-\contentsline {paragraph}{Context Aggregation.}{21}{section*.63}%
-\contentsline {paragraph}{Output Projection and Residual Connection.}{22}{section*.64}%
-\contentsline {subsection}{\numberline {4.3.3}Convolutional Decoder}{22}{subsection.4.3.3}%
-\contentsline {paragraph}{Multi-Scale Receptive Field.}{22}{section*.65}%
-\contentsline {paragraph}{Bounded Correction via Tanh.}{22}{section*.66}%
-\contentsline {subsection}{\numberline {4.3.4}Final Prediction}{22}{subsection.4.3.4}%
-\contentsline {section}{\numberline {4.4}Training Strategy}{22}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Loss Function Design}{22}{subsection.4.4.1}%
-\contentsline {paragraph}{Mean Squared Error (MSE).}{23}{section*.67}%
-\contentsline {paragraph}{Gradient Matching Loss.}{23}{section*.68}%
-\contentsline {paragraph}{Energy Dissipation Constraint.}{23}{section*.69}%
-\contentsline {paragraph}{Combined Loss.}{23}{section*.70}%
-\contentsline {subsection}{\numberline {4.4.2}Curriculum Learning Strategy}{23}{subsection.4.4.2}%
-\contentsline {paragraph}{Rollout Depth Scheduling.}{23}{section*.71}%
-\contentsline {paragraph}{Teacher Forcing.}{24}{section*.72}%
-\contentsline {subsection}{\numberline {4.4.3}Noise Injection for Robustness}{24}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.4.4}Optimization Details}{24}{subsection.4.4.4}%
-\contentsline {paragraph}{Optimizer.}{24}{section*.73}%
-\contentsline {paragraph}{Learning Rate Schedule.}{25}{section*.74}%
-\contentsline {paragraph}{Gradient Clipping.}{25}{section*.75}%
-\contentsline {paragraph}{Batch Size and Epochs.}{25}{section*.76}%
-\contentsline {section}{\numberline {4.5}Evaluation Metrics}{25}{section.4.5}%
-\contentsline {subsection}{\numberline {4.5.1}Accuracy Metrics}{25}{subsection.4.5.1}%
-\contentsline {paragraph}{Mean Squared Error (MSE).}{25}{section*.77}%
-\contentsline {paragraph}{Relative L2 Error.}{25}{section*.78}%
-\contentsline {paragraph}{Per-Timestep Relative L2.}{25}{section*.79}%
-\contentsline {paragraph}{Peak Signal-to-Noise Ratio (PSNR).}{25}{section*.80}%
-\contentsline {paragraph}{Structural Similarity Index (SSIM).}{26}{section*.81}%
-\contentsline {subsection}{\numberline {4.5.2}Physical Consistency Metrics}{26}{subsection.4.5.2}%
-\contentsline {paragraph}{Mass Conservation Error.}{26}{section*.82}%
-\contentsline {paragraph}{Energy Dissipation Consistency.}{26}{section*.83}%
-\contentsline {subsection}{\numberline {4.5.3}Correlation and Spectral Metrics}{26}{subsection.4.5.3}%
-\contentsline {paragraph}{Pearson Correlation per Timestep.}{26}{section*.84}%
-\contentsline {paragraph}{Energy Spectrum Error.}{26}{section*.85}%
-\contentsline {section}{\numberline {4.6}Implementation Details}{26}{section.4.6}%
-\contentsline {subsection}{\numberline {4.6.1}Software and Hardware}{26}{subsection.4.6.1}%
-\contentsline {paragraph}{Framework.}{26}{section*.86}%
-\contentsline {paragraph}{Hardware.}{27}{section*.87}%
-\contentsline {subsection}{\numberline {4.6.2}Reproducibility}{27}{subsection.4.6.2}%
-\contentsline {subsection}{\numberline {4.6.3}Code Organization}{27}{subsection.4.6.3}%
-\contentsline {section}{\numberline {4.7}Summary}{27}{section.4.7}%
-\contentsline {paragraph}{Transition to Chapter 5.}{28}{section*.88}%
-\contentsline {chapter}{\numberline {5}Approaches for Neural PDE Simulators}{29}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Approach 1: Samuel's Model}{29}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}Model Architecture}{29}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}}{29}{subsection.5.1.2}%
-\contentsline {section}{\numberline {5.2}Approach 2: Causal Temporal Convolutional Attention Network}{29}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Model Architecture}{29}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Temporal Attention Encoder}{29}{subsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}Decoder and Residual Correction}{30}{subsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.2.4}Autoregressive Training Procedure}{31}{subsection.5.2.4}%
-\contentsline {subsection}{\numberline {5.2.5}Evaluation Metrics}{31}{subsection.5.2.5}%
-\contentsline {chapter}{\numberline {6}Conclusion and Perspectives }{33}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Gl remarks}{33}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Gl remarks about the presentation}{33}{section.6.2}%
-\contentsline {chapter}{\numberline {A}Appendix}{35}{appendix.A}%
-\contentsline {chapter}{Bibliography}{37}{appendix*.90}%
+\contentsline {section}{\numberline {1.1}Context and motivation}{1}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Project goals}{1}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}Minimal mathematical frame}{1}{subsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.1.3}Historical milestones: AI and PDEs}{1}{subsection.1.1.3}%
+\contentsline {section}{\numberline {1.2}Fluid Mechanics Overview}{2}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Why Navier--Stokes?}{2}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Governing equations}{2}{subsection.1.2.2}%
+\contentsline {subsection}{\numberline {1.2.3}Burger's equation as a starting point}{3}{subsection.1.2.3}%
+\contentsline {chapter}{\numberline {2}Related Work}{5}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Background}{7}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Approaches for Neural PDE Simulators}{9}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Approach 1: Transformer based Model}{9}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Model Architecture}{9}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}}{9}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}Approach 2: TCAN based Model}{9}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Model Architecture}{9}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Temporal Attention Encoder}{11}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Decoder and Residual Correction}{12}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Autoregressive Training Procedure}{12}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Evaluation Metrics}{12}{subsection.4.2.5}%
+\contentsline {chapter}{\numberline {5}Next Steps}{13}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Conclusion and Perspectives }{15}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Gl remarks}{15}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Gl remarks about the presentation}{15}{section.6.2}%
+\contentsline {chapter}{\numberline {A}Appendix}{17}{appendix.A}%
+\contentsline {chapter}{Bibliography}{19}{appendix*.5}%

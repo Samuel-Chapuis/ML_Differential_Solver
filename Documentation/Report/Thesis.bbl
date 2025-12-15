@@ -3,12 +3,21 @@
 \bibitem{brandstetter2022message}
 Johannes Brandstetter, Daniel Worrall, and Max Welling.
 \newblock Message passing neural {PDE} solvers.
-\newblock In {\em Proceedings of the International Conference on Learning Representations (ICLR)}, 2022.
+\newblock In {\em Proceedings of the International Conference on Learning
+  Representations (ICLR)}, 2022.
+
+\bibitem{cai2021physics}
+Shengze Cai, Zhiping Mao, Zhicheng Wang, Minglang Yin, and George~Em
+  Karniadakis.
+\newblock Physics-informed neural networks ({PINNs}) for fluid mechanics: A
+  review.
+\newblock {\em Acta Mechanica Sinica}, 37:1727--1738, 2021.
 
 \bibitem{chen2018neural}
 Ricky T.~Q. Chen, Yulia Rubanova, Jesse Bettencourt, and David~K. Duvenaud.
 \newblock Neural ordinary differential equations.
-\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)}, volume~31, pages 6571--6583, 2018.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~31, pages 6571--6583, 2018.
 
 \bibitem{cole1951quasi}
 Julian~D. Cole.
@@ -21,68 +30,93 @@ Alex Graves, Greg Wayne, and Ivo Danihelka.
 \newblock {\em arXiv preprint arXiv:1410.5401}, 2014.
 
 \bibitem{graves2016hybrid}
-Alex Graves, Greg Wayne, Malcolm Reynolds, Tim Harley, Ivo Danihelka, Agnieszka Grabska-Barwi\'nska, Sergio~G\'omez Colmenarejo, Edward Grefenstette, Tiago Ramalho, John Agapiou, Adri\`a~Puigdom\`enech Badia, Karl~Moritz Hermann, Yori Zwols, Georg Ostrovski, Adam Cain, Helen King, Christopher Summerfield, Phil Blunsom, Koray Kavukcuoglu, and Demis Hassabis.
+Alex Graves, Greg Wayne, Malcolm Reynolds, Tim Harley, Ivo Danihelka, Agnieszka
+  Grabska-Barwi\'nska, Sergio~G\'omez Colmenarejo, Edward Grefenstette, Tiago
+  Ramalho, John Agapiou, Adri\`a~Puigdom\`enech Badia, Karl~Moritz Hermann,
+  Yori Zwols, Georg Ostrovski, Adam Cain, Helen King, Christopher Summerfield,
+  Phil Blunsom, Koray Kavukcuoglu, and Demis Hassabis.
 \newblock Hybrid computing using a neural network with dynamic external memory.
 \newblock {\em Nature}, 538:471--476, 2016.
 
 \bibitem{greydanus2019hamiltonian}
 Samuel Greydanus, Misko Dzamba, and Jason Yosinski.
 \newblock Hamiltonian neural networks.
-\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)}, volume~32, pages 15379--15389, 2019.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~32, pages 15379--15389, 2019.
 
 \bibitem{hopf1950partial}
 Eberhard Hopf.
 \newblock The partial differential equation $u_t + uu_x = \mu u_{xx}$.
-\newblock {\em Communications on Pure and Applied Mathematics}, 3:201--230, 1950.
+\newblock {\em Communications on Pure and Applied Mathematics}, 3:201--230,
+  1950.
 
 \bibitem{kovachki2023neural}
-Nikola~B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew~M. Stuart, and Anima Anandkumar.
-\newblock Neural operator: Learning maps between function spaces with applications to {PDEs}.
+Nikola~B. Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik
+  Bhattacharya, Andrew~M. Stuart, and Anima Anandkumar.
+\newblock Neural operator: Learning maps between function spaces with
+  applications to {PDEs}.
 \newblock {\em Journal of Machine Learning Research}, 24(89):1--97, 2023.
 
 \bibitem{krishnapriyan2021characterizing}
-Aditi~S. Krishnapriyan, Amir Gholami, Shandian Zhe, Robert~M. Kirby, and Michael~W. Mahoney.
-\newblock Characterizing possible failure modes in physics-informed neural networks.
-\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)}, volume~34, pages 26548--26560, 2021.
+Aditi~S. Krishnapriyan, Amir Gholami, Shandian Zhe, Robert~M. Kirby, and
+  Michael~W. Mahoney.
+\newblock Characterizing possible failure modes in physics-informed neural
+  networks.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~34, pages 26548--26560, 2021.
 
 \bibitem{li2021fourier}
-Zongyi Li, Nikola~Borislavov Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew~M. Stuart, and Anima Anandkumar.
-\newblock Fourier neural operator for parametric partial differential equations.
-\newblock In {\em Proceedings of the International Conference on Learning Representations (ICLR)}, 2021.
+Zongyi Li, Nikola~Borislavov Kovachki, Kamyar Azizzadenesheli, Burigede Liu,
+  Kaushik Bhattacharya, Andrew~M. Stuart, and Anima Anandkumar.
+\newblock Fourier neural operator for parametric partial differential
+  equations.
+\newblock In {\em Proceedings of the International Conference on Learning
+  Representations (ICLR)}, 2021.
 
 \bibitem{long2018pde}
 Zichao Long, Yiping Lu, Xianzhong Ma, and Bin Dong.
 \newblock {PDE-Net}: Learning {PDEs} from data.
-\newblock In {\em Proceedings of the 35th International Conference on Machine Learning (ICML)}, volume~80, pages 3208--3216, 2018.
+\newblock In {\em Proceedings of the 35th International Conference on Machine
+  Learning (ICML)}, volume~80, pages 3208--3216, 2018.
 
 \bibitem{lu2021learning}
 Lu~Lu, Pengzhan Jin, Guofei Pang, Zhongqiang Zhang, and George~Em Karniadakis.
-\newblock Learning nonlinear operators via {DeepONet} based on the universal approximation theorem of operators.
+\newblock Learning nonlinear operators via {DeepONet} based on the universal
+  approximation theorem of operators.
 \newblock {\em Nature Machine Intelligence}, 3:218--229, 2021.
 
 \bibitem{rahaman2019spectral}
-Nasim Rahaman, Aristide Baratin, Devansh Arpit, Felix Draxler, Min Lin, Fred~A. Hamprecht, Yoshua Bengio, and Aaron Courville.
+Nasim Rahaman, Aristide Baratin, Devansh Arpit, Felix Draxler, Min Lin, Fred~A.
+  Hamprecht, Yoshua Bengio, and Aaron Courville.
 \newblock On the spectral bias of neural networks.
-\newblock In {\em Proceedings of the 36th International Conference on Machine Learning (ICML)}, volume~97, pages 5301--5310, 2019.
+\newblock In {\em Proceedings of the 36th International Conference on Machine
+  Learning (ICML)}, volume~97, pages 5301--5310, 2019.
 
 \bibitem{raissi2019physics}
 Maziar Raissi, Paris Perdikaris, and George~E. Karniadakis.
-\newblock Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations.
+\newblock Physics-informed neural networks: A deep learning framework for
+  solving forward and inverse problems involving nonlinear partial differential
+  equations.
 \newblock {\em Journal of Computational Physics}, 378:686--707, 2019.
 
 \bibitem{raissi2020hidden}
 Maziar Raissi, Alireza Yazdani, and George~Em Karniadakis.
-\newblock Hidden fluid mechanics: Learning velocity and pressure fields from flow visualizations.
+\newblock Hidden fluid mechanics: Learning velocity and pressure fields from
+  flow visualizations.
 \newblock {\em Science}, 367(6481):1026--1030, 2020.
 
 \bibitem{shi2015convolutional}
-Xingjian Shi, Zhourong Chen, Hao Wang, Dit-Yan Yeung, Wai-Kin Wong, and Wang chun Woo.
-\newblock Convolutional {LSTM} network: A machine learning approach for precipitation nowcasting.
-\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)}, volume~28, pages 802--810, 2015.
+Xingjian Shi, Zhourong Chen, Hao Wang, Dit-Yan Yeung, Wai-Kin Wong, and Wang
+  chun Woo.
+\newblock Convolutional {LSTM} network: A machine learning approach for
+  precipitation nowcasting.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~28, pages 802--810, 2015.
 
 \bibitem{wang2021understanding}
 Sifan Wang, Yujun Teng, and Paris Perdikaris.
-\newblock Understanding and mitigating gradient flow pathologies in physics-informed neural networks.
+\newblock Understanding and mitigating gradient flow pathologies in
+  physics-informed neural networks.
 \newblock {\em SIAM Journal on Scientific Computing}, 43(5):A3055--A3081, 2021.
 
 \end{thebibliography}
