@@ -1,0 +1,25 @@
+\section{1D Burgers Equation}
+
+% ===== Slide 1 =====
+\begin{secframe}
+\small
+\begin{block}{1D Burgers Equation}
+\[
+\frac{\partial u}{\partial t} + u \frac{\partial u}{\partial x} = \nu \frac{\partial^2 u}{\partial x^2}
+\]
+\begin{itemize}
+  \item \scriptsize $u(x,t)$: velocity of the fluid at spatial position $x$ and time $t$.
+  \item \scriptsize The \textbf{left side} represents the total rate of change in the fluid's velocity $u$.
+  \item \scriptsize The \textbf{right side} adds the effect of smoothness due to viscosity $\nu$.
+\end{itemize}
+\end{block}
+\vspace{0.2em}
+\begin{block}{Parameters}
+$\nu$: smoothness parameter, known as \textit{viscosity}.
+\end{block}
+\begin{itemize}
+  \item \scriptsize \textbf{Higher $\nu$} means more diffusion, leading to smoother solutions (more diffusion).
+  \item \scriptsize \textbf{Lower $\nu$} means less diffusion, leading to sharper gradients and possible discontinuities.
+  \item \scriptsize Changing the value of $\nu$ has an effect on the smoothness and sharpness of the solution as it evolves.
+\end{itemize}
+\end{secframe}

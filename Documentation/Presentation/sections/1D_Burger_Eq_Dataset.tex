@@ -1,26 +1,49 @@
-\section{1D Burger Equation Datasets}
+\section{1D Burgers Equation Dataset}
 
 \begin{secframe}
 
-\begin{block}{Dataset Generation for 1D Burger Equation}
+\begin{block}{Dataset Generation}
 \begin{itemize}
-    \item We generated datasets for different viscosity values $\epsilon$.
-    \item Changing the value of viscosity has an effect on the smoothness and sharpness of the solution as it evolves.
-    \item We consider four datasets with $\epsilon = \{0.001, 0.01, 0.1, 0.5\}$.
-    \item The higher the value of $\epsilon$, the smoother the solution is over time.
+    \item We generated a dataset with different viscosity values $\nu$.
+    \item Our training dataset consists of \textbf{724 trajectories} across \textbf{13 different viscosity values} (from $0.001$ to $0.5$).
+    \item Our testing dataset consists of \textbf{123 trajectories} with \textbf{4 new viscosity values} to test generalization.
+    \item Each trajectory corresponds to the evolution of the Burger's equation across $128$ spatial positions and over $256$ time steps.
+    \item The higher the value of $\nu$, the smoother the solution is over time.
+    \item The dataset was generated using a custom simulator implemented in Python.
+    \item The simulator uses different types of initial conditions to create a diverse set of trajectories.
 \end{itemize}
 \end{block}
-
-\begin{alertblock}{Personal Simluator}
-\begin{itemize}
-    \item The datasets were generated using a custom simulator implemented in Python.
-    \item The simulator uses more diffrent types of initial conditions to create a diverse set of trajectories.
-\end{itemize}
-\end{alertblock}
-
 \end{secframe}
 
-\begin{frame}{1D Burger Equation Datasets}
+\begin{secframe}
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tabular}{cccc|ccc}
+\toprule
+\multicolumn{4}{c|}{\textbf{Training (724 samples)}} & \multicolumn{3}{c}{\textbf{Testing (123 samples)}} \\
+\midrule
+\textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Pct.} & & \textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Pct.} \\
+\midrule
+0.0010 & 60 & 8.3 & & 0.0100 & 50 & 40.7 \\
+0.0020 & 40 & 5.5 & & 0.0269 & 13 & 10.6 \\
+0.0065 & 40 & 5.5 & & 0.2000 & 30 & 24.4 \\
+0.0080 & 40 & 5.5 & & 0.3000 & 30 & 24.4 \\
+0.0400 & 40 & 5.5 & & & & \\
+0.0500 & 60 & 8.3 & & & & \\
+0.0700 & 60 & 8.3 & & & & \\
+0.1000 & 60 & 8.3 & & & & \\
+0.1500 & 60 & 8.3 & & & & \\
+0.2500 & 60 & 8.3 & & & & \\
+0.3500 & 60 & 8.3 & & & & \\
+0.4000 & 60 & 8.3 & & & & \\
+0.5000 & 84 & 11.6 & & & & \\
+\bottomrule
+\end{tabular}%
+}
+\end{secframe}
+
+
+\begin{secframe}
     \small
     \textcolor{red_unipd}{\Large Comparaison of Datasets}
 
@@ -45,4 +68,4 @@
         \centering
         \includegraphics[width=\textwidth*5/4]{images/burger/OwnSimulator_Sim.png}
     \end{minipage}
-\end{frame}
+\end{secframe}

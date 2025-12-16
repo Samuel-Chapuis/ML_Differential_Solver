@@ -2,7 +2,7 @@
 \chapter{Approaches for Neural PDE Simulators}
 \label{chap:approaches}
 
-In this chapter, we present two distinct Neural Field Turing Machine (NFTM) model architectures, developed as data-driven simulators for the 1D Burger's equation. Currently, these are defined for the simulation of Burger's dynamics and both approaches utilize the dataset described in Table~\ref{tab:dataset_Burger_statistics}, which consits of 724 training trajectories across 13 different viscosity values (from 0.001 to 0.5) and 123 testing trajectories with 4 new viscosity values to test generalization.\\
+In this chapter, we present two distinct Neural Field Turing Machine (NFTM) model architectures, developed as data-driven simulators for the 1D Burger's equation. Currently, these are defined for the simulation of Burger's dynamics and both approaches utilize the dataset described in Table~\ref{tab:dataset_Burger_statistics}, which consits of 724 training trajectories across 13 different viscosity values (from 0.001 to 0.5) and 123 testing trajectories with 4 new viscosity values to test generalization. Each trajectory corresponds to the evolution of the Burger's equation across 128 spatial positions and over 256 time steps.\\
 The first model \textbf{........ EXPLAIN TRANSFORMER MODEL ........}.\\
 The second approach, corresponds to a \textbf{Causal Temporal Convolutional Attention Network (TCAN)} that combines attention with convolutional feature extraction, by restricting attention to past timesteps only and using 1D convolutions for spatial processing.\\
 Both approaches enforce physics-informed constraints. We detail their architectures, training procedures, and comprehensive evaluation metrics, highlighting respective strengths and limitations.

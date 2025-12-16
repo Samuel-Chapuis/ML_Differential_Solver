@@ -14,17 +14,23 @@ Alex Graves, Greg Wayne, and Ivo Danihelka.
 \bibitem{hopf1950partial}
 Eberhard Hopf.
 \newblock The partial differential equation $u_t + uu_x = \mu u_{xx}$.
-\newblock {\em Communications on Pure and Applied Mathematics}, 3:201--230, 1950.
+\newblock {\em Communications on Pure and Applied Mathematics}, 3:201--230,
+  1950.
 
 \bibitem{kovachki2023neural}
-Nikola Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya, Andrew Stuart, and Anima Anandkumar.
-\newblock Neural operator: Learning maps between function spaces with applications to {PDE}s.
+Nikola Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik
+  Bhattacharya, Andrew Stuart, and Anima Anandkumar.
+\newblock Neural operator: Learning maps between function spaces with
+  applications to {PDE}s.
 \newblock {\em Journal of Machine Learning Research}, 24(89):1--97, 2023.
 
 \bibitem{li2021fourier}
-Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew Stuart, and Anima Anandkumar.
-\newblock Fourier neural operator for parametric partial differential equations.
-\newblock In {\em Proceedings of the International Conference on Learning Representations (ICLR)}, 2021.
+Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik
+  Bhattacharya, Andrew Stuart, and Anima Anandkumar.
+\newblock Fourier neural operator for parametric partial differential
+  equations.
+\newblock In {\em Proceedings of the International Conference on Learning
+  Representations (ICLR)}, 2021.
 \newblock arXiv:2010.08895.
 
 \bibitem{malhotra2025neuralfieldturingmachine}
@@ -32,13 +38,18 @@ Akash Malhotra and Nacéra Seghouani.
 \newblock Neural field turing machine: A differentiable spatial computer, 2025.
 
 \bibitem{rahaman2019spectral}
-Nasim Rahaman, Aristide Baratin, Devansh Arpit, Felix Draxler, Min Lin, Fred~A. Hamprecht, Yoshua Bengio, and Aaron Courville.
+Nasim Rahaman, Aristide Baratin, Devansh Arpit, Felix Draxler, Min Lin, Fred~A.
+  Hamprecht, Yoshua Bengio, and Aaron Courville.
 \newblock On the spectral bias of neural networks.
-\newblock In {\em Proceedings of the 36th International Conference on Machine Learning (ICML)}, volume~97 of {\em Proceedings of Machine Learning Research}, pages 5301--5310. PMLR, 2019.
+\newblock In {\em Proceedings of the 36th International Conference on Machine
+  Learning (ICML)}, volume~97 of {\em Proceedings of Machine Learning
+  Research}, pages 5301--5310. PMLR, 2019.
 
 \bibitem{raissi2019physics}
 Maziar Raissi, Paris Perdikaris, and George~E. Karniadakis.
-\newblock Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations.
+\newblock Physics-informed neural networks: A deep learning framework for
+  solving forward and inverse problems involving nonlinear partial differential
+  equations.
 \newblock {\em Journal of Computational Physics}, 378:686--707, 2019.
 
 \end{thebibliography}
