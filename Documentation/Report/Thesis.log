@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.9)  16 DEC 2025 12:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.9)  16 DEC 2025 13:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1245,12 +1245,12 @@ Package pgfplots Warning: running in backwards compatibility mode (unsuitable ti
 \openout2 = `TitlePage.aux'.
 
 (TitlePage.tex
-<images/logocs.jpeg, id=166, 315.1775pt x 161.60374pt>
+<images/logocs.jpeg, id=202, 315.1775pt x 161.60374pt>
 File: images/logocs.jpeg Graphic file (type jpg)
 <use images/logocs.jpeg>
 Package pdftex.def Info: images/logocs.jpeg  used on input line 5.
 (pdftex.def)             Requested size: 152.66125pt x 78.27415pt.
-<Images/logops.png, id=167, 178.68758pt x 80.76172pt>
+<Images/logops.png, id=203, 178.68758pt x 80.76172pt>
 File: Images/logops.png Graphic file (type png)
 <use Images/logops.png>
 Package pdftex.def Info: Images/logops.png  used on input line 8.
@@ -1271,7 +1271,7 @@ Package pdftex.def Info: Images/logops.png  used on input line 8.
 pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.56 ...e {chapter}{Bibliography}{25}{chapter*.25}
+l.52 ...{\numberline {5}Next Steps}{25}{chapter.5}
                                                   % [1
 
 
@@ -1330,7 +1330,39 @@ Chapter 2.
 
 [6]
 
-[7]) (Chapter4_updated.tex (C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarypositioning.code.tex
+[7]) (Chapter3_Dataset.tex
+
+[8]
+Chapter 3.
+
+
+[9
+
+]
+<images/smooth.png, id=390, 722.7pt x 433.62pt>
+File: images/smooth.png Graphic file (type png)
+<use images/smooth.png>
+Package pdftex.def Info: images/smooth.png  used on input line 49.
+(pdftex.def)             Requested size: 203.54713pt x 122.12735pt.
+<images/sin.png, id=391, 722.7pt x 433.62pt>
+File: images/sin.png Graphic file (type png)
+<use images/sin.png>
+Package pdftex.def Info: images/sin.png  used on input line 55.
+(pdftex.def)             Requested size: 203.54713pt x 122.12735pt.
+<images/hyperbolic_tangeante.png, id=392, 722.7pt x 433.62pt>
+File: images/hyperbolic_tangeante.png Graphic file (type png)
+<use images/hyperbolic_tangeante.png>
+Package pdftex.def Info: images/hyperbolic_tangeante.png  used on input line 61.
+(pdftex.def)             Requested size: 203.54713pt x 122.12735pt.
+File: images/smooth.png Graphic file (type png)
+<use images/smooth.png>
+Package pdftex.def Info: images/smooth.png  used on input line 67.
+(pdftex.def)             Requested size: 203.54713pt x 122.12735pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+) (Chapter4_updated.tex (C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
 ) (C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.geometric.code.tex
 File: tikzlibraryshapes.geometric.code.tex 2023-01-15 v3.1.10 (3.1.10)
@@ -1344,32 +1376,30 @@ File: pgflibraryarrows.meta.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfarrowlinewidth=\dimen348
 )
 
-[8]
-Chapter 3.
+[10]
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+[11 <./images/smooth.png> <./images/sin.png> <./images/hyperbolic_tangeante.png>]
+
+[12
+
+]
+Chapter 4.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
+
+[13]
 Underfull \hbox (badness 10000) in paragraph at lines 44--45
 \T1/cmr/m/n/10.95 Our first ap-proach uses a lightweight Transformer-inspired con-troller
  []
 
 
-Underfull \vbox (badness 1509) has occurred while \output is active []
 
+[14]
 
-
-[9
-
-]
-
-[10]
-Underfull \vbox (badness 7981) has occurred while \output is active []
-
-
-
-[11]
-<images/transformers_exemple.png, id=356, 1069.596pt x 281.853pt>
+[15]
+<images/transformers_exemple.png, id=431, 1069.596pt x 281.853pt>
 File: images/transformers_exemple.png Graphic file (type png)
 <use images/transformers_exemple.png>
 Package pdftex.def Info: images/transformers_exemple.png  used on input line 182.
@@ -1378,7 +1408,7 @@ Package pdftex.def Info: images/transformers_exemple.png  used on input line 182
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<images/transformers_MeansAbsErr.png, id=357, 426.393pt x 281.853pt>
+<images/transformers_MeansAbsErr.png, id=432, 426.393pt x 281.853pt>
 File: images/transformers_MeansAbsErr.png Graphic file (type png)
 <use images/transformers_MeansAbsErr.png>
 Package pdftex.def Info: images/transformers_MeansAbsErr.png  used on input line 190.
@@ -1387,13 +1417,10 @@ Package pdftex.def Info: images/transformers_MeansAbsErr.png  used on input line
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
-Underfull \vbox (badness 1478) has occurred while \output is active []
 
+[16]
 
-
-[12]
-
-[13 <./images/transformers_exemple.png> <./images/transformers_MeansAbsErr.png>]
+[17 <./images/transformers_exemple.png> <./images/transformers_MeansAbsErr.png>]
 Underfull \hbox (badness 10000) in paragraph at lines 263--267
 
  []
@@ -1408,51 +1435,51 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
 
-[14]
+[18]
 
-[15]
+[19]
 Overfull \hbox (41.97939pt too wide) in paragraph at lines 430--430
  [][]\T1/cmr/m/n/10 CausalTemporalAttention 
  []
 
 
 
-[16]
+[20]
 
-[17]
+[21]
 Overfull \hbox (42.43394pt too wide) in paragraph at lines 546--565
  [][] 
  []
 
 ) (Chapter5.tex
 
-[18]
-
-[19]
-
-[20
-
-]
-Chapter 4.
-
-
-[21]
-
-[22]) (Thesis.bbl (Thesis.brf)
-\tf@brf=\write8
-\openout8 = `Thesis.brf'.
-
-
+[22]
 
 [23]
 
 [24
 
-])
+]
+Chapter 5.
+
 
 [25]
 
-[26
+[26]) (Thesis.bbl (Thesis.brf)
+\tf@brf=\write8
+\openout8 = `Thesis.brf'.
+
+
+
+[27]
+
+[28
+
+])
+
+[29]
+
+[30
 
 ]
 Package minitoc Info: I0009
@@ -1473,28 +1500,28 @@ Package minitoc(hints) Warning: W0024
 
 
 
-[27] (Thesis.aux (TitlePage.aux))
+[31] (Thesis.aux (TitlePage.aux))
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-05-26>
  ***********
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 7412E6F281C334242084D624DB675C72;7561.
+(rerunfilecheck)             Checksum: 00776701EB24BACEC8A063BE97F84CB8;8983.
 Package rerunfilecheck Info: File `Thesis.brf' has not changed.
 (rerunfilecheck)             Checksum: C396A045030129AA327B85B07708FDD5;1153.
  ) 
 Here is how much of TeX's memory you used:
- 42642 strings out of 468219
- 934760 string characters out of 5442936
- 1449389 words of memory out of 5000000
- 70271 multiletter control sequences out of 15000+600000
+ 42708 strings out of 468219
+ 936048 string characters out of 5442936
+ 1449693 words of memory out of 5000000
+ 70315 multiletter control sequences out of 15000+600000
  680753 words of font info for 197 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  115i,19n,110p,1406b,899s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0600.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/public/mathabx/dpi600\matha7.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0900.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx0800.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/public/mathabx/dpi600\mathx10.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/public/mathabx/dpi600\matha10.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0800.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/public/mathabx/dpi600\matha8.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1095.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/public/mathabx/dpi657\mathx10.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/public/mathabx/dpi657\matha10.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1440.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1095.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1095.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1200.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecxc1728.pk> <C:\Users\Samue\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2488.pk><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Thesis.pdf (31 pages, 684778 bytes).
+Output written on Thesis.pdf (35 pages, 833282 bytes).
 PDF statistics:
- 1240 PDF objects out of 1440 (max. 8388607)
- 140 named destinations out of 1000 (max. 500000)
- 353 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1332 PDF objects out of 1440 (max. 8388607)
+ 159 named destinations out of 1000 (max. 500000)
+ 440 words of extra memory for PDF output out of 10000 (max. 10000000)
 

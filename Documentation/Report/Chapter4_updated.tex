@@ -2,13 +2,13 @@
 \chapter{Approaches for Neural PDE Simulators}
 \label{chap:approaches}
 
-In this chapter, we present two distinct Neural Field Turing Machine (NFTM) model architectures, developed as data-driven simulators for the 1D Burger's equation. Currently, these are defined for the simulation of Burger's dynamics and both approaches utilize the dataset described in Table~\ref{tab:dataset_Burger_statistics}, which consits of 724 training trajectories across 13 different viscosity values (from 0.001 to 0.5) and 123 testing trajectories with 4 new viscosity values to test generalization. Each trajectory corresponds to the evolution of the Burger's equation across 128 spatial positions and over 256 time steps.\\
+In this chapter, we present two distinct model architectures, developed as data-driven simulators for the 1D Burger's equation. Currently, these are defined for the simulation of Burger's dynamics and both approaches utilize the dataset described in Table~\ref{tab:dataset_Burger_statistics}, which consits of 724 training trajectories across 13 different viscosity values (from 0.001 to 0.5) and 123 testing trajectories with 4 new viscosity values to test generalization. Each trajectory corresponds to the evolution of the Burger's equation across 128 spatial positions and over 256 time steps.\\
 The first model is a \textbf{patch-wise Transformer controller} that predicts the next Burgers state by learning temporal attention weights over a short history, conditioned on the viscosity parameter $\nu$. Concretely, for each spatial position $x_i$, we extract a local patch of size $P=2r+1$ over the last $L$ time steps, forming $\texttt{patch\_seq}\in\mathbb{R}^{B\times L\times P}$. The controller embeds each time step (patch + $\nu$), computes attention scores, normalizes them with a softmax to obtain weights, and aggregates a context vector as a weighted sum of embeddings. A small MLP head then outputs a scalar prediction for the patch center. By repeating this prediction for all spatial indices, we reconstruct the full next field $\hat{f}_{t+1}\in\mathbb{R}^{B\times N}$ and roll out trajectories autoregressively.\\
 The second approach, corresponds to a \textbf{Causal Temporal Convolutional Attention Network (TCAN)} that combines attention with convolutional feature extraction, by restricting attention to past timesteps only and using 1D convolutions for spatial processing.\\
 Both approaches enforce physics-informed constraints. We detail their architectures, training procedures, and comprehensive evaluation metrics, highlighting respective strengths and limitations.
 
 % TABLE OF BURGER'S DATASET STATISTICS
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \begin{tabular}{cccc|ccc}
 \toprule
@@ -41,7 +41,7 @@ Both approaches enforce physics-informed constraints. We detail their architectu
 
 \subsection{Model Architecture}
 
-Our first approach uses a lightweight Transformer-inspired controller (\texttt{TransformerController}) to learn a discrete-time update rule for Burgers dynamics from data. Instead of full token-to-token self-attention, this controller implements \emph{temporal attention pooling}: it assigns a learned importance weight to each past time step within a short history window and aggregates the corresponding latent embeddings to produce a prediction. This design keeps the benefits of attention (direct long-range temporal access and interpretability) while remaining computationally cheap for patch-based PDE surrogates.
+Our first approach uses a lightweight Transformer-inspired controller (\texttt{TransformerController}) to learn a discrete-time update rule for Burgers dynamics from data. Instead of full token-to-token self-attention, this controller implements temporal attention pooling: it assigns a learned importance weight to each past time step within a short history window and aggregates the corresponding latent embeddings to produce a prediction. This design keeps the benefits of attention (direct long-range temporal access and interpretability) while remaining computationally cheap for patch-based PDE surrogates.
 
 \subsubsection{Input representation: temporal patches and conditioning on viscosity}
 Given a trajectory $f_t\in\mathbb{R}^{N}$ and a patch radius $r$, we extract for each spatial index $i$ a local patch
