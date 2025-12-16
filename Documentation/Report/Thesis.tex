@@ -17,13 +17,13 @@
 
 \input{Introduction}
 \input{Chapter2}
-\input{Chapter3}
+%\input{Chapter3}
 \input{Chapter4}
 \input{Chapter5}
 %\input{Chapter6}
-\appendix
+%\appendix
 
-\include{Appendix1}
+%\include{Appendix1}
 %\include{Appendix2}
 %\include{Appendix3}
 \nocite{*}  % Include all entries in the bibliography
@@ -37,10 +37,10 @@
 
 
 \noindent{\large\textbf{Abstract:}}
-\\
+Solving partial differential equations (PDEs) efficiently remains a fundamental challenge in computational physics, with traditional numerical methods often requiring significant computational resources for complex, multi-scale dynamics. This work presents a Neural Field Turing Machine (NFTM) approach for learning PDE solutions, combining external continuous spatial memory with learned read/write operations through a neural controller. We develop architectures as data-driven simulators for the viscous Burgers equation, a canonical nonlinear PDE that captures essential features of fluid dynamics including shock formation and nonlinear advection. Our approach employs causal temporal attention to aggregate information across history windows, bounded residual corrections for numerical stability during long autoregressive rollouts, and physics-informed loss terms enforcing energy dissipation and gradient accuracy. Trained on 724 trajectories spanning viscosity values from 0.001 to 0.5, the models are evaluated on both standard metrics (MSE, SSIM, PSNR) and physics-informed criteria (mass conservation, energy monotonicity, PDE residual). This framework establishes a foundation for generalizable neural PDE solvers, with planned extensions to two-dimensional Burgers and incompressible Navier-Stokes equations.
 \noindent\rule[2pt]{\textwidth}{0.5pt}
 {\large\textbf{Keywords:}}
-
+Neural Field Turing Machines, Physics-Informed Neural Networks, Partial Differential Equations, Burgers Equation, Temporal Convolutional Networks, Attention Mechanisms, Autoregressive Models, Scientific Machine Learning, Computational Fluid Dynamics, Deep Learning for Physics.
 
 \end{vcenterpage}
 
