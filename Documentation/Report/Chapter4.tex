@@ -109,55 +109,55 @@ Thus, this model operates as a one-step neural PDE surrogate, repeatedly applied
 \begin{figure}[h!]
 \centering
 \resizebox{0.55\textwidth}{!}{%
-\begin{tikzpicture}[
-    box/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=blue!10},
-    op/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=green!10},
-    arrow/.style={->, thick, >=stealth},
-    input/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=orange!20},
-    output/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=red!20},
-    node distance=2.0cm and 1.6cm
-]
+    \begin{tikzpicture}[
+        box/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=blue!10},
+        op/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=green!10},
+        arrow/.style={->, thick, >=stealth},
+        input/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=orange!20},
+        output/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=red!20},
+        node distance=2.0cm and 1.6cm
+    ]
+    % Main flow - left column
+    \node[input] (input) {INPUT\\$f_{\text{history}}$};
+    \node[op, below=of input] (embed) {Embedding\\Conv1d+GELU};
+    \node[box, below=of embed] (features) {Features\\$(B,20,32,N)$};
 
-% Main flow - left column
-\node[input] (input) {INPUT\\$f_{\text{history}}$};
-\node[op, below=of input] (embed) {Embedding\\Conv1d+GELU};
-\node[box, below=of embed] (features) {Features\\$(B,W,C,N)$};
+    % Attention column - center-right
+    \node[box, right=1.8cm of features] (query) {Query $Q$\\(last frame)};
+    \node[op, below=of query] (attn) {Causal\\Attention};
+    \node[box, below=of attn] (context) {Context\\$(B,32,N)$};
 
-% Attention column - center-right
-\node[box, right=1.8cm of features] (query) {Query $Q$\\(last frame)};
-\node[op, below=of query] (attn) {Causal\\Attention};
-\node[box, below=of attn] (context) {Context\\$(B,C,N)$};
+    % Decoder/output column - right
+    \node[op, right=1.8cm of context] (decoder) {Decoder\\Conv1d};
+    \node[box, below=of decoder] (corr) {Correction\\$\tanh(\times0.1)$};
+    \node[output, below=of corr] (output) {OUTPUT \\$f_{\text{next}}$};
 
-% Decoder/output column - right
-\node[op, right=1.8cm of context] (decoder) {Decoder\\Conv1d};
-\node[box, below=of decoder] (corr) {Correction\\$\tanh(\times0.1)$};
-\node[output, below=of corr] (output) {$f_{\text{next}}$};
+    % CLEAN ARROWS - NO CROSSING
+    \draw[arrow] (input) -- (embed);
+    \draw[arrow] (embed) -- (features);
+    \draw[arrow] (features) -| ([xshift=-0.3cm]query.west) -- (query);
+    \draw[arrow] (query) -- (attn);
+    \draw[arrow] (attn) -- (context);
+    \draw[arrow] (context) -- (decoder);
+    \draw[arrow] (decoder) -- (corr);
+    \draw[arrow] (corr) -- (output);
 
-% CLEAN ARROWS - NO CROSSING
-\draw[arrow] (input) -- (embed);
-\draw[arrow] (embed) -- (features);
-\draw[arrow] (features) -| ([xshift=-0.3cm]query.west) -- (query);
-\draw[arrow] (query) -- (attn);
-\draw[arrow] (attn) -- (context);
-\draw[arrow] (context) -- (decoder);
-\draw[arrow] (decoder) -- (corr);
-\draw[arrow] (corr) -- (output);
+    % Residual from features to context (ABOVE)
+    \draw[arrow, dashed, blue] (features.south) 
+        to[out=-5,in=150] node[above, font=\footnotesize, black]{residual} 
+        (context.west);
 
-% Residual from features to context (ABOVE)
-\draw[arrow, dashed, blue] ([yshift=0.4cm]features.north east) 
-    to[out=30,in=150] node[above, font=\footnotesize, black]{residual} 
-    ([yshift=0.4cm]context.north west);
+    % FIXED: LEFT→DOWN→RIGHT path from input to output
+    \draw[arrow, dashed, orange, thick] (input.south) 
+        |- ++(-2,0)     % LEFT (west)
+        |- ++(0,-18)     % DOWN (south) 
+        -| (output.west)     % RIGHT to output
+        node[below, font=\scriptsize, pos=0.1]{$f_t$};
 
-% FIXED: LEFT→DOWN→RIGHT path from input to output
-\draw[arrow, dashed, orange, thick] ([xshift=-0.8cm]input.south west) 
-    |- ++(0,-0.8) 
-    -| ([xshift=-0.8cm]output.south west)
-    node[below, font=\footnotesize, pos=0.7]{$u_t$};
 
-% KV note
-\node[font=\footnotesize, align=center, right=0.2cm of query, anchor=west] (kv) {$K,V$\\all frames};
-
-\end{tikzpicture}%
+    % KV note
+    \node[font=\footnotesize, align=center, right=0.2cm of query, anchor=west] (kv) {$K,V$\\all frames};
+    \end{tikzpicture}%
 }
 \caption{Data flow through the Causal Temporal Attention Network during one prediction step.}
 \label{fig:tcn-flow}
