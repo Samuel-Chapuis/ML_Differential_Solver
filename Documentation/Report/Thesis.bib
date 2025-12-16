@@ -1,5 +1,6 @@
 %% Bibliography for NFTM Burgers Equation Solver Thesis
 %% Generated: December 2025
+%% Contains only cited references
 
 %% ========================================
 %% FOUNDATIONAL MEMORY-AUGMENTED ARCHITECTURES
@@ -9,22 +10,8 @@
   author    = {Alex Graves and Greg Wayne and Ivo Danihelka},
   title     = {Neural {T}uring Machines},
   journal   = {arXiv preprint arXiv:1410.5401},
-  year      = {2014}
-}
-
-@article{graves2016hybrid,
-  author    = {Alex Graves and Greg Wayne and Malcolm Reynolds and Tim Harley and 
-               Ivo Danihelka and Agnieszka Grabska-Barwi\'nska and 
-               Sergio G\'omez Colmenarejo and Edward Grefenstette and Tiago Ramalho and 
-               John Agapiou and Adri\`a Puigdom\`enech Badia and Karl Moritz Hermann and 
-               Yori Zwols and Georg Ostrovski and Adam Cain and Helen King and 
-               Christopher Summerfield and Phil Blunsom and Koray Kavukcuoglu and 
-               Demis Hassabis},
-  title     = {Hybrid Computing Using a Neural Network with Dynamic External Memory},
-  journal   = {Nature},
-  volume    = {538},
-  pages     = {471--476},
-  year      = {2016}
+  year      = {2014},
+  note      = {arXiv:1410.5401v2 [cs.NE]}
 }
 
 %% ========================================
@@ -38,47 +25,8 @@
   journal   = {Journal of Computational Physics},
   volume    = {378},
   pages     = {686--707},
-  year      = {2019}
-}
-
-@article{raissi2020hidden,
-  author    = {Maziar Raissi and Alireza Yazdani and George Em Karniadakis},
-  title     = {Hidden Fluid Mechanics: Learning Velocity and Pressure Fields from Flow Visualizations},
-  journal   = {Science},
-  volume    = {367},
-  number    = {6481},
-  pages     = {1026--1030},
-  year      = {2020}
-}
-
-@article{wang2021understanding,
-  author    = {Sifan Wang and Yujun Teng and Paris Perdikaris},
-  title     = {Understanding and Mitigating Gradient Flow Pathologies in Physics-Informed Neural Networks},
-  journal   = {SIAM Journal on Scientific Computing},
-  volume    = {43},
-  number    = {5},
-  pages     = {A3055--A3081},
-  year      = {2021}
-}
-
-@inproceedings{krishnapriyan2021characterizing,
-  author    = {Aditi S. Krishnapriyan and Amir Gholami and Shandian Zhe and 
-               Robert M. Kirby and Michael W. Mahoney},
-  title     = {Characterizing Possible Failure Modes in Physics-Informed Neural Networks},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  volume    = {34},
-  pages     = {26548--26560},
-  year      = {2021}
-}
-
-@article{cai2021physics,
-  author    = {Shengze Cai and Zhiping Mao and Zhicheng Wang and Minglang Yin and 
-               George Em Karniadakis},
-  title     = {Physics-Informed Neural Networks ({PINNs}) for Fluid Mechanics: A Review},
-  journal   = {Acta Mechanica Sinica},
-  volume    = {37},
-  pages     = {1727--1738},
-  year      = {2021}
+  year      = {2019},
+  doi       = {10.1016/j.jcp.2018.10.045}
 }
 
 @inproceedings{rahaman2019spectral,
@@ -88,27 +36,28 @@
   booktitle = {Proceedings of the 36th International Conference on Machine Learning (ICML)},
   volume    = {97},
   pages     = {5301--5310},
-  year      = {2019}
+  year      = {2019},
+  series    = {Proceedings of Machine Learning Research},
+  publisher = {PMLR}
 }
 
 %% ========================================
-%% OPERATOR LEARNING METHODS
+%% NEURAL OPERATOR LEARNING
 %% ========================================
 
 @inproceedings{li2021fourier,
-  author    = {Zongyi Li and Nikola Borislavov Kovachki and Kamyar Azizzadenesheli and 
-               Burigede Liu and Kaushik Bhattacharya and Andrew M. Stuart and 
-               Anima Anandkumar},
+  author    = {Zongyi Li and Nikola Kovachki and Kamyar Azizzadenesheli and Burigede Liu and 
+               Kaushik Bhattacharya and Andrew Stuart and Anima Anandkumar},
   title     = {Fourier Neural Operator for Parametric Partial Differential Equations},
   booktitle = {Proceedings of the International Conference on Learning Representations (ICLR)},
-  year      = {2021}
+  year      = {2021},
+  note      = {arXiv:2010.08895}
 }
 
 @article{kovachki2023neural,
-  author    = {Nikola B. Kovachki and Zongyi Li and Burigede Liu and 
-               Kamyar Azizzadenesheli and Kaushik Bhattacharya and Andrew M. Stuart and 
-               Anima Anandkumar},
-  title     = {Neural Operator: Learning Maps Between Function Spaces with Applications to {PDEs}},
+  author    = {Nikola Kovachki and Zongyi Li and Burigede Liu and Kamyar Azizzadenesheli and 
+               Kaushik Bhattacharya and Andrew Stuart and Anima Anandkumar},
+  title     = {Neural Operator: Learning Maps Between Function Spaces with Applications to {PDE}s},
   journal   = {Journal of Machine Learning Research},
   volume    = {24},
   number    = {89},
@@ -116,69 +65,8 @@
   year      = {2023}
 }
 
-@article{lu2021learning,
-  author    = {Lu Lu and Pengzhan Jin and Guofei Pang and Zhongqiang Zhang and 
-               George Em Karniadakis},
-  title     = {Learning Nonlinear Operators via {DeepONet} Based on the Universal 
-               Approximation Theorem of Operators},
-  journal   = {Nature Machine Intelligence},
-  volume    = {3},
-  pages     = {218--229},
-  year      = {2021}
-}
-
-@inproceedings{brandstetter2022message,
-  author    = {Johannes Brandstetter and Daniel Worrall and Max Welling},
-  title     = {Message Passing Neural {PDE} Solvers},
-  booktitle = {Proceedings of the International Conference on Learning Representations (ICLR)},
-  year      = {2022}
-}
-
 %% ========================================
-%% SPECIALIZED PDE LEARNING FRAMEWORKS
-%% ========================================
-
-@inproceedings{long2018pde,
-  author    = {Zichao Long and Yiping Lu and Xianzhong Ma and Bin Dong},
-  title     = {{PDE-Net}: Learning {PDEs} from Data},
-  booktitle = {Proceedings of the 35th International Conference on Machine Learning (ICML)},
-  volume    = {80},
-  pages     = {3208--3216},
-  year      = {2018}
-}
-
-@inproceedings{chen2018neural,
-  author    = {Ricky T. Q. Chen and Yulia Rubanova and Jesse Bettencourt and 
-               David K. Duvenaud},
-  title     = {Neural Ordinary Differential Equations},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  volume    = {31},
-  pages     = {6571--6583},
-  year      = {2018}
-}
-
-@inproceedings{shi2015convolutional,
-  author    = {Xingjian Shi and Zhourong Chen and Hao Wang and Dit-Yan Yeung and 
-               Wai-Kin Wong and Wang-chun Woo},
-  title     = {Convolutional {LSTM} Network: A Machine Learning Approach for 
-               Precipitation Nowcasting},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  volume    = {28},
-  pages     = {802--810},
-  year      = {2015}
-}
-
-@inproceedings{greydanus2019hamiltonian,
-  author    = {Samuel Greydanus and Misko Dzamba and Jason Yosinski},
-  title     = {Hamiltonian Neural Networks},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  volume    = {32},
-  pages     = {15379--15389},
-  year      = {2019}
-}
-
-%% ========================================
-%% CLASSICAL PDE REFERENCES (FROM CHAPTER 1)
+%% CLASSICAL PDE REFERENCES
 %% ========================================
 
 @article{cole1951quasi,
@@ -187,7 +75,8 @@
   journal   = {Quarterly of Applied Mathematics},
   volume    = {9},
   pages     = {225--236},
-  year      = {1951}
+  year      = {1951},
+  doi       = {10.1090/qam/42889}
 }
 
 @article{hopf1950partial,
@@ -196,5 +85,17 @@
   journal   = {Communications on Pure and Applied Mathematics},
   volume    = {3},
   pages     = {201--230},
-  year      = {1950}
+  year      = {1950},
+  doi       = {10.1002/cpa.3160030302}
+}
+
+
+@misc{malhotra2025neuralfieldturingmachine,
+      title={Neural Field Turing Machine: A Differentiable Spatial Computer}, 
+      author={Akash Malhotra and Nacéra Seghouani},
+      year={2025},
+      eprint={2509.03370},
+      archivePrefix={arXiv},
+      primaryClass={cs.NE},
+      url={https://arxiv.org/abs/2509.03370}, 
 }

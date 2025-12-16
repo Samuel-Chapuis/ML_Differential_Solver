@@ -11,13 +11,14 @@ Many PDEs of interest can be written in a (semi-)invariant form:
 \end{equation}
 with initial/boundary conditions. Here $u$ is a scalar or vector field; $\mathcal{F}$ encodes advection, diffusion, reaction, constraints; and $\theta$ collects physical parameters (viscosity $\nu$, conductivity $\alpha$, permeability $a(x)$, etc.). Our network seeks to learn a local time-advance operator that approximates $\mathcal{F}$ across multiple PDE families.
 
+
 \subsection{Historical milestones: AI and PDEs}
 \begin{itemize}
 	\item \textbf{1990s--2000s}: early universal approximators for simple PDEs; occasional RBF/MLP surrogates.
-	\item \textbf{2017--2019}: \textit{Physics-Informed Neural Networks} (PINNs) enforce PDE residuals in the loss; good on simple geometries, sensitive to stiffness and turbulent regimes.
-	\item \textbf{2020}: \textit{Fourier Neural Operator} (FNO) and \textit{Neural Operators} learn the operator between function spaces; reference benchmarks on Burgers, incompressible Navier--Stokes, Darcy.
-	\item \textbf{2021--2024}: rise of spatio-temporal architectures (Transformers, ConvNeXt) for continuous fields; work on numerical stability, spectral regularization, and conservation of physical quantities.
-	\item \textbf{NFTM (2025)}: Neural Field Turing Machine (Malhotra \& Seghouani) combines \textbf{continuous spatial memory + read/write heads + a neural controller} (CNN/RNN/Transformer). It resembles an explicit scheme: local read, compute an update, local write. Our work builds on this idea to generalize across PDEs.
+	\item \textbf{2017--2019}: \textit{Physics-Informed Neural Networks} (PINNs)~\cite{raissi2019physics} enforce PDE residuals in the loss; good on simple geometries, sensitive to stiffness and turbulent regimes.
+	\item \textbf{2020}: \textit{Fourier Neural Operator} (FNO)~\cite{li2021fourier} and \textit{Neural Operators}~\cite{kovachki2023neural} learn the operator between function spaces; reference benchmarks on Burgers, incompressible Navier--Stokes, Darcy.
+	\item \textbf{2021--2024}: rise of spatio-temporal architectures (Transformers, ConvNeXt) for continuous fields; work on numerical stability, spectral regularization~\cite{rahaman2019spectral}, and conservation of physical quantities.
+	\item \textbf{NFTM (2025)}: Neural Field Turing Machine (Malhotra \& Seghouani) \cite{malhotra2025neuralfieldturingmachine} combines \textbf{continuous spatial memory + read/write heads + a neural controller} (CNN/RNN/Transformer). It resembles an explicit scheme: local read, compute an update, local write. Our work builds on this idea to generalize across PDEs.
 \end{itemize}
 
 \section{Fluid Mechanics Overview}

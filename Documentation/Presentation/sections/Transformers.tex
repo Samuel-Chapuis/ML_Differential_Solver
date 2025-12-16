@@ -1,0 +1,137 @@
+\section{Transformers}
+
+\begin{frame}{Transformers}
+    \small
+    \textcolor{red_unipd}{\Large 1D Burger Equation Datasets}
+    \begin{alertblock}{Transformer Architecture for 1D Burger Equation}
+    \begin{itemize}
+        \item We designed a Transformer-based architecture to predict the next state of the 1D Burger equation given a sequence of past states and the viscosity parameter $\nu$.
+        \item The model ingests sequences of patches across time steps plus $\nu$ (for physical completeness), but empirically the explicit $\nu$ channel does not materially change the prediction quality on our datasets.
+    \end{itemize}
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}{Transformers}
+    \small
+    \textcolor{red_unipd}{\Large Transformer Architecture}
+    \vspace{1em}
+    \begin{figure}[h]
+    \centering
+    \begin{minipage}{\textwidth}
+        \centering
+        % On fixe la largeur totale pour éviter les overfull hboxes
+        \resizebox{\textwidth}{!}{%
+        \begin{tikzpicture}[
+        node distance=8mm and 14mm,
+        font=\small,
+        line/.style={-Latex, thick},
+        box/.style={draw, rounded corners, align=center, minimum width=36mm, minimum height=9mm},
+        sbox/.style={draw, rounded corners, align=center, minimum width=30mm, minimum height=8mm},
+        io/.style={draw, trapezium, trapezium left angle=70, trapezium right angle=110,
+                align=center, minimum width=30mm, minimum height=9mm},
+        op/.style={draw, diamond, aspect=2, align=center, inner sep=1.2mm}
+        ]
+
+        % Entrées (haut)
+        \node[io] (in1) {patch\_seq\\$(B,L,P)$};
+        \node[io, below=12mm of in1] (in2) {$\nu$\\$(B,1)$};
+
+        % Broadcast + concat (vertical)
+        \node[sbox, right=20mm of in2] (bcast) {Broadcast\\$\nu \rightarrow (B,L,1)$};
+        \node[box,  right=20mm of in1] (concat) {Concat\\$x=[\text{patch\_seq},\nu]$\\$(B,L,P{+}1)$};
+
+        \draw[line] (in2) -- (bcast);
+        \draw[line] (in1) -- (concat);
+        \draw[line] (bcast.north) |- (concat.south);
+
+        % Embed MLP
+        \node[box, right=20mm of concat] (embed) {Embed MLP\\Linear$(P{+}1\to H)$\\ReLU\\Linear$(H\to H)$\\ReLU\\$h:(B,L,H)$};
+        \draw[line] (concat) -- (embed);
+
+        % Attn scores + softmax (à droite)
+        \node[box, right=22mm of embed] (scores) {Scores\\Linear$(H\to 1)$\\$s:(B,L)$};
+        \node[sbox, right=18mm of scores] (softmax) {Softmax sur $L$\\$w:(B,L)$};
+        \draw[line] (embed) -- (scores);
+        \draw[line] (scores) -- (softmax);
+
+        % Context
+        \node[box, below=12mm of embed] (context) {Contexte\\$c=\sum_t w_t\,h_t$\\$(B,H)$};
+        \draw[line] (embed) -- (context);
+        \draw[line] (softmax.south) |- (context.east);
+
+        % Output head
+        \node[box, below=10mm of context] (head) {Tête de sortie\\ReLU\\Linear$(H\to H)$\\ReLU\\Dropout\\Linear$(H\to 1)$};
+        \draw[line] (context) -- (head);
+
+        % Sortie
+        \node[io, below=10mm of head] (out) {Sortie\\$\hat{y}:(B)$};
+        \draw[line] (head) -- (out);
+
+        \end{tikzpicture}%
+        }% fin resizebox
+    \end{minipage}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Transformers}
+    \small
+    \textcolor{red_unipd}{\Large Training and Evaluation Procedure}
+    \begin{alertblock}{Overview}
+    \begin{itemize}
+        \item Training: extract spatio-temporal patches, add $\nu$, feed into model, optimize MSE with stability penalty using Adam + cosine scheduler.
+        \item Rollout: multi-step auto-regression for prediction stabilization and energy regularization.
+        \item Evaluation: MSE/PSNR/SSIM/R$^2$ metrics, loss curves, and ground truth vs. prediction visualization.
+    \end{itemize}
+    \end{alertblock}
+
+
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+    \resizebox{0.98\textwidth}{!}{%
+    \begin{tikzpicture}[
+        node distance=9mm and 14mm,
+        font=\small,
+        line/.style={-Latex, thick},
+        box/.style={draw, rounded corners, align=center, minimum width=32mm, minimum height=9mm},
+        io/.style={draw, trapezium, trapezium left angle=70, trapezium right angle=110,
+                    align=center, minimum width=30mm, minimum height=9mm}
+    ]
+
+    \node[io] (data) {Trajectory \& $\nu$};
+    \node[box, below=10mm of data] (prep) {Patch/align\newline DataLoader};
+    \node[box, below=10mm of prep] (model) {Model\newline (Transformer/RNN/CNN)};
+    \node[box, below=10mm of model] (loss) {MSE +\newline stability};
+    \node[box, below=10mm of loss] (optim) {Adam +\newline Cosine LR};
+    \node[io, below=12mm of optim] (eval) {Metrics +\newline Visualization};
+    \node[io, right=22mm of model] (roll) {Multi-step\newline Rollout};
+
+    \draw[line] (data) -- (prep);
+    \draw[line] (prep) -- (model);
+    \draw[line] (model) -- (loss);
+    \draw[line] (loss) -- (optim);
+    \draw[line] (optim) -- (eval);
+    \draw[line] (model.east) -- (roll.west);
+    \draw[line] (roll.south) |- (prep.east);
+
+    \end{tikzpicture}%
+    }
+    \end{center}
+\end{frame}
+
+
+\begin{frame}{Transformers}
+    \small
+    \textcolor{red_unipd}{\Large Results and Observations}
+    \begin{figure}
+        \centering
+        \includegraphics[width=1\textwidth]{images/Transformers/transformers_exemple.png}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{images/Transformers/transformers_MeansAbsErr.png}
+    \end{figure}
+\end{frame}

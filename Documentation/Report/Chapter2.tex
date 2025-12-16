@@ -1,16 +1,121 @@
-
 \chapter{Related Work}
-\label{chap:intro}
-It is expected to find:
+\label{chap:related_work}
+%It is expected to find:
 
+%\begin{itemize}
+%\item The research articles  related to your defined problem/objective 
+%\item Try to present them by category, the main ideas behind and their limitations
+%\item Justify your directions/choices. This part should make a link with the next chapter.
+
+%\end{itemize}
+
+%==============================================================================
+\section{Memory Architectures}
+\label{sec:related_memory}
+%==============================================================================
+
+The foundation of Neural Field Turing Machine approach lies in architectures that augment neural networks with external memory and sophisticated attention mechanisms.
+
+%------------------------------------------------------------------------------
+\subsection{Neural Turing Machines}
+\label{subsec:ntm}
+%------------------------------------------------------------------------------
+
+Graves, Wayne, and Danihelka~\cite{graves2014neural} introduced Neural Turing Machines (NTMs) as differentiable analogues of classical Turing machines. The key innovation is coupling a neural network controller with an external memory matrix that can be read from and written to via learned attention mechanisms, all while remaining end-to-end differentiable~\cite{graves2014neural}.
+
+\paragraph{Architecture.}
+An NTM~\cite{graves2014neural} consists of:
 \begin{itemize}
-\item The research articles  related to your defined problem/objective 
-\item Try to present them by category, the main ideas behind and their limitations
-\item Justify your directions/choices. This part should make a link with the next chapter.
-
-
-
-
+    \item \textbf{Controller}: A recurrent or feedforward network that processes inputs and emits control signals
+    \item \textbf{Memory matrix}: \(\mathbf{M}_t \in \mathbb{R}^{N \times M}\) with \(N\) addressable locations of size \(M\)
+    \item \textbf{Read/Write heads}: Attention-based addressing mechanisms
 \end{itemize}
 
+%The controller interacts with memory through two complementary addressing modes:
 
+%\textit{Content-based addressing} uses similarity to focus on relevant memory locations:
+%\begin{equation}
+%w_t^c(i) = \frac{\exp\left(\beta_t \cdot K[\mathbf{k}_t, \mathbf{M}_t(i)]\right)}{\sum_j \exp\left(\beta_t \cdot K[\mathbf{k}_t, \mathbf{M}_t(j)]\right)}
+%\label{eq:ntm_content_addressing}
+%\end{equation}
+%where \(K[\mathbf{u}, \mathbf{v}] = \frac{\mathbf{u}^T\mathbf{v}}{\|\mathbf{u}\|\|\mathbf{v}\|}\) is cosine similarity and \(\beta_t\) controls focus sharpness.
+
+%\textit{Location-based addressing} enables algorithmic operations via shifting and sharpening:
+%\begin{align}
+%\tilde{w}_t &= s_t \circledast w_t^g \quad \text{(convolutional shift)} \label{eq:ntm_shift} \\
+%w_t(i) &= \frac{[\tilde{w}_t(i)]^{\gamma_t}}{\sum_j [\tilde{w}_t(j)]^{\gamma_t}} \quad \text{(sharpening)} \label{eq:ntm_sharpen}
+%\end{align}
+
+While \textbf{Reading}~\cite{graves2014neural} extracts information via weighted average:
+\begin{equation}
+\mathbf{r}_t = \sum_{i=1}^N w_t^r(i) \mathbf{M}_t(i)
+\label{eq:ntm_read}
+\end{equation}
+
+\textbf{Writing}~\cite{graves2014neural} combines selective erasure and addition:
+\begin{equation}
+\mathbf{M}_t(i) = \mathbf{M}_{t-1}(i) \odot [\mathbf{1} - w_t^w(i)\mathbf{e}_t] + w_t^w(i)\mathbf{a}_t
+\label{eq:ntm_write}
+\end{equation}
+
+%\paragraph{Limitations for PDEs.}
+%While groundbreaking for discrete algorithmic tasks, NTMs face fundamental obstacles for PDE solving:
+%\begin{enumerate}
+%    \item \textbf{Discrete memory structure}: The tabular format \(\mathbf{M} \in \mathbb{R}^{N \times M}\) is designed for discrete symbols, not continuous spatial fields
+%    \item \textbf{No geometric structure}: Memory locations lack inherent spatial relationships critical for PDEs
+%    \item \textbf{Scalability}: Content-based addressing costs \(\mathcal{O}(N \times M)\) per timestep
+%    \item \textbf{Lack of spatial inductive bias}: No assumptions about locality or translation invariance
+%\end{enumerate}
+
+\paragraph{Limitations for PDEs.}
+While groundbreaking for discrete algorithmic tasks~\cite{graves2014neural}, Neural Turing Machines face fundamental obstacles for Partial Differential Equation 
+solving due to their discrete memory structure, which uses a tabular format \(\mathbf{M} \in \mathbb{R}^{N \times M}\) designed for discrete symbols rather than continuous spatial fields. 
+Furthermore, their memory locations possess no inherent geometric or spatial relationships, which are critical for representing PDE domains. This design also leads to scalability issues, as content-based addressing incurs a cost of \(\mathcal{O}(N \times M)\) per timestep~\cite{graves2014neural}. Ultimately, the architecture lacks the necessary spatial inductive biases—such as assumptions about locality or translation invariance—that are essential for efficiently learning and solving PDEs.
+
+\paragraph{Relevance.}
+NTMs establish the foundational principle we coded, an external memory (the spatial field \(u(x,t)\)) combined with learned read/write operations (our controller implementation). However, we fundamentally adapt this paradigm from discrete memory slots to continuous spatial fields, replacing content-based addressing with local spatial convolutions.
+
+%==============================================================================
+\section{Physics-Informed Neural Networks}
+\label{sec:related_pinns}
+%==============================================================================
+
+Physics-Informed Neural Networks represent a fundamentally different paradigm: instead of learning from data, they embed physical laws directly into the loss function.
+
+%------------------------------------------------------------------------------
+\subsection{PINN Framework}
+\label{subsec:pinn_framework}
+%------------------------------------------------------------------------------
+
+Raissi, Perdikaris, and Karniadakis~\cite{raissi2019physics} introduced PINNs as a method for solving forward and inverse PDE problems by incorporating the governing equations as soft constraints during training.
+
+For the Burgers equation~\cite{raissi2019physics}:
+\begin{equation}
+\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} = \nu\frac{\partial^2 u}{\partial x^2}, \quad (x,t) \in \Omega \times [0,T]
+\label{eq:burgers_pinn_pde}
+\end{equation}
+
+A PINN approximates \(u(x,t) \approx u_{\theta}(x,t)\) using a deep neural network and minimizes~\cite{raissi2019physics}:
+\begin{equation}
+\mathcal{L}_{\text{PINN}} = \lambda_f \mathcal{L}_f + \lambda_u \mathcal{L}_u + \lambda_b \mathcal{L}_b
+\label{eq:pinn_total_loss}
+\end{equation}
+
+%where:
+%\begin{align}
+%\mathcal{L}_f &= \frac{1}{N_f}\sum_{i=1}^{N_f} \left|f_{\theta}(x_i^f, t_i^f)\right|^2 \label{eq:pinn_physics_loss} \\
+%f_{\theta} &= \frac{\partial u_{\theta}}{\partial t} + u_{\theta}\frac{\partial u_{\theta}}{\partial x} - \nu\frac{\partial^2 u_{\theta}}{\partial x^2} \label{eq:pinn_residual} \\
+%\mathcal{L}_u &= \frac{1}{N_u}\sum_{j=1}^{N_u} \left|u_{\theta}(x_j^u, t_j^u) - u_j\right|^2 \label{eq:pinn_data_loss} \\
+%\mathcal{L}_b &= \frac{1}{N_b}\sum_{k=1}^{N_b} \left|u_{\theta}(x_k^b, t_k^b) - u_k^b\right|^2 \label{eq:pinn_boundary_loss}
+%\end{align}
+
+\paragraph{Advantages.}
+The approach~\cite{raissi2019physics} is fundamentally \textbf{mesh-free}, eliminating the need for spatial discretization of the domain. This framework is naturally suited for \textbf{inverse problems}, as it can infer unknown physical parameters, such as the viscosity coefficient \(\nu\), directly from sparse and noisy observational data. Furthermore, it provides a \textbf{continuous solution} across space and time, allowing for evaluation at arbitrary query points \((x, t)\). Finally, it is effective in a \textbf{low data regime}, capable of producing accurate solutions with few or even no traditional high-fidelity training measurements~\cite{raissi2019physics}.
+
+\paragraph{Limitations for Burgers Equation.}
+Despite their theoretical elegance, Physics-Informed Neural Networks (PINNs) face severe challenges for convection-dominated PDEs such as Burgers' equation. A primary issue is the \textbf{spectral bias toward low frequencies}, where neural networks, as demonstrated by Rahaman et al.~\cite{rahaman2019spectral}, preferentially learn low-frequency components of a solution. For shock-forming solutions rich in high-frequency content, this inherent bias manifests as an inability to accurately represent sharp gradients, leads to oscillatory artifacts (Gibbs phenomenon) near discontinuities, and results in extremely slow convergence, often requiring over \(10^5\) training iterations~\cite{rahaman2019spectral}. This limitation is compounded by a significant \textbf{computational cost}. Training a PINN requires a dense set of collocation points (\(N_f \sim 10^4\) for 1D problems), the computation of high-order derivatives via expensive automatic differentiation, and a lengthy optimization process typically spanning \(50{,}000\) to \(200{,}000\) iterations for convergence~\cite{raissi2019physics}. These factors together present substantial practical barriers for solving convection-dominated flows.
+
+\paragraph{Relevance to Our Work.}
+Rather than minimizing PDE residuals, we learn from pre-computed high-fidelity trajectories. However, we retain physics-informed \textit{regularization} without requiring it as the primary loss.
+
+%------------------------------------------------------------------------------
