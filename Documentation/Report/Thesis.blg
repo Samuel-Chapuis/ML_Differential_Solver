@@ -1,52 +1,52 @@
-This is BibTeX, Version 0.99d
+This is BibTeX, Version 0.99d (TeX Live 2025)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: Thesis.aux
-Reallocating 'name_of_file' (item size: 1) to 14 items.
 A level-1 auxiliary file: TitlePage.aux
-Reallocating 'name_of_file' (item size: 1) to 14 items.
 A level-1 auxiliary file: Appendix1.aux
-Reallocating 'name_of_file' (item size: 1) to 6 items.
 The style file: plain.bst
-Reallocating 'name_of_file' (item size: 1) to 7 items.
 Database file #1: Thesis.bib
-You've used 18 entries,
+Warning--I didn't find a database entry for "chen2018neural"
+Warning--I didn't find a database entry for "long2018pde"
+Warning--I didn't find a database entry for "greydanus2019hamiltonian"
+You've used 8 entries,
             2118 wiz_defined-function locations,
-            608 strings with 7996 characters,
-and the built_in function-call counts, 8553 in all, are:
-= -- 820
-> -- 507
-< -- 12
-+ -- 201
-- -- 182
-* -- 673
-:= -- 1369
-add.period$ -- 54
-call.type$ -- 18
-change.case$ -- 145
+            553 strings with 5829 characters,
+and the built_in function-call counts, 3082 in all, are:
+= -- 295
+> -- 182
+< -- 2
++ -- 73
+- -- 64
+* -- 232
+:= -- 522
+add.period$ -- 26
+call.type$ -- 8
+change.case$ -- 56
 chr.to.int$ -- 0
-cite$ -- 18
-duplicate$ -- 289
-empty$ -- 583
-format.name$ -- 182
-if$ -- 1772
+cite$ -- 8
+duplicate$ -- 101
+empty$ -- 215
+format.name$ -- 64
+if$ -- 625
 int.to.chr$ -- 0
-int.to.str$ -- 18
-missing$ -- 18
-newline$ -- 93
-num.names$ -- 36
-pop$ -- 147
+int.to.str$ -- 8
+missing$ -- 7
+newline$ -- 44
+num.names$ -- 16
+pop$ -- 56
 preamble$ -- 1
-purify$ -- 127
+purify$ -- 48
 quote$ -- 0
-skip$ -- 230
+skip$ -- 73
 stack$ -- 0
-substring$ -- 579
-swap$ -- 100
-text.length$ -- 12
+substring$ -- 172
+swap$ -- 23
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 72
+type$ -- 32
 warning$ -- 0
-while$ -- 72
-width$ -- 20
-write$ -- 203
+while$ -- 27
+width$ -- 9
+write$ -- 91
+(There were 3 warnings)

@@ -132,5 +132,5 @@ If you use this work, please cite:
 
 ---
 
-**Last Updated**: December 2024  
-**Status**: Active Development 🚧
+**Last Updated**: December 2025
+**Status**: Working Progress
