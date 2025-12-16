@@ -1,46 +1,114 @@
-\section{Hypernetwork 'Brain' Architecture}
+\section{Next Steps}
 
-% ===== Slide 1: Architecture Diagram (3 IMAGES IN A ROW) =====
-\begin{frame}{Hypernetwork 'Brain' Architecture}
+% ===== Next Steps Summary Slides =====
 
-% Three images side by side (equal width)
-\begin{minipage}[t]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{images/architecture/Brain-architecture.png}
-\end{minipage}%
-\hfill
-\begin{minipage}[t]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{images/architecture/Brain-architecture-1.png}
-\end{minipage}%
-\hfill
-\begin{minipage}[t]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{images/architecture/Brain-architecture-2.png}
-\end{minipage}
-
-\end{frame}
-
-
-% ===== Slide 2: Main Ideas =====
+% ===== Slide 1: Next Steps Summary =====
 \begin{secframe}
-\small
-\textcolor{red_unipd}{\Large Main Ideas}
+\footnotesize
+\textcolor{red_unipd}{\Large Summary}
 
-\vspace{0.6em}
+\vspace{0.3em}
 
-\begin{alertblock}{Meta-Learning Framework}
-A large neural network (hypernetwork) learns to predict parameters for a smaller CNN that solves the PDE.
-\end{alertblock}
-
-\begin{block}{Architecture Components}
-\begin{itemize}
-  \item \textbf{Features:} Predicts context features from input field
-  \item \textbf{Dynamic Attention:} Transformer-style mechanism instead of fixed weights
-  \item \textbf{Hypernetwork (Brain):} Predicts equation parameters $\theta$ from context
-  \item \textbf{$F_\theta$ (Equation):} Small CNN applies predicted equation to field
+\begin{block}{Technical Improvements}
+\begin{itemize}\setlength\itemsep{-0.2em}
+  \item \textbf{Boundary Conditions:} Replace symmetric padding
+  \item \textbf{Training Optimization:} Weights \& Biases + distributed training (12 GPUs)
+  \item \textbf{Generalization:} Test extended viscosity ranges
+  \item \textbf{2D Burgers:} Extension to 2D: without and with obstacles
+  \item \textbf{Navier–Stokes:} Incompressible Navier–Stokes (pressure term)
 \end{itemize}
 \end{block}
 
+\vspace{-0.3em}
+
+\begin{block}{Scientific Goals}
+\begin{itemize}\setlength\itemsep{-0.2em}
+  \item \textbf{Equation Discovery:} Infer PDEs from trajectory data
+  \item \textbf{Prediction Horizon:} Study rollout stability limits
+  \item \textbf{Architectural Impact:} Attention vs. convolution effects
+\end{itemize}
+\end{block}
 
 \end{secframe}
+
+% ===== Slide 2: Technical Improvements Details =====
+\begin{secframe}
+\footnotesize
+\textcolor{red_unipd}{\Large Technical Improvements Details}
+
+\vspace{0.2em}
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{block}{Boundary Conditions}
+\textbf{Issue:} Symmetric padding causes artifacts\\
+\textbf{Solution:} Replication padding ($u_{n+1}= 0$)\\
+\end{block}
+
+\vspace{-0.3em}
+
+\begin{block}{Training Performance}
+\textbf{Ruche} More processing to run\\
+\textbf{Solution:}
+\begin{itemize}\setlength\itemsep{-0.2em}
+  \item W\&B optimization
+  \item 12 GPUs distributed training
+  \item Hyperparameter tuning
+\end{itemize}
+\end{block}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{block}{Generalization}
+\begin{itemize}\setlength\itemsep{-0.2em}
+  \item Remove viscosity conditioning
+  \item Generate diverse trajectories
+  \item Compare with benchmark
+\end{itemize}
+\end{block}
+
+\vspace{-0.3em}
+
+\begin{block}{2D Burgers Equation}
+\vspace{-0.5em}
+\[\footnotesize
+\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} + v\frac{\partial u}{\partial y} = \nu\left(\frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2}\right)
+\]
+\vspace{-0.7em}
+
+\end{block}
+\end{column}
+\end{columns}
+
+\end{secframe}
+
+% ===== Slide 3: Scientific Goals Details =====
+\begin{secframe}
+\footnotesize
+\textcolor{red_unipd}{\Large Scientific Goals Details}
+
+\vspace{0.2em}
+
+\begin{block}{Equation Discovery from Data}
+\textbf{Core Question:} Can networks discover PDEs from trajectory data?
+\begin{itemize}\setlength\itemsep{-0.2em}
+  \item No prior equation form
+  \item No parameter values provided
+  \item Applications to complex systems
+\end{itemize}
+\end{block}
+
+\vspace{-0.3em}
+
+\begin{block}{Research Questions}
+\begin{itemize}\setlength\itemsep{-0.2em}
+  \item \textbf{Prediction Horizon:} Limits on rollout stability
+  \item \textbf{Architecture:} Attention vs. convolution effects
+  \item \textbf{Residuals:} Role in preserving quantities
+\end{itemize}
+\end{block}
+
+\vspace{-0.3em}
+
+\end{secframe}
+
