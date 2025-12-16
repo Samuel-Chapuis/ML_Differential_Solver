@@ -77,13 +77,21 @@
 \begin{frame}{Transformers}
     \small
     \textcolor{red_unipd}{\Large Training and Evaluation Procedure}
-    \begin{alertblock}{Overview}
+    
+    \begin{alertblock}{Set specificity}
+    \begin{itemize}
+        \item Train set use only $\nu = 0.5 $
+        \item Test set use only $\nu = [0.1;1]$
+    \end{itemize}
+    \end{alertblock}
+    
+    \begin{block}{Overview}
     \begin{itemize}
         \item Training: extract spatio-temporal patches, add $\nu$, feed into model, optimize MSE with stability penalty using Adam + cosine scheduler.
         \item Rollout: multi-step auto-regression for prediction stabilization and energy regularization.
         \item Evaluation: MSE/PSNR/SSIM/R$^2$ metrics, loss curves, and ground truth vs. prediction visualization.
     \end{itemize}
-    \end{alertblock}
+    \end{block}
 
 
 \end{frame}
