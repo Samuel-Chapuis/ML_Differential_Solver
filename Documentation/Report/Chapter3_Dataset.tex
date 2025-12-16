@@ -1,0 +1,73 @@
+\chapter{Dataset Design and Generation}
+\label{chap:dataset}
+
+This chapter explains how we built the 1D Burgers datasets used across the neural simulators. We opted to generate our own data rather than rely on public sets so we could (i) enforce precise boundary conditions, (ii) sweep viscosities and initial conditions of interest, and (iii) guarantee numerically stable trajectories suitable for long autoregressive rollouts.
+
+\section{Design goals}
+\begin{itemize}
+    \item \textbf{Controlled boundary conditions}: periodic boundaries by default, with optional Dirichlet/Neumann variants for ablation.
+    \item \textbf{Rich initial conditions}: shocks, rarefactions, sinusoidal modes, and smoothed random fields to exercise different flow regimes.
+    \item \textbf{Parameter coverage}: viscosities spanning two orders of magnitude; spatial domains in $[-5,5]$ and $[-2,2]$; $N=128$ grid points; $T=256$ time steps with $\Delta t = 5\times10^{-3}$.
+    \item \textbf{Stable rollouts}: CFL-safe time steps, bounded corrections, and rejection of unstable trajectories (NaN/Inf or $\|u\|_\infty>5$).
+    \item \textbf{Train/test split}: separated folders (\texttt{train}/\texttt{test}) with non-overlapping viscosity values to measure cross-parameter generalization.
+\end{itemize}
+
+\section{Generation pipeline}
+\begin{enumerate}
+    \item \textbf{Grid setup}: uniform mesh with $N=128$, domain $x\in[x_{\min}, x_{\max}]$, and temporal grid $t\in[0,1.28]$ (256 steps at $\Delta t=5\times10^{-3}$).
+    \item \textbf{Initial condition sampling}: draw a waveform type (shock, rarefaction, sine, smooth) and amplitude $\texttt{speed}\in[1,5]$; construct $u(x,0)$ accordingly.
+    \item \textbf{Boundary condition enforcement}: apply the selected BC (periodic by default) before each spatial stencil.
+    \item \textbf{Numerical integration}: advance Burgers' equation with a conservative flux (Rusanov) and diffusion term, respecting a CFL safety factor.
+    \item \textbf{Quality gates}: drop trajectories that violate stability checks; store survivors as compressed \texttt{.npz} with fields $U$, $x$, $t$, $\nu$, $\Delta x$, $\Delta t$, and metadata tags.
+\end{enumerate}
+
+\section{Splits and coverage}
+The final corpus mirrors the counts in Table~\ref{tab:dataset_Burger_statistics}: 724 training trajectories over 13 viscosities and 123 testing trajectories over 4 unseen viscosities. Each sample stores the full space--time field $U\in\mathbb{R}^{T\times N}$.
+
+\section{Boundary conditions}
+Periodic BCs are used for the main experiments to match the assumed invariance in the neural controllers. Dirichlet and Neumann clamps are available in the generator for ablations; these were useful to verify the robustness of the learned update rule under different edge behaviors.
+
+\section{Initial condition diversity}
+\begin{itemize}
+    \item \textbf{Shock / shock with gap}: discontinuities to probe how models handle steep gradients.
+    \item \textbf{Rarefaction}: expansion waves that test smooth, sign-changing flows.
+    \item \textbf{Sinusoidal modes}: low-frequency spectra for mild regimes.
+    \item \textbf{Smoothed random fields}: broadband content to encourage spectral generalization.
+\end{itemize}
+This variety forces the model to attend to both advective and diffusive behaviors across viscosities.
+
+\section{Quality assurance}
+We reject trajectories that fail any of the following: (i) NaN/Inf presence, (ii) $\|u\|_\infty>5$, (iii) non-monotone energy drift beyond tolerance. Periodic mass conservation and energy dissipation are checked to ensure physical plausibility of the training data.
+
+\section{Placeholders for figures}
+\section{Visual examples}
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/smooth.png}
+        \caption{Shock initial condition}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/sin.png}
+        \caption{Rarefaction initial condition}
+    \end{minipage}
+    \\[0.5cm]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/hyperbolic_tangeante.png}
+        \caption{Sinusoidal initial condition}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/smooth.png}
+        \caption{Smoothed random field initial condition}
+    \end{minipage}
+    \label{fig:initial_conditions}
+\end{figure}
+
+\noindent Insert the actual plots produced by the notebook (e.g., \texttt{visualization.py} helpers) in place of the placeholders above.

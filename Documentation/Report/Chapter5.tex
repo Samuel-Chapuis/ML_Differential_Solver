@@ -690,109 +690,48 @@
 
 
 %==============================================================================
-\section{Immediate Technical Improvements}
+\section{Technical Improvements}
 \label{sec:immediate_improvements}
 %==============================================================================
 
-Our current implementation has revealed several critical technical issues that require immediate attention to ensure robust and accurate predictions.
-
+Our current implementation has revealed several technical issues that require attention to ensure robust and accurate predictions. Addressing these limitations will enable the development of a more robust and generalizable model for solving partial differential equations.
 %------------------------------------------------------------------------------
 \subsection{Boundary Condition Treatment}
 \label{subsec:boundary_conditions}
 %------------------------------------------------------------------------------
 
-\paragraph{Current Issue.}
 Our model currently employs symmetric padding at domain boundaries, which creates artificial artifacts in the predicted solutions. Specifically, the symmetry assumption \(u_{n+1} = u_0\) violates the physics of the Burgers equation near boundaries, leading to incorrect diffusion behavior and asymmetric predictions where symmetry is expected.
 
 \paragraph{Proposed Solution.}
-We will modify the padding configuration to use either zero padding (\(u_{n+1} = 0\)) or replication padding (\(u_{n+1} = u_n\)). Replication padding is preferred as it maintains local gradient continuity while avoiding the introduction of spurious boundary values. This change requires minimal modification to the model configuration and should immediately improve prediction quality near domain boundaries.
+We will modify the padding configuration to use either zero padding (\(u_{n+1} = 0\)) (first insight is the most accurate for the project) or replication padding (\(u_{n+1} = u_n\)). Replication padding is preferred as it maintains local gradient continuity while avoiding the introduction of spurious boundary values. This change requires minimal modification to the model configuration and should immediately improve prediction quality near domain boundaries.
 
-\paragraph{Implementation.}
-The padding scheme can be adjusted in the convolutional layer definitions by changing the \texttt{padding\_mode} parameter from \texttt{'circular'} to \texttt{'replicate'} or \texttt{'zeros'}. We will evaluate both options and select based on empirical performance on held-out test trajectories.
+ We will evaluate both options and select based on empirical performance on held-out test trajectories.
 
 %------------------------------------------------------------------------------
 \subsection{Training Performance Optimization}
 \label{subsec:training_optimization}
 %------------------------------------------------------------------------------
 
-\paragraph{Current Issue.}
 Training currently requires several hours for convergence, whereas comparable models train in minutes. This inefficiency severely limits our ability to perform hyperparameter sweeps and architecture experiments.
 
-\paragraph{Suspected Causes.}
-Profiling suggests potential inefficiencies in the autoregressive rollout loop during training, possibly due to:
-\begin{itemize}
-    \item Unnecessary gradient computations during intermediate rollout steps
-    \item Inefficient tensor operations in the temporal attention mechanism
-    \item Suboptimal batch processing in the training loop
-    \item Redundant data transfers between CPU and GPU
-\end{itemize}
-
 \paragraph{Proposed Solution.}
-We will refactor the training loop following established best practices~\cite{chen2018neural}:
-\begin{enumerate}
-    \item Implement gradient checkpointing to reduce memory overhead during backpropagation through time
-    \item Vectorize rollout operations where possible to leverage GPU parallelism
-    \item Profile the code systematically using PyTorch Profiler to identify bottlenecks
-    \item Review optimized reference implementations to identify architectural inefficiencies
-\end{enumerate}
-
+We will deploy Weights \& Biases with Bayesian optimization to systematically explore the hyperparameter space. Key parameters include:
+\begin{itemize}
+    \item Learning rate and scheduler parameters
+    \item Implement the use of 12 GPUs for distributed training
+    \item Architectural choices (kernel size, number of channels, attention heads)
+\end{itemize}
 %------------------------------------------------------------------------------
 \subsection{Generalization Verification}
 \label{subsec:generalization_verification}
 %------------------------------------------------------------------------------
 
-\paragraph{Critical Finding.}
-Our model demonstrates surprising generalization: after training on trajectories with a single viscosity value \(\nu_{\text{train}}\), it successfully predicts dynamics for unseen viscosity values \(\nu_{\text{test}} \neq \nu_{\text{train}}\). This is unexpected, as the viscosity parameter fundamentally changes the PDE dynamics.
-
-\paragraph{Verification Needed.}
-We must rigorously verify that this generalization is genuine and not an artifact of:
-\begin{itemize}
-    \item The model inadvertently accessing viscosity values from the dataset
-    \item Similar-looking dynamics arising from different viscosity values
-    \item Limited test set diversity failing to stress-test generalization
-\end{itemize}
-
-\paragraph{Experimental Protocol.}
 We will:
 \begin{enumerate}
     \item Remove all explicit viscosity inputs from the model architecture
-    \item Generate test trajectories spanning viscosity values \(\nu \in [0.001, 0.5]\) well outside the training range
-    \item Compute quantitative error metrics (relative \(L^2\), PSNR) as a function of \(|\nu_{\text{test}} - \nu_{\text{train}}|\)
+    \item Generate more test trajectories spanning viscosity values 
     \item Compare against a baseline model explicitly conditioned on viscosity values
 \end{enumerate}
-
-If genuine, this generalization capability represents a significant scientific finding that warrants detailed analysis and reporting.
-
-%==============================================================================
-\section{Short-Term Research Objectives}
-\label{sec:short_term_objectives}
-%==============================================================================
-
-Building on the immediate technical improvements, we outline our research agenda for the next two months.
-
-%------------------------------------------------------------------------------
-\subsection{Advanced Training Techniques}
-\label{subsec:advanced_training}
-%------------------------------------------------------------------------------
-
-\paragraph{Teacher Forcing Implementation.}
-Teacher forcing is a curriculum learning technique where the model is initially trained using ground truth states as input, gradually transitioning to using its own predictions. This technique is standard in the Neural ODE literature~\cite{chen2018neural} and available in reference NFTM implementations. We will implement scheduled teacher forcing with an exponentially decaying schedule:
-\begin{equation}
-p_{\text{teacher}}(t) = p_0 \exp\left(-\frac{t}{\tau}\right)
-\label{eq:teacher_forcing_schedule}
-\end{equation}
-where \(p_{\text{teacher}}\) is the probability of using ground truth at training step \(t\), \(p_0 = 0.9\) is the initial probability, and \(\tau\) controls decay rate.
-
-\paragraph{Hyperparameter Optimization.}
-We will deploy Weights \& Biases with Bayesian optimization to systematically explore the hyperparameter space. Key parameters include:
-\begin{itemize}
-    \item Learning rate and scheduler parameters
-    \item Rollout depth for curriculum learning
-    \item Physics loss weighting coefficients \(\lambda_{\text{energy}}\), \(\lambda_{\text{grad}}\)
-    \item Architectural choices (kernel size, number of channels, attention heads)
-\end{itemize}
-
-The Bayesian approach constructs a surrogate model of the loss landscape to intelligently propose parameter combinations, dramatically reducing computational cost compared to grid search.
 
 %------------------------------------------------------------------------------
 \subsection{Extension to Two-Dimensional Burgers Equation}
@@ -809,57 +748,15 @@ The natural next step is extending our framework to the two-dimensional Burgers 
 \label{eq:2d_burgers_v}
 \end{equation}
 
-\paragraph{Staged Approach.}
+\paragraph{Approach.}
 We will proceed incrementally:
 \begin{enumerate}
-    \item \textbf{Phase 1}: Solve 2D Burgers in an empty domain (no obstacles)
-    \item \textbf{Phase 2}: Introduce simple geometric obstacles (cylinders, squares) to create vortex shedding and complex flow patterns
-    \item \textbf{Phase 3}: Test generalization to unseen obstacle configurations
+    \item \textbf{1.}: Solve 2D Burgers in an empty domain (no obstacles)
+    \item \textbf{2.}: Introduce simple geometric obstacles (cylinders, squares) to create vortex shedding and complex flow patterns
+    \item \textbf{3.}: Test generalization to unseen obstacle configurations
 \end{enumerate}
 
-The 2D case introduces significantly richer spatiotemporal dynamics including vortex formation, turbulent cascades, and boundary layer effects, providing a more stringent test of our architecture's capacity.
 
-\paragraph{Architectural Modifications.}
-The extension requires:
-\begin{itemize}
-    \item Replacing 1D convolutions with 2D convolutions
-    \item Extending attention mechanisms to handle 2D spatial dimensions
-    \item Modifying the memory field from \(\mathbb{R}^{N}\) to \(\mathbb{R}^{N_x \times N_y \times 2}\) (two velocity components)
-\end{itemize}
-
-%------------------------------------------------------------------------------
-\subsection{Baseline Comparisons and Alignment}
-\label{subsec:baseline_comparisons}
-%------------------------------------------------------------------------------
-
-To contextualize our results within the broader literature, we will implement and compare against established baseline methods:
-
-\paragraph{Neural ODE.}
-Neural ODEs~\cite{chen2018neural} represent the most closely related approach. They parameterize the time derivative directly:
-\begin{equation}
-\frac{du}{dt} = f_{\theta}(u(t), t)
-\label{eq:neural_ode}
-\end{equation}
-and use ODE solvers for integration. We will implement a CNN-based Neural ODE and compare prediction accuracy, computational cost, and stability during long rollouts.
-
-\paragraph{PINNs.}
-While PINNs~\cite{raissi2019physics} are known to struggle with the Burgers equation due to spectral bias~\cite{rahaman2019spectral}, implementing a PINN baseline provides a reference point for data efficiency and physical consistency. We will train PINNs with identical physics constraints to isolate the effect of the training paradigm (physics loss vs. trajectory matching).
-
-\paragraph{Evaluation Protocol.}
-All methods will be trained on identical datasets and evaluated on:
-\begin{itemize}
-    \item Relative \(L^2\) error over rollout horizon
-    \item Mass conservation accuracy
-    \item Energy dissipation monotonicity
-    \item Computational cost (training time, inference speed)
-\end{itemize}
-
-%==============================================================================
-\section{Medium-Term Development}
-\label{sec:medium_term_development}
-%==============================================================================
-
-Our medium-term objectives focus on demonstrating generalization across multiple PDE families and developing a unified neural solver.
 
 %------------------------------------------------------------------------------
 \subsection{Incompressible Navier-Stokes Equations}
@@ -872,49 +769,8 @@ The incompressible Navier-Stokes equations represent a significant step beyond B
 \nabla \cdot \mathbf{u} &= 0 \label{eq:ns_incompressibility}
 \end{align}
 
-\paragraph{Technical Challenges.}
-The incompressibility constraint (\ref{eq:ns_incompressibility}) couples the velocity and pressure fields, requiring either:
-\begin{itemize}
-    \item Projection methods to enforce divergence-free velocities
-    \item Pressure Poisson equation solvers
-    \item Specialized loss functions penalizing divergence
-\end{itemize}
-
-We will investigate soft constraint approaches where the model is trained to minimize divergence rather than enforcing it exactly, following recent work on differentiable physics~\cite{raissi2019physics}.
-
-%------------------------------------------------------------------------------
-\subsection{Multi-PDE Generalization}
-\label{subsec:multi_pde}
-%------------------------------------------------------------------------------
-
-A key scientific question is whether a single architecture can learn dynamics across fundamentally different PDE families. We will test our framework on:
-
-\paragraph{Heat Equation.}
-The parabolic heat equation:
-\begin{equation}
-\frac{\partial u}{\partial t} = \alpha \nabla^2 u
-\label{eq:heat}
-\end{equation}
-represents pure diffusion without advection, testing whether the model can learn dynamics dominated by smoothing.
-
-\paragraph{Reaction-Diffusion Systems.}
-Systems like the Gray-Scott model couple diffusion with nonlinear reaction terms:
-\begin{align}
-\frac{\partial u}{\partial t} &= D_u \nabla^2 u - uv^2 + F(1-u) \label{eq:gray_scott_u} \\
-\frac{\partial v}{\partial t} &= D_v \nabla^2 v + uv^2 - (F+k)v \label{eq:gray_scott_v}
-\end{align}
-These systems exhibit rich pattern formation (spots, stripes, spirals) that stress-test the model's ability to capture emergent spatial structures.
-
-\paragraph{Evaluation Criteria.}
-For each PDE, we will assess:
-\begin{enumerate}
-    \item Whether the same architecture (without hyperparameter tuning) achieves reasonable accuracy
-    \item What architectural components transfer successfully across PDEs
-    \item Whether pre-training on one PDE improves performance on others
-\end{enumerate}
-
 %==============================================================================
-\section{Long-Term Scientific Goals}
+\section{Scientific Goals}
 \label{sec:long_term_goals}
 %==============================================================================
 
@@ -927,118 +783,11 @@ Our long-term vision extends beyond accurate PDE simulation to fundamental quest
 
 Can a neural network discover the governing PDE from trajectory data alone, without being told the equation form or parameter values? This inverse problem has profound implications for scientific modeling of complex systems where equations are unknown.
 
-\paragraph{Approach.}
-We will train models on trajectory data \emph{without} providing:
-\begin{itemize}
-    \item The explicit PDE form
-    \item Parameter values (e.g., viscosity \(\nu\))
-    \item Conservation laws or symmetries
-\end{itemize}
-
-Success would be demonstrated by the model learning dynamics that:
-\begin{enumerate}
-    \item Match ground truth trajectories quantitatively
-    \item Respect underlying conservation laws (mass, energy, momentum)
-    \item Generalize to initial conditions and parameter regimes outside the training distribution
-\end{enumerate}
-
-\paragraph{Interpretability.}
-A key challenge is extracting interpretable equations from the learned model. We will investigate:
-\begin{itemize}
-    \item Symbolic regression techniques to recover closed-form equations~\cite{long2018pde}
-    \item Analysis of learned convolutional filters to identify differential operators
-    \item Dimensionality reduction to discover latent coordinates aligned with physical variables
-\end{itemize}
-
-%------------------------------------------------------------------------------
-\subsection{Conservation Law Enforcement}
-\label{subsec:conservation_laws}
-%------------------------------------------------------------------------------
-
-\paragraph{Current State.}
-Hard-coding conservation laws (mass, momentum, energy) into neural network architectures remains an open problem. Existing approaches include:
-\begin{itemize}
-    \item Hamiltonian Neural Networks~\cite{greydanus2019hamiltonian}: Parameterize energy functions for conservative systems
-    \item Port-Hamiltonian formulations: Extend to dissipative systems
-    \item Projection methods: Post-process predictions to satisfy constraints
-\end{itemize}
-
-However, these methods either require restrictive assumptions (no dissipation) or conflict with gradient-based optimization when implemented as hard constraints.
-
-\paragraph{Proposed Research Direction.}
-We will develop \emph{soft constraint} methods that:
-\begin{enumerate}
-    \item Penalize violations of conservation laws through auxiliary loss terms
-    \item Learn to satisfy constraints approximately rather than exactly
-    \item Adaptively weight conservation vs. accuracy during training
-\end{enumerate}
-
-For example, mass conservation can be enforced softly via:
-\begin{equation}
-\mathcal{L}_{\text{mass}} = \lambda_{\text{mass}} \left|\int_{\Omega} u_{\text{pred}}(x,t)\,dx - \int_{\Omega} u_0(x)\,dx\right|^2
-\label{eq:soft_mass_constraint}
-\end{equation}
-
-We will investigate whether soft constraints provide sufficient regularization to improve long-term stability without the optimization difficulties of hard constraints.
-
-%------------------------------------------------------------------------------
-\subsection{Improved Long-Horizon Prediction}
-\label{subsec:long_horizon}
-%------------------------------------------------------------------------------
-
-\paragraph{Current Limitation.}
-All current state-of-the-art methods for neural PDE solving suffer from \emph{divergence} during long autoregressive rollouts. Errors accumulate, and predictions eventually become physically implausible or numerically unstable.
-
 \paragraph{Research Questions.}
 \begin{itemize}
     \item What is the fundamental limit on prediction horizon for learned simulators?
-    \item Can we develop provable stability guarantees for neural time-steppers?
     \item How do architectural choices (attention vs. convolution, residual connections) affect error accumulation?
 \end{itemize}
 
-\paragraph{Proposed Investigations.}
-We will explore:
-\begin{enumerate}
-    \item \textbf{Multi-step prediction}: Train models to predict multiple steps ahead rather than single steps, reducing error accumulation
-    \item \textbf{Stability-aware training}: Penalize predictions that amplify high-frequency modes
-    \item \textbf{Hybrid approaches}: Combine learned time-steppers with traditional stabilization techniques (spectral filtering, artificial viscosity)
-\end{enumerate}
 
-%==============================================================================
-\section{Summary and Timeline}
-\label{sec:summary_timeline}
-%==============================================================================
-
-We conclude by summarizing our roadmap with an approximate timeline:
-
-\paragraph{Immediate (1-2 weeks).}
-\begin{itemize}
-    \item Fix boundary padding configuration
-    \item Optimize training performance
-    \item Verify generalization to unseen viscosity values
-    \item Set up Weights \& Biases for hyperparameter tuning
-\end{itemize}
-
-\paragraph{Short-term (1-2 months).}
-\begin{itemize}
-    \item Implement teacher forcing and curriculum learning
-    \item Extend to 2D Burgers equation with obstacles
-    \item Compare against Neural ODE and PINN baselines
-    \item Systematic hyperparameter optimization
-\end{itemize}
-
-\paragraph{Medium-term (3-4 months).}
-\begin{itemize}
-    \item Incompressible Navier-Stokes implementation
-    \item Multi-PDE generalization experiments (Heat, Reaction-Diffusion)
-    \item Equation discovery investigations
-\end{itemize}
-
-\paragraph{Long-term (ongoing).}
-\begin{itemize}
-    \item Conservation law enforcement research
-    \item Long-horizon prediction stability analysis
-    \item Publication preparation and alignment with literature
-\end{itemize}
-
-This roadmap balances immediate practical improvements with ambitious scientific goals, positioning our work to make both methodological contributions (improved neural PDE solvers) and conceptual contributions (understanding what neural networks can learn about physical laws).
+%----- The end -----

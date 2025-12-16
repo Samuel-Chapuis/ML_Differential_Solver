@@ -73,6 +73,8 @@ def sample_initial_condition_burgers(x, speed, kind="shock"):
         u0 = np.where((x >= -1.0) & (x <= 1.0), 0.0, np.where(x < 0, 1.0, -1.0)) * speed
     elif kind == "rarefaction":
         u0 = np.where(x < 0, -speed, speed)
+    elif kind == "hyperbolic_tangent":
+        u0 = np.tanh(x) * speed
     elif kind == "sine":
         k = np.random.randint(1, 5)
         phase = np.random.uniform(0, 2*np.pi)
@@ -332,7 +334,7 @@ def visualize_random_sample(out_dir="generated_1d_burgers/test", cmap="seismic",
 if __name__ == "__main__":
     # Your data loading
     project_root = Path(__file__).parent.parent
-    dir = project_root / "saved_dataset/generated_1d_burgers"
+    dir = project_root / "saved_dataset/images"
     # dir = "test/"
 
     generate_dataset_burgers(
@@ -343,13 +345,13 @@ if __name__ == "__main__":
         dt=5e-3,
         n_steps=[256],
         # nu=np.linspace(0.01, 0.5, 30),
-        nu = 0.0065,
+        nu = 0.5,
         speed=[1.0, 5.0],
         speed_random=True,  # Active la génération aléatoire entre 1.0 et 5.0
         boundary_condition=bc_neumann_zero,
         # ic_kinds=["shock","rarefaction","sine","smooth"],
-        ic_kinds=["smooth"],
-        n_train=20, n_test=0,
+        ic_kinds=["hyperbolic_tangent"],
+        n_train=1, n_test=0,
         cfl_safety=1
     )
 
