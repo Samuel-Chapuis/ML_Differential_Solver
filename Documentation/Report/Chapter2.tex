@@ -119,3 +119,49 @@ Despite their theoretical elegance, Physics-Informed Neural Networks (PINNs) fac
 Rather than minimizing PDE residuals, we learn from pre-computed high-fidelity trajectories. However, we retain physics-informed \textit{regularization} without requiring it as the primary loss.
 
 %------------------------------------------------------------------------------
+
+\section{Transformer-based Temporal Modeling}
+
+This section explains the role and functioning of Transformer-inspired models used in this work for temporal prediction tasks.
+
+\subsection{Motivation}
+
+Classical recurrent models (RNN, LSTM, GRU) process temporal information sequentially, which can limit their ability to capture long-range dependencies and makes training unstable for long sequences. Transformers address this limitation by replacing recurrence with an attention mechanism, allowing the model to directly weight the importance of each past time step when making a prediction.
+
+In the context of physical systems such as the Burgers equation, this property is particularly relevant: the future state may depend more strongly on specific past configurations (e.g. shocks or gradients) than on the immediately preceding state alone.
+
+\subsection{General Principle of Transformers}
+
+A Transformer operates on a sequence of inputs by mapping each element into a latent representation (embedding), then computing attention weights that quantify how relevant each time step is with respect to the prediction objective. Formally, attention can be interpreted as a learned weighted average over time, where the weights are data-dependent and normalized using a softmax function.
+
+Unlike full self-attention Transformers used in NLP, the architecture employed here focuses on temporal attention only, which is sufficient for short-to-medium temporal windows and significantly reduces computational cost.
+
+\subsection{TransformerController Architecture}
+
+The \texttt{TransformerController} implemented in this work takes as input a temporal sequence of spatial patches and a physical parameter (the viscosity $\nu$). Each time step is processed independently by a shared encoder, then aggregated using attention.
+
+\paragraph{Input encoding}
+At each time step, the spatial patch and the viscosity are concatenated and passed through a multi-layer perceptron to produce a hidden embedding. This step lifts the raw physical variables into a higher-dimensional latent space where nonlinear relationships can be represented.
+
+\paragraph{Temporal attention}
+For a sequence of length $L$, the model computes a scalar attention score for each time step. These scores are normalized across time using a softmax function, producing attention weights that sum to one. The final temporal context vector is obtained as a weighted sum of the embeddings:
+\[
+\mathbf{c} = \sum_{t=1}^{L} \alpha_t , \mathbf{h}_t
+\]
+where $\alpha_t$ denotes the learned attention weight and $\mathbf{h}_t$ the embedding at time $t$.
+
+\paragraph{Prediction head}
+The aggregated context vector is then passed through a fully connected prediction head to output a scalar value. In this application, this scalar corresponds to the predicted value of the field at the center of the spatial patch at the next time step.
+
+\subsection{Interpretability and Advantages}
+
+A key advantage of this Transformer-based controller is interpretability. The attention weights provide direct insight into which past time steps are most influential for a given prediction. This is particularly useful in a physical setting, where one may want to verify whether the model focuses on physically meaningful events (e.g. shock formation).
+
+Compared to recurrent alternatives, this architecture:
+\begin{itemize}
+\item avoids vanishing or exploding gradients caused by long recursions,
+\item enables parallel processing over the temporal dimension,
+\item and provides explicit, learnable temporal importance weights.
+\end{itemize}
+
+For these reasons, the TransformerController serves as a strong baseline for learning temporal dependencies in data-driven physical modeling.

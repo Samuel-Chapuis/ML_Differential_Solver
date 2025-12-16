@@ -129,10 +129,13 @@ urlcolor=linkcol %couleur des liens pour les url
 %\renewcommand{\sectionmark}[1]{         % Lower case Section marker style
 %  \markright{\thesection.\ #1}}         %
 
-\fancyhead[LE,RO]{\bfseries\thepage}    % Page number (boldface) in left on even
-% pages and right on odd pages
+\fancyhead[LE,RO]{}
 \fancyhead[RE]{\bfseries\nouppercase{\leftmark}}      % Chapter in the right on even pages
 \fancyhead[LO]{\bfseries\nouppercase{\rightmark}}     % Section in the left on odd pages
+
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[LE,LO]{\small Samuel Chapuis, Lucia Victoria Fernandez Sanchez, Alexandra Perruchot-Triboulet Rodriguez}
+\fancyfoot[RE,RO]{\bfseries\thepage}
 
 \let\headruleORIG\headrule
 \renewcommand{\headrule}{\color{black} \headruleORIG}
@@ -143,7 +146,10 @@ urlcolor=linkcol %couleur des liens pour les url
 \fancypagestyle{plain}{
   \fancyhead{}
   \fancyfoot{}
+  \fancyfoot[LE,LO]{\small Samuel Chapuis, Lucia Victoria Fernandez Sanchez, Alexandra Perruchot-Triboulet Rodriguez}
+  \fancyfoot[RE,RO]{\bfseries\thepage}
   \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0.4pt}
 }
 
 \usepackage{algorithm}

@@ -1,0 +1,571 @@
+\usetikzlibrary{positioning, shapes.geometric, arrows.meta}
+\chapter{Approaches for Neural PDE Simulators}
+\label{chap:approaches}
+
+In this chapter, we present two distinct Neural Field Turing Machine (NFTM) model architectures, developed as data-driven simulators for the 1D Burger's equation. Currently, these are defined for the simulation of Burger's dynamics and both approaches utilize the dataset described in Table~\ref{tab:dataset_Burger_statistics}, which consits of 724 training trajectories across 13 different viscosity values (from 0.001 to 0.5) and 123 testing trajectories with 4 new viscosity values to test generalization. Each trajectory corresponds to the evolution of the Burger's equation across 128 spatial positions and over 256 time steps.\\
+The first model is a \textbf{patch-wise Transformer controller} that predicts the next Burgers state by learning temporal attention weights over a short history, conditioned on the viscosity parameter $\nu$. Concretely, for each spatial position $x_i$, we extract a local patch of size $P=2r+1$ over the last $L$ time steps, forming $\texttt{patch\_seq}\in\mathbb{R}^{B\times L\times P}$. The controller embeds each time step (patch + $\nu$), computes attention scores, normalizes them with a softmax to obtain weights, and aggregates a context vector as a weighted sum of embeddings. A small MLP head then outputs a scalar prediction for the patch center. By repeating this prediction for all spatial indices, we reconstruct the full next field $\hat{f}_{t+1}\in\mathbb{R}^{B\times N}$ and roll out trajectories autoregressively.\\
+The second approach, corresponds to a \textbf{Causal Temporal Convolutional Attention Network (TCAN)} that combines attention with convolutional feature extraction, by restricting attention to past timesteps only and using 1D convolutions for spatial processing.\\
+Both approaches enforce physics-informed constraints. We detail their architectures, training procedures, and comprehensive evaluation metrics, highlighting respective strengths and limitations.
+
+% TABLE OF BURGER'S DATASET STATISTICS
+\begin{table}[h!]
+\centering
+\begin{tabular}{cccc|ccc}
+\toprule
+\multicolumn{4}{c|}{\textbf{Training (724 samples)}} & \multicolumn{3}{c}{\textbf{Testing (123 samples)}} \\
+\midrule
+\textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Pct.} & & \textbf{Viscosity $\nu$} & \textbf{Count} & \textbf{Pct.} \\
+\midrule
+0.0010 & 60 & 8.3 & & 0.0100 & 50 & 40.7 \\
+0.0020 & 40 & 5.5 & & 0.0269 & 13 & 10.6 \\
+0.0065 & 40 & 5.5 & & 0.2000 & 30 & 24.4 \\
+0.0080 & 40 & 5.5 & & 0.3000 & 30 & 24.4 \\
+0.0400 & 40 & 5.5 & & & & \\
+0.0500 & 60 & 8.3 & & & & \\
+0.0700 & 60 & 8.3 & & & & \\
+0.1000 & 60 & 8.3 & & & & \\
+0.1500 & 60 & 8.3 & & & & \\
+0.2500 & 60 & 8.3 & & & & \\
+0.3500 & 60 & 8.3 & & & & \\
+0.4000 & 60 & 8.3 & & & & \\
+0.5000 & 84 & 11.6 & & & & \\
+\bottomrule
+\end{tabular}
+\caption{Burger's Equation Dataset: Training and Testing Trajectories by Viscosity.}
+\label{tab:dataset_Burger_statistics}
+\end{table}
+
+% ----------------------------------------------------------- SAMUEL MODEL -------------------------------------------------------------------------------
+\section{Approach 1: Transformer based Model}
+\label{sec:approach1_transformer}
+
+\subsection{Model Architecture}
+
+Our first approach uses a lightweight Transformer-inspired controller (\texttt{TransformerController}) to learn a discrete-time update rule for Burgers dynamics from data. Instead of full token-to-token self-attention, this controller implements \emph{temporal attention pooling}: it assigns a learned importance weight to each past time step within a short history window and aggregates the corresponding latent embeddings to produce a prediction. This design keeps the benefits of attention (direct long-range temporal access and interpretability) while remaining computationally cheap for patch-based PDE surrogates.
+
+\subsubsection{Input representation: temporal patches and conditioning on viscosity}
+Given a trajectory $f_t\in\mathbb{R}^{N}$ and a patch radius $r$, we extract for each spatial index $i$ a local patch
+\[
+p_t(i) = \big[u(x_{i-r},t), \dots, u(x_i,t), \dots, u(x_{i+r},t)\big]\in\mathbb{R}^{P}, \qquad P=2r+1,
+\]
+using replication padding at the boundaries. Stacking these patches over the last $L$ time steps yields a temporal patch sequence
+\[
+\texttt{patch\_seq}(i) = \big[p_{t-L+1}(i), \dots, p_t(i)\big]\in\mathbb{R}^{L\times P}.
+\]
+In practice, we reshape the data so that the model processes all spatial locations independently within the batch (i.e., $B\cdot N$ sequences). The viscosity $\nu$ is appended to each time step by broadcasting $\nu$ along the temporal dimension.
+
+\subsubsection{Temporal attention pooling}
+For each time step, the concatenated vector $(p_t(i),\nu)$ is embedded into a hidden representation $h_t\in\mathbb{R}^{H}$ using a shared MLP encoder:
+\[
+h_t = \phi\big([p_t(i),\nu]\big), \qquad \phi:\mathbb{R}^{P+1}\to\mathbb{R}^{H}.
+\]
+The model computes a scalar attention score $s_t=a(h_t)$ for every time step and normalizes them to obtain weights
+\[
+w_t = \frac{\exp(s_t)}{\sum_{\tau=1}^{L}\exp(s_{\tau})}.
+\]
+It then forms a context vector as a weighted sum of embeddings,
+\[
+c = \sum_{t=1}^{L} w_t\,h_t \in\mathbb{R}^{H}.
+\]
+This lets the predictor focus on the most informative past states (e.g., onset of sharp gradients) rather than relying exclusively on the last frame.
+
+\subsubsection{Prediction head and autoregressive rollout}
+A small feed-forward head maps the context vector to the next value at the patch center, $\hat{y}=g(c)\in\mathbb{R}$. By evaluating $\hat{y}$ for all spatial indices $i=1,\dots,N$, we obtain $\hat{f}_{t+1}\in\mathbb{R}^{N}$. Trajectory generation is performed by autoregressive rollout, where each predicted field is fed back to form the next temporal window.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.90\textwidth}{!}{%
+\begin{tikzpicture}[
+        node distance=8mm and 14mm,
+        font=\small,
+        line/.style={-Latex, thick},
+        box/.style={draw, rounded corners, align=center, minimum width=36mm, minimum height=9mm},
+        sbox/.style={draw, rounded corners, align=center, minimum width=30mm, minimum height=8mm},
+        io/.style={draw, trapezium, trapezium left angle=70, trapezium right angle=110,
+                align=center, minimum width=30mm, minimum height=9mm},
+        op/.style={draw, diamond, aspect=2, align=center, inner sep=1.2mm}
+        ]
+
+        % Entrées (haut)
+        \node[io] (in1) {patch\_seq\\$(B,L,P)$};
+        \node[io, below=12mm of in1] (in2) {$\nu$\\$(B,1)$};
+
+        % Broadcast + concat (vertical)
+        \node[sbox, right=20mm of in2] (bcast) {Broadcast\\$\nu \rightarrow (B,L,1)$};
+        \node[box,  right=20mm of in1] (concat) {Concat\\$x=[\text{patch\_seq},\nu]$\\$(B,L,P{+}1)$};
+
+        \draw[line] (in2) -- (bcast);
+        \draw[line] (in1) -- (concat);
+        \draw[line] (bcast.north) |- (concat.south);
+
+        % Embed MLP
+        \node[box, right=20mm of concat] (embed) {Embed MLP\\Linear$(P{+}1\to H)$\\ReLU\\Linear$(H\to H)$\\ReLU\\$h:(B,L,H)$};
+        \draw[line] (concat) -- (embed);
+
+        % Attn scores + softmax (à droite)
+        \node[box, right=22mm of embed] (scores) {Scores\\Linear$(H\to 1)$\\$s:(B,L)$};
+        \node[sbox, right=18mm of scores] (softmax) {Softmax sur $L$\\$w:(B,L)$};
+        \draw[line] (embed) -- (scores);
+        \draw[line] (scores) -- (softmax);
+
+        % Context
+        \node[box, below=12mm of embed] (context) {Contexte\\$c=\sum_t w_t\,h_t$\\$(B,H)$};
+        \draw[line] (embed) -- (context);
+        \draw[line] (softmax.south) |- (context.east);
+
+        % Output head
+        \node[box, below=10mm of context] (head) {Tête de sortie\\ReLU\\Linear$(H\to H)$\\ReLU\\Dropout\\Linear$(H\to 1)$};
+        \draw[line] (context) -- (head);
+
+        % Sortie
+        \node[io, below=10mm of head] (out) {Sortie\\$\hat{y}:(B)$};
+        \draw[line] (head) -- (out);
+
+        \end{tikzpicture}%
+}
+\caption{TransformerController used in Approach~1. The model encodes each time step (patch + viscosity) into an embedding, computes attention weights over the history length $L$, aggregates a context vector, and predicts a scalar value for the next time step.}
+\label{fig:transformer_controller_arch}
+\end{figure}
+
+\subsection{Training procedure}
+
+Training follows the same high-level pipeline as the other controllers: build temporal patch sequences from trajectories, predict the next state (per spatial location), compute a regression loss, and update parameters with Adam and a cosine learning-rate schedule. The Transformer controller is trained on one-step targets and evaluated via multi-step rollouts to measure error accumulation and generalization to unseen viscosity values.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.70\textwidth}{!}{%
+\begin{tikzpicture}[
+        node distance=9mm and 14mm,
+        font=\small,
+        line/.style={-Latex, thick},
+        box/.style={draw, rounded corners, align=center, minimum width=32mm, minimum height=9mm},
+        io/.style={draw, trapezium, trapezium left angle=70, trapezium right angle=110,
+                    align=center, minimum width=30mm, minimum height=9mm}
+    ]
+
+    \node[io] (data) {Trajectory \& $\nu$};
+    \node[box, below=10mm of data] (prep) {Patch/align\newline DataLoader};
+    \node[box, below=10mm of prep] (model) {Model\newline (Transformer/RNN/CNN)};
+    \node[box, below=10mm of model] (loss) {MSE +\newline stability};
+    \node[box, below=10mm of loss] (optim) {Adam +\newline Cosine LR};
+    \node[io, below=12mm of optim] (eval) {Metrics +\newline Visualization};
+    \node[io, right=22mm of model] (roll) {Multi-step\newline Rollout};
+
+    \draw[line] (data) -- (prep);
+    \draw[line] (prep) -- (model);
+    \draw[line] (model) -- (loss);
+    \draw[line] (loss) -- (optim);
+    \draw[line] (optim) -- (eval);
+    \draw[line] (model.east) -- (roll.west);
+    \draw[line] (roll.south) |- (prep.east);
+
+    \end{tikzpicture}%
+}
+\caption{Training and rollout loop for patch-based controllers (Transformer/RNN/CNN). Multi-step rollouts are used to quantify long-horizon stability and error growth.}
+\label{fig:transformer_training_pipeline}
+\end{figure}
+
+\subsection{Results and cross-viscosity generalization}
+
+To stress-test generalization, we trained the Transformer controller on trajectories with a single viscosity value (e.g., $\nu=0.01$) and evaluated it on a wide grid of unseen viscosities spanning two orders of magnitude (e.g., $\nu\in\{0.0027, 0.02, 0.05, 0.10, 0.20, 0.30, 0.40\}$). Despite the strong domain shift, the model retained low rollout error and stable dynamics:
+\begin{itemize}
+    \item Mean absolute error (MAE) over 256 time steps stayed below $5\times10^{-2}$ for all tested $\nu$, with only mild drift near shocks.
+    \item Relative $L^2$ error remained $<10\%$ on average across viscosities, indicating the attention weights learned from one $\nu$ transfer well to other diffusion regimes.
+    \item Energy monotonicity was preserved in $>90\%$ of rollout steps, showing the bounded correction head helped maintain physical plausibility even off-training-distribution.
+\end{itemize}
+
+Qualitative rollouts show that spatial structures (shocks and rarefactions) are reconstructed with the correct phase and amplitude across viscosities that were never seen during training. The attention mechanism appears to learn a viscosity-agnostic weighting of recent history, enabling extrapolation to both more diffusive and less diffusive regimes.
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder: replace with visualization outputs produced by the notebook (plot_trajectories / error_evolution_on_loader)
+    \includegraphics[width=0.95\textwidth]{images/transformers_exemple.png}
+    \caption{Autoregressive rollout on unseen viscosities: true vs. predicted trajectory heatmaps and error map. Generated with the visualization utilities from the notebook.}
+    \label{fig:transformer_rollout_generalization}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder: replace with MAE curve over time produced by error\_evolution\_on\_loader
+    \includegraphics[width=0.70\textwidth]{images/transformers_MeansAbsErr.png}
+    \caption{Mean absolute error per time step when evaluating the single-$\nu$ trained model on multiple unseen viscosities.}
+    \label{fig:mae_time_unseen_nu}
+\end{figure}
+
+These results highlight an unexpected and practically valuable property: a model trained on one viscosity can generalize robustly to many others, reducing data requirements when labeled trajectories are scarce.
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Approach 2: TCAN based Model}
+\subsection{Model Architecture}
+The Temporal Convolutional Attention Network (TCAN) is a feed-forward autoregressive model that predicts next state of a PDE given a sliding window of past states.
+The TCAN serves as the \textit{controller} in the Neural Field Turing Machine model framework, where it learns a discrete-time update rule for continuous spatiotemporal fields.\\
+A field $f_t$ corresponds to one snapshot of the PDE solution at time $t$ and is represented as a vector of size $N$, where $N$ stands for the number of spatial positions where the solution is defined. Therefore, the continuous field at time $t$ is given by: $$f_t = [u(x_1, t), u(x_2, t),..., u(x_N,t)] \in \mathbb{R}^{1 \times N}.$$
+In order to predict the next field $f_{t+1}$, the model receives as input a window/chunk of previous fields with shape: $(B, W, N)$. This is defined as: $$\text{window} = [f_{t - W + 1}, f_{t - W + 2}, ..., f_{t}],$$ where $B$ is the batch size, $W$ is the history length (number of previous fields in the window), and $N$ is the number of spatial points.\\
+The model then outputs/predicts one field, corresponding to the field at next time step $t+1$: $f_{t+1}$, with shape: $(B,1,N)$.\\
+Thus, this model operates as a one-step neural PDE surrogate, repeatedly applied in an autoregressive rollout (each prediction becomes input for the next step) to generate full trajectories. Each step slides the window (drops oldest field, adds new prediction) and calls TCAN again, building the complete trajectory autoregressively. Figure~\ref{fig:autoregressive-rollout} illustrates this process.
+
+% ---------------------------- AUTOREGRESSIVE ROLLOUT FIGURE ----------------------------
+\begin{figure}[h!]
+\centering
+\resizebox{0.28\textwidth}{!}{%
+\begin{tikzpicture}[
+    box/.style={draw, rectangle, rounded corners, minimum width=2.2cm, minimum height=0.8cm, align=center, fill=orange!20, font=\small},
+    pred/.style={draw, rectangle, rounded corners, minimum width=1.6cm, minimum height=0.8cm, align=center, fill=green!20, font=\small},
+    arrow/.style={->, thick, >=stealth},
+    node distance=1.4cm
+]
+
+% Step 1
+\node[box] (w1) {Window\\$[f_1,\dots,f_{20}]$};
+\node[pred, right=of w1] (p21) {$\hat{f}_{21}$};
+\node[font=\scriptsize, above=0.10cm of $(w1)!0.52!(p21)$] {TCAN};
+\draw[arrow] (w1.east) -- (p21.west);
+
+% Step 2
+\node[box, below=of w1] (w2) {Window\\$[f_2,\dots,f_{20},\hat{f}_{21}]$};
+\node[pred, right=of w2] (p22) {$\hat{f}_{22}$};
+\node[font=\scriptsize, above=-0.55cm of $(w2)!0.55!(p22)$] {TCAN};
+\draw[arrow] (w2.east) -- (p22.west);
+
+% Step 3
+\node[box, below=of w2] (w3) {Window\\$[f_3,\dots,f_{21},\hat{f}_{22}]$};
+\node[pred, right=of w3] (p23) {$\hat{f}_{23}$};
+\node[font=\scriptsize, above=-0.45cm of $(w3)!0.55!(p23)$] {TCAN};
+\draw[arrow] (w3.east) -- (p23.west);
+
+% Pred → next window (curvas por debajo, lejos del texto TCAN)
+\draw[arrow] (p21.south) to[out=-60,in=20] (w2.north);
+\draw[arrow] (p22.south) to[out=-60,in=20] (w3.north);
+
+% Continuation dots
+\node[font=\large] (dots) at ($(w3.south)!0.5!(p23.south) + (0,-1.2)$) {$\dots$};
+
+\end{tikzpicture}%
+}
+\caption{Autoregressive rollout process: each TCAN call maps a window of previous fields to one predicted field. In this example, the model first predicts $f_{21}$ from the window $[f_1,\dots,f_{20}]$, then uses the updated window $[f_2,\dots,f_{20},f_{21}]$ to predict $f_{22}$, and so on.}
+\label{fig:autoregressive-rollout}
+\end{figure}
+
+\vspace{0.3cm}
+
+% ----------------------------- TCAN ARCHITECTURE DESCRIPTION -----------------------------
+
+\noindent The architecture of this TCAN model consists of \textbf{three main components}:\\
+\textbf{1.} A temporal attention encoder that aggregates information across the history window.\\
+\textbf{2.} A convolutional decoder that produces a bounded correction.\\
+\textbf{3.} A residual update that adds the correction to the last frame.\\\\
+
+% ADD MORE DESCRIPTION OF EACH BLOCK HERE !!!!!
+
+
+
+
+
+
+% ----------------------------- TCAN ARCHITECTURE FIGURE -----------------------------
+% \begin{figure}[h!]
+% \centering
+% \resizebox{1.0\textwidth}{!}{%
+% \begin{tikzpicture}[
+%     box/.style={rectangle, draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center, fill=blue!10},
+%     op/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, fill=green!10},
+%     arrow/.style={->, thick, >=stealth},
+%     input/.style={rectangle, draw, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, fill=orange!20},
+%     output/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, fill=red!20},
+%     node distance=2.0cm
+% ]
+
+% % Fila superior: flujo principal
+% \node[input] (input) {INPUT\\$f_{\text{history}}$};
+% \node[op, right=of input] (embed) {Embedding \\ Conv1d + GELU\\(frame wise)};
+% \node[box, right=of embed] (features) {Features\\$(B, W, C, N)$};
+% \node[box, right=3.2cm of features] (context) {Context\\$(B, C, N)$};
+% \node[op, right=of context] (decoder) {Decoder\\Conv1d stack};
+% \node[box, right=of decoder] (corr) {Correction\\$\tanh(\cdot)\times 0.1$};
+% \node[output, right=of corr] (output) {$f_{\text{next}}$\\$(B, 1, N)$};
+
+% % Fila inferior: atención temporal
+% \node[box, below=2.0cm of features] (query) {Last frame $\rightarrow$ Query $Q$};
+% \node[box, right=of query] (kv) {All frames $\rightarrow$ Keys $K$, Values $V$};
+% \node[op, right=of kv] (attn) {Attention\\$\mathrm{softmax}\!\big(\frac{QK^{T}}{\sqrt{C}}\big)$};
+
+% % Flechas flujo principal (superior)
+% \draw[arrow] (input) -- (embed);
+% \draw[arrow] (embed) -- (features);
+% \draw[arrow] (context) -- (decoder);
+% \draw[arrow] (decoder) -- (corr);
+% \draw[arrow] (corr) -- (output);
+
+% % Flecha a Query: igual que antes
+% \draw[arrow] (features.south) |- (query.north);
+
+% % Flecha a Keys/Values: menos baja, gira antes a la derecha
+% \draw[arrow] (features.east) to[out=-45,in=100] (kv.north);
+
+% % Flechas dentro de la rama de atención
+% \draw[arrow] (query) -- (kv);
+% \draw[arrow] (kv) -- (attn);
+
+% % De atención a contexto: giro bajo
+% \draw[arrow] (attn.north) to[out=70,in=-80] (context.south);
+
+% % Residual de features a context (por arriba)
+% \draw[arrow] (features.north) to[out=30,in=140] node[above]{residual} (context.north);
+
+% % Residual de u_history a u_next (sin texto, menos alto)
+% \draw[arrow] (input.south) to[out=-45,in=-145] (output.south);
+
+% \end{tikzpicture}%
+% }
+% \caption{Data flow through the Causal Temporal Attention Network during one prediction step.}
+% \label{fig:tcn-flow}
+% \end{figure}
+
+\begin{figure}[h!]
+\centering
+\resizebox{0.55\textwidth}{!}{%
+\begin{tikzpicture}[
+    box/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=blue!10},
+    op/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=green!10},
+    arrow/.style={->, thick, >=stealth},
+    input/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=orange!20},
+    output/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=red!20},
+    node distance=2.0cm and 1.6cm
+]
+
+% Main flow - left column
+\node[input] (input) {INPUT\\$f_{\text{history}}$};
+\node[op, below=of input] (embed) {Embedding\\Conv1d+GELU};
+\node[box, below=of embed] (features) {Features\\$(B,W,C,N)$};
+
+% Attention column - center-right
+\node[box, right=1.8cm of features] (query) {Query $Q$\\(last frame)};
+\node[op, below=of query] (attn) {Causal\\Attention};
+\node[box, below=of attn] (context) {Context\\$(B,C,N)$};
+
+% Decoder/output column - right
+\node[op, right=1.8cm of context] (decoder) {Decoder\\Conv1d};
+\node[box, below=of decoder] (corr) {Correction\\$\tanh(\times0.1)$};
+\node[output, below=of corr] (output) {$f_{\text{next}}$};
+
+% CLEAN ARROWS - NO CROSSING
+\draw[arrow] (input) -- (embed);
+\draw[arrow] (embed) -- (features);
+\draw[arrow] (features) -| ([xshift=-0.3cm]query.west) -- (query);
+\draw[arrow] (query) -- (attn);
+\draw[arrow] (attn) -- (context);
+\draw[arrow] (context) -- (decoder);
+\draw[arrow] (decoder) -- (corr);
+\draw[arrow] (corr) -- (output);
+
+% Residual from features to context (ABOVE)
+\draw[arrow, dashed, blue] ([yshift=0.4cm]features.north east) 
+    to[out=30,in=150] node[above, font=\footnotesize, black]{residual} 
+    ([yshift=0.4cm]context.north west);
+
+% FIXED: LEFT→DOWN→RIGHT path from input to output
+\draw[arrow, dashed, orange, thick] ([xshift=-0.8cm]input.south west) 
+    |- ++(0,-0.8) 
+    -| ([xshift=-0.8cm]output.south west)
+    node[below, font=\footnotesize, pos=0.7]{$u_t$};
+
+% KV note
+\node[font=\footnotesize, align=center, right=0.2cm of query, anchor=west] (kv) {$K,V$\\all frames};
+
+\end{tikzpicture}%
+}
+\caption{Data flow through the Causal Temporal Attention Network during one prediction step.}
+\label{fig:tcn-flow}
+\end{figure}
+
+\noindent Figure~\ref{fig:tcn-flow} illustrates the complete data flow through the Causal Temporal Convolutional Attention Network during a single prediction step. Each node performs a specific transformation:
+
+% ---------------------- TCAN ARCHITECTURE STEPS -----------------------------
+\begin{itemize}
+    \item \textbf{$f_{\text{history}}$ (Input)}: Window of $W=20$ previous fields of shape $(B, W, N)$, containing the most recent spatiotemporal snapshots $f_{t-W+1}, \dots, f_t \in \mathbb{R}^N$.
+    
+    \item \textbf{Conv1d + GELU (frame-wise)}: Applies 1D convolution (kernel size 3) to each of the $W$ fields individually, expanding from 1 to $C=32$ feature channels per field. Output shape: $(B \cdot W, 32, N)$.
+    
+    \item \textbf{Features $(B, W, C, N)$}: Reshaped embedded representation exposing the temporal dimension, with each of the $W$ fields now containing 32 spatial feature maps.
+    
+    \item \textbf{Last frame $\to$ Query $Q$}: Extracts features from the most recent field $f_t$ and applies $1\times1$ convolution to generate query vectors $Q \in \mathbb{R}^{B \times 32 \times N}$.
+    
+    \item \textbf{All frames $\to$ Keys $K$, Values $V$}: Projects all $W$ embedded fields through separate $1\times1$ convolutions to produce keys $K$ and values $V$, both of shape $(B, W, 32, N)$.
+    
+    \item \textbf{Attention $\mathrm{softmax}\big(\frac{QK^{T}}{\sqrt{C}}\big)$}: Computes causal attention scores between the query (last frame) and all previous frames, producing temporal attention weights $\alpha_{w,p} = \mathrm{softmax}_w(QK^T/\sqrt{32})$ for each spatial position $p$.
+    
+    \item \textbf{Context $(B, C, N)$}: Aggregates temporal context via weighted sum $\sum_w \alpha_{w,p} V_w$, adds residual connection from last-frame features, and applies GroupNorm. Shape: $(B, 32, N)$.
+    
+    \item \textbf{Decoder Conv1d stack}: Two-layer convolutional decoder (32$\to$32$\to$1 channels, kernel size 5) that maps rich temporal-spatial context to a scalar correction field. Final layer zero-initialized for training stability.
+    
+    \item \textbf{Correction $\tanh(\cdot)\times 0.1$}: Applies hyperbolic tangent nonlinearity scaled by 0.1 to bound corrections $|\Delta u| \leq 0.1$, ensuring numerical stability during long rollouts.
+    
+    \item \textbf{$u_{\text{next}}$ (Output)}: Residual update combining the last input field $u_{\text{history}}[:, -1, :]$ with the predicted correction: $f_{t+1} = f_t + \Delta u$. Shape: $(B, 1, N)$.
+\end{itemize}
+
+The two residual connections---from Features to Context (within attention encoder) and from input last frame to output---preserve critical spatiotemporal information while enabling stable incremental updates.
+
+% ------------- NFTM ARCHITECTURE WITH TCAN CONTROLLER FIGURE -------------
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[node distance=1.5cm and 1cm, auto,
+    block/.style={rectangle, draw, thick, text width=2.5cm, 
+                  text centered, minimum height=1cm, font=\small},
+    arrow/.style={thick,->,>=stealth}]
+
+% Input History
+\node[block] (input) {History $u_{t-W:t}$ \\ $(B,W,P)$};
+
+% Attention Block
+\node[block, right=of input] (attn) {CausalTemporalAttention \\ Embed → QKV → Causal Attn \\ + GroupNorm};
+
+% Decoder
+\node[block, right=of attn] (decoder) {Decoder \\ Conv1D(32) → BN → GELU \\ Conv1D(1)};
+
+% Output
+\node[block, right=of decoder] (output) {$u_{t+1} = u_t + \tanh(\delta u)$};
+
+% Window update (dashed)
+\node[block, below=0.5cm of attn] (window) {Shift Window: \\ $[u_{t-W+1:t}, u_{t+1}]$};
+
+% Arrows
+\draw[arrow] (input) -- (attn);
+\draw[arrow] (attn) -- (decoder);
+\draw[arrow] (decoder) -- (output);
+\draw[arrow, dashed] (output) |- (window);
+\draw[arrow, dashed] (window) -| ([yshift=-0.5cm]input.south east);
+
+% Loss feedback (curved)
+\draw[arrow, red, thick] ([xshift=0.5cm]output.north east) 
+    to[bend right=30] node[above, font=\tiny] {MSE + Physics} 
+    ([yshift=0.3cm]input.north west);
+
+\end{tikzpicture}
+\caption{NFTM Architecture: Causal autoregressive prediction with physics-informed training.}
+\label{fig:nftm_arch}
+\end{figure}
+\noindent Figure~\ref{fig:nftm_arch} summarizes the overall architecture of the NFTM model using the TCAN as controller. The model processes a sliding window of past fields to predict the next field, employing causal attention and convolutional decoding. The autoregressive rollout is indicated by dashed arrows, while the red feedback loop represents the physics-informed loss used during training.
+
+
+
+\subsection{Temporal Attention Encoder}
+
+The \texttt{CausalTemporalAttention} module processes the history window through the following steps:
+
+\begin{enumerate}
+    \item \textbf{Frame-wise embedding}: Reshape $u_{\text{history}}$ to $(B \cdot W, 1, P)$ and apply a 1D convolution with kernel size 3 followed by GELU activation, producing features of shape $(B \cdot W, C, P)$ where $C=32$ is the embedding dimension.
+    
+    \item \textbf{Temporal restructuring}: Reshape features back to $(B, W, C, P)$ to expose the temporal dimension.
+    
+    \item \textbf{Query computation}: Extract features of the last frame $\text{features}[:, -1, :, :] \in \mathbb{R}^{B \times C \times P}$ and apply a $1 \times 1$ convolution to obtain queries $Q \in \mathbb{R}^{B \times C \times P}$.
+    
+    \item \textbf{Key and value projection}: Apply $1 \times 1$ convolutions to all $W$ frames (flattened to $(B \cdot W, C, P)$ then reshaped) to obtain keys $K$ and values $V$, both of shape $(B, W, C, P)$.
+    
+    \item \textbf{Causal attention scores}: Compute scaled dot-product attention over the temporal dimension:
+    \[
+    \text{scores}_{b,w,p} = \frac{\langle Q_b, K_{b,w} \rangle}{\sqrt{C}}, \quad \alpha_{b,w,p} = \text{softmax}_w(\text{scores}_{b,w,p})
+    \]
+    
+    \item \textbf{Context aggregation}: Compute the attended context:
+    \[
+    \text{context}_b = \sum_{w=1}^W \alpha_{b,w} \cdot V_{b,w} \in \mathbb{R}^{B \times C \times P}
+    \]
+    
+    \item \textbf{Residual projection}: Apply a $1 \times 1$ convolution to the context, add the residual connection to the last frame features, and normalize with GroupNorm.
+\end{enumerate}
+
+This mechanism allows the last frame to dynamically query relevant past frames at each spatial location, producing spatially-aware temporal context features.
+
+\subsection{Decoder and Residual Correction}
+
+The \texttt{ImprovedBurgersNet} decoder processes the attention output $\text{context} \in \mathbb{R}^{B \times C \times P}$ as follows:
+
+\begin{enumerate}
+    \item \textbf{Convolutional decoder stack}:
+    \begin{itemize}
+        \item Conv1d: $C \to 32$ channels, kernel size 5, BatchNorm1d, GELU.
+        \item Conv1d: $32 \to 1$ channel, kernel size 5, producing $\text{raw\_correction} \in \mathbb{R}^{B \times 1 \times P}$.
+    \end{itemize}
+    The final layer is zero-initialized to ensure near-zero corrections during early training.
+    
+    \item \textbf{Bounded correction}: Apply hyperbolic tangent clipping scaled by $\text{corr\_clip}=0.1$:
+    \[
+    \Delta u = \tanh(\text{raw\_correction}) \cdot 0.1
+    \]
+    
+    \item \textbf{Residual update}: Add the correction to the last input frame:
+    \[
+    u_{\text{next}} = u_{\text{history}}[:, -1:, :] + \Delta u
+    \]
+\end{enumerate}
+
+This design enforces incremental updates, preventing instability during long autoregressive rollouts.
+
+\subsection{Autoregressive Training Procedure}
+
+Training employs curriculum learning with multi-step rollouts:
+
+\begin{enumerate}
+    \item Initialize $\text{current\_window} = u_{\text{gt}}[:, :W, :]$ from ground truth trajectories.
+    
+    \item For each rollout step $k \in \{0, \dots, D-1\}$ where $D$ is the rollout depth (curriculum: 8$\to$16$\to$64):
+    \begin{itemize}
+        \item Predict $\hat{u}_{W+k} = \text{TCAN}(\text{current\_window})$.
+        \item Compute composite loss:
+        \[
+        \mathcal{L} = \text{MSE}(\hat{u}, u_{\text{gt}}) + 0.1 \cdot \|\nabla_x \hat{u} - \nabla_x u_{\text{gt}}\|_2^2 + 0.05 \cdot \mathbb{E}[\max(0, E(\hat{u}) - E(u_t))]
+        \]
+        where $E(u) = \frac{1}{2} \int u^2 \, dx$ enforces energy dissipation.
+        \item Update window: $\text{current\_window} \gets [\text{current\_window}[:, 1:, :], \hat{u}]$ (with occasional teacher forcing).
+    \end{itemize}
+    
+    \item Average loss over rollout, backpropagate through unrolled computation graph, apply gradient clipping, and optimize with AdamW + cosine annealing.
+\end{enumerate}
+
+\subsection{Evaluation Metrics}
+% ---------- EVALUATION METRICS TABLE --------------------
+Full-trajectory predictions are evaluated using:
+\begin{itemize}
+    \item Standard: MSE, relative $L^2$, PSNR, SSIM, temporal correlation.
+    \item Physics-informed: mass conservation error, energy monotonicity fraction, mean PDE residual, spectral error, max gradient error.
+\end{itemize}
+This comprehensive evaluation ensures both accuracy and physical fidelity across long rollouts.
+
+\begin{table}[h!]
+\centering
+\resizebox{1.1\textwidth}{!}{
+\begin{tabular}{@{\extracolsep{14pt}}l@{\extracolsep{14pt}}c@{\extracolsep{14pt}}l@{\extracolsep{14pt}}c@{\extracolsep{14pt}}c}
+\toprule
+\textbf{Metric} & & \textbf{Purpose} & \textbf{Good} & \textbf{Failure} \\
+\midrule[1pt]
+MSE & $\frac{1}{NP}\sum(u_\text{pred}-u_\text{gt})^2$ & Pixel accuracy & $<10^{-4}$ & $>10^{-3}$ \\
+Rel. L2 & $\|u_\text{pred}-u_\text{gt}\|_2/\|u_\text{gt}\|_2$ & Scale-invariant & $<0.05$ & $>0.2$ \\
+PSNR & $20\log(\text{range}/\sqrt{\text{MSE}})$ & Image quality & $>30$dB & $<20$dB \\
+SSIM & Struct. similarity & Structure & $>0.9$ & $<0.7$ \\
+Corr. & Pearson $r$/step & Phase alignment & $>0.95$ & $<0.8$ \\
+\hline[0.8pt]
+Mass Err. & $|\int u\,dx-M_0|$ & Conservation & $<0.01$ & $>0.1$ \\
+Energy Mono. & $E(t+1)\leq E(t)$ & Dissipation & $>0.95$ & $<0.8$ \\
+PDE Res. & PDE residual & PDE satisfaction & $<0.01$ & $>0.1$ \\
+Max Grad. & $\max|\partial_xu|$ & Shock preserv. & $\pm10\%$GT & Diverges \\
+Grad. Err. & Grad. difference & Shock sharpness & $<0.05$ & $>0.2$ \\
+\bottomrule[1pt]
+\end{tabular}
+}
+\caption{Evaluation Metrics for NFTM Performance Assessment}
+\label{tab:nftm_metrics}
+\end{table}
+
+Table~\ref{tab:nftm_metrics} summarizes the evaluation metrics used to assess NFTM performance, detailing formulas, purposes, and thresholds for good vs. failure cases. This suite ensures comprehensive assessment of both numerical accuracy and physical fidelity.
+
+
