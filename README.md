@@ -1,6 +1,6 @@
 # Partial Differential Equation Solver using Neural Field Turing Machines (NFTM)
 
-**Master's Thesis - Big Data Management & Analytics**  
+**Big Data Research Project - Big Data Management & Analytics**  
 CentraleSupélec & Université Paris-Saclay
 
 ---
@@ -45,7 +45,6 @@ We begin with the **viscous Burgers equation**, a simplified 1D version of Burge
 - Natural stepping stone to full Navier-Stokes
 
 ---
----
 
 
 
@@ -79,27 +78,16 @@ We begin with the **viscous Burgers equation**, a simplified 1D version of Burge
 
 ## 🚀 Next Steps
 
-### Immediate (1-2 weeks)
-- [x] Fix boundary padding (symmetric → replication)
-- [x] Optimize training performance
-- [ ] Verify viscosity generalization
-- [ ] Set up Weights & Biases for hyperparameter tuning
 
-### Short-term (1-2 months)
-- [ ] Implement teacher forcing
-- [ ] **Extend to 2D Burgers equation**
-- [ ] Compare with Neural ODE and PINN baselines
-- [ ] Systematic hyperparameter optimization
+- Merge architectures to have a generalized model
+- Verify viscosity generalization (no sending the viscosity as parameter)
+- Set up Weights & Biases for hyperparameter tuning
+- Systematic hyperparameter optimization
+- **Extend to 2D Burgers equation** (first try without articles, then add objects inside flow field)
+- **Incompressible Navier-Stokes** implementation (include pressure)
+- Long-horizon prediction stability
+- Publication preparation
 
-### Medium-term (3-4 months)
-- [ ] **Incompressible Navier-Stokes** implementation
-- [ ] Multi-PDE generalization (Heat equation, Reaction-Diffusion)
-- [ ] Equation discovery from data
-
-### Long-term (ongoing)
-- [ ] Conservation law enforcement research
-- [ ] Long-horizon prediction stability
-- [ ] Publication preparation
 
 ---
 
@@ -111,24 +99,6 @@ We begin with the **viscous Burgers equation**, a simplified 1D version of Burge
 4. **Neural Operators** - Kovachki et al. (2023)
 5. **Spectral Bias in Neural Networks** - Rahaman et al. (2019)
 6. **Neural Field Turing Machine** - Malhotra & Seghouani (2025)
-
----
-
-
-
-## 📝 License & Citation
-
-If you use this work, please cite:
-
-```bibtex
-@mastersthesis{chapuis2025nftm,
-  title={Partial Differential Equation Solver using Neural Field Turing Machines},
-  author={Chapuis, Samuel and Fernandez Sanchez, Lucia Victoria and Perruchot-Triboulet Rodriguez, Alexandra},
-  school={CentraleSupélec, Université Paris-Saclay},
-  year={2025},
-  type={Master's Thesis}
-}
-```
 
 ---
 
