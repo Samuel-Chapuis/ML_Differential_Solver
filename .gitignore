@@ -1,0 +1,33 @@
+# Python bytecode files
+*__pycache__/
+*.py[cod]
+*$py.class
+
+# Tex files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.blg
+*.brf
+*.fdb_latexmk
+*.maf
+*.mtc
+*.mtc0
+*.nlo
+*.gz
+*.bbl
+*.zip
+
+Data/
+video/
+Documentation/
+saved_dataset/
+saved_results/
+saved_models/
+
