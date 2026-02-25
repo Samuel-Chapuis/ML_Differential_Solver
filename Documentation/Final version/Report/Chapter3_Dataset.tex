@@ -1,43 +1,150 @@
 \chapter{Dataset Design and Generation}
 \label{chap:dataset}
 
-This chapter explains how we built the 1D Burgers datasets used across the neural simulators. We opted to generate our own data rather than rely on public sets so we could (i) enforce precise boundary conditions, (ii) sweep viscosities and initial conditions of interest, and (iii) guarantee numerically stable trajectories suitable for long autoregressive rollouts.
+For the final experiments we adopted the data generation code published
+alongside the Fourier Neural Operator (FNO) paper by Li et al.\
+\cite{li2021fourier}. Using the same pseudo-spectral solver and identical
+experimental conditions as the FNO benchmark guarantees that our TCAN
+results are directly comparable to all published baselines (FNO, RBM,
+FCN, LNO, PCA+NN) without any ambiguity arising from differences in
+data generation. The midterm phase used a custom Rusanov-based solver
+(described in Appendix~\ref{app:rusanov}) which was valuable for
+controlled ablations but not suitable for direct benchmark comparison.
 
-\section{Design goals}
-\begin{itemize}
-    \item \textbf{Controlled boundary conditions}: periodic boundaries by default, with optional Dirichlet/Neumann variants for ablation.
-    \item \textbf{Rich initial conditions}: shocks, rarefactions, sinusoidal modes, and smoothed random fields to exercise different flow regimes.
-    \item \textbf{Parameter coverage}: viscosities spanning two orders of magnitude; spatial domains in $[-5,5]$ and $[-2,2]$; $N=128$ grid points; $T=256$ time steps with $\Delta t = 5\times10^{-3}$.
-    \item \textbf{Stable rollouts}: CFL-safe time steps, bounded corrections, and rejection of unstable trajectories (NaN/Inf or $\|u\|_\infty>5$).
-    \item \textbf{Train/test split}: separated folders (\texttt{train}/\texttt{test}) with non-overlapping viscosity values to measure cross-parameter generalization.
-\end{itemize}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\section{Physical Setup}
+\label{sec:physical-setup}
 
-\section{Generation pipeline}
-\begin{enumerate}
-    \item \textbf{Grid setup}: uniform mesh with $N=128$, domain $x\in[x_{\min}, x_{\max}]$, and temporal grid $t\in[0,1.28]$ (256 steps at $\Delta t=5\times10^{-3}$).
-    \item \textbf{Initial condition sampling}: draw a waveform type (shock, rarefaction, sine, smooth) and amplitude $\texttt{speed}\in[1,5]$; construct $u(x,0)$ accordingly.
-    \item \textbf{Boundary condition enforcement}: apply the selected BC (periodic by default) before each spatial stencil.
-    \item \textbf{Numerical integration}: advance Burgers' equation with a conservative flux (Rusanov) and diffusion term, respecting a CFL safety factor.
-    \item \textbf{Quality gates}: drop trajectories that violate stability checks; store survivors as compressed \texttt{.npz} with fields $U$, $x$, $t$, $\nu$, $\Delta x$, $\Delta t$, and metadata tags.
-\end{enumerate}
+We consider the one-dimensional viscous Burgers equation
+\begin{equation}
+  u_t + u\,u_x = \nu\,u_{xx},
+  \qquad x \in [0,1],\quad t \in [0,1],
+  \label{eq:burgers}
+\end{equation}
+with periodic boundary conditions. The operator to learn maps an initial
+condition to the solution at the final time:
+\[
+  \mathcal{G}^{\dagger} : u(\cdot,\,0) \;\longmapsto\; u(\cdot,\,1).
+\]
+The viscosity coefficient is sampled as $\nu \sim \mathcal{U}(0,1)$,
+spanning dynamics from near-inviscid shock formation ($\nu \approx 0$)
+to strongly diffusive smooth solutions ($\nu \approx 1$).
 
-\section{Splits and coverage}
-The final corpus mirrors the counts in Table~\ref{tab:dataset_Burger_statistics}: 724 training trajectories over 13 viscosities and 123 testing trajectories over 4 unseen viscosities. Each sample stores the full space--time field $U\in\mathbb{R}^{T\times N}$.
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\section{Data Generation}
+\label{sec:data-generation}
 
-\section{Boundary conditions}
-Periodic BCs are used for the main experiments to match the assumed invariance in the neural controllers. Dirichlet and Neumann clamps are available in the generator for ablations; these were useful to verify the robustness of the learned update rule under different edge behaviors.
+Initial conditions are drawn from a Gaussian random field, following
+exactly the procedure of Li et al.\ \cite{li2021fourier}. Each trajectory is
+solved with a \textbf{pseudo-spectral method} at high resolution and then
+downsampled to the target grid size $s$. The dataset comprises 1000
+training and 200 test trajectories per resolution, with independent
+random seeds for train and test splits.
 
-\section{Initial condition diversity}
-\begin{itemize}
-    \item \textbf{Shock / shock with gap}: discontinuities to probe how models handle steep gradients.
-    \item \textbf{Rarefaction}: expansion waves that test smooth, sign-changing flows.
-    \item \textbf{Sinusoidal modes}: low-frequency spectra for mild regimes.
-    \item \textbf{Smoothed random fields}: broadband content to encourage spectral generalization.
-\end{itemize}
-This variety forces the model to attend to both advective and diffusive behaviors across viscosities.
+\paragraph{Four spatial resolutions.}
+Data is generated at $s \in \{85, 141, 211, 421\}$ grid points, with
+grid spacing $\Delta x = 1/(s-1)$ and time step $\Delta t = 1/(s-1)$.
+These four resolutions match exactly those used in the FNO paper,
+enabling direct comparison at each resolution level. Table~\ref{tab:grid}
+summarises the grid parameters.
 
-\section{Quality assurance}
-We reject trajectories that fail any of the following: (i) NaN/Inf presence, (ii) $\|u\|_\infty>5$, (iii) non-monotone energy drift beyond tolerance. Periodic mass conservation and energy dissipation are checked to ensure physical plausibility of the training data.
+\begin{table}[h]
+  \centering
+  \caption{Grid parameters for the four resolutions.}
+  \label{tab:grid}
+  \begin{tabular}{@{}cccc@{}}
+    \toprule
+    Resolution $s$ & $\Delta x$ & $\Delta t$ & Samples (train/test) \\
+    \midrule
+    85  & $1/84$  & $1/84$  & 1000 / 200 \\
+    141 & $1/140$ & $1/140$ & 1000 / 200 \\
+    211 & $1/210$ & $1/210$ & 1000 / 200 \\
+    421 & $1/420$ & $1/420$ & 1000 / 200 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\section{Viscosity Coverage and Regime Analysis}
+\label{sec:viscosity-coverage}
+
+Because $\nu$ is sampled uniformly over $(0,1)$, the dataset spans three
+qualitatively distinct dynamical regimes:
+
+\begin{table}[h]
+  \centering
+  \caption{Viscosity regimes and dominant physics.}
+  \label{tab:nu-regimes}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    $\nu$ range & Regime & Dominant physics \\
+    \midrule
+    $(0,\;0.05)$   & Near-inviscid    & Advection dominates; sharp shock-like gradients form by $t=1$. \\
+    \addlinespace
+    $(0.05,\;0.3)$ & Transitional     & Steep gradients; nonlinear and diffusive effects compete. \\
+    \addlinespace
+    $(0.3,\;1.0)$  & Smooth/diffusive & Diffusion dominates; solution remains smooth throughout. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+This broad coverage forces the model to learn across a wide range of
+dynamics rather than specialising to a single flow regime, motivating the
+FiLM viscosity conditioning introduced in Chapter~\ref{chap:tcan}.
+
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\section{Benchmark Baselines}
+\label{sec:baselines}
+
+Table~\ref{tab:fno-baselines} reproduces the relative $L^2$ errors
+reported by Li et al.\ \cite{li2021fourier} alongside our TCAN results.
+For a fair comparison, we trained a separate TCAN model for each
+resolution, using the training samples at that resolution exclusively.
+All models share the same architecture and hyperparameters.
+
+\begin{table}[h]
+  \centering
+  \caption{Relative $L^2$ error on the 1D Burgers benchmark
+           (Li et al., 2021). Lower is better.
+           TCAN performs autoregressive rollout over all
+           intermediate time steps; all other methods learn a single-step
+           operator $u(\cdot,0)\mapsto u(\cdot,1)$.}
+  \label{tab:fno-baselines}
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    Method & $s=85$ & $s=141$ & $s=211$ & $s=421$ \\
+    \midrule
+    FCN    & 0.0253 & 0.0493 & 0.0727 & 0.1097 \\
+    PCA+NN & 0.0299 & 0.0298 & 0.0298 & 0.0299 \\
+    RBM    & 0.0244 & 0.0251 & 0.0255 & 0.0259 \\
+    LNO    & 0.0520 & 0.0461 & 0.0445 & ---    \\
+    FNO    & \textbf{0.0108} & \textbf{0.0109} & \textbf{0.0109} & \textbf{0.0098} \\
+    \midrule
+    TCAN (ours) & 0.3208 & 0.3347 & 0.7261 & 0.9435 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+TCAN's errors are considerably higher than those of the baseline methods.
+The main reason is a fundamental difference in task formulation: all
+baselines learn a \emph{single-step operator} that maps the initial
+condition directly to the solution at $t=1$, whereas TCAN performs an
+\emph{autoregressive rollout} over all intermediate time steps,
+accumulating prediction error at each one. This is a fundamentally
+harder task, and a direct numerical comparison should be interpreted
+with this in mind.
+
+The degradation at finer resolutions ($s=211$: 0.73, $s=421$: 0.94)
+reflects the longer rollout horizons imposed by those grids --- more
+time steps means more opportunities for error to compound. Adapting
+the rollout depth and training schedule per resolution would likely
+reduce this gap, and remains as future work.
+
+Despite the numerical gap, TCAN offers capabilities that single-step
+operators do not: it produces the \emph{full temporal trajectory}
+rather than just the endpoint, handles arbitrary intermediate query
+times, and its architecture is naturally extensible to longer
+prediction horizons and other PDE families.
 
 \section{Placeholders for figures}
 \section{Visual examples}
