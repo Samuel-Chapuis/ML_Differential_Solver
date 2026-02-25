@@ -1,0 +1,694 @@
+
+\chapter{Introduction}
+\label{chap:intro}
+
+
+%This chapter must introduce :
+%\begin{itemize}
+%\item The general context: applications/needs 
+%\item The problem and the challenges, you can cite some main works
+%\item Your problem/ objective in this project
+%\item The main contributions of the woek
+%\item the outline about the content of the report.
+%\end{itemize}
+
+
+%==============================================================================
+\section{General Context: Partial Differential Equations in Science and Engineering}
+\label{sec:general_context}
+%==============================================================================
+
+Partial differential equations (PDEs) constitute the fundamental mathematical framework for describing continuous phenomena across virtually all domains of science and engineering. From the quantum mechanics governing subatomic particles to the fluid dynamics shaping atmospheric patterns, PDEs provide the rigorous language through which we understand, predict, and control the physical world.
+
+%------------------------------------------------------------------------------
+\subsection{Mathematical Framework of PDEs}
+\label{subsec:pde_framework}
+%------------------------------------------------------------------------------
+
+A partial differential equation is a relationship involving an unknown function \(u\) of multiple independent variables and its partial derivatives. The general form of a PDE can be expressed as:
+\begin{equation}
+F\left(x_1, x_2, \ldots, x_n, t, u, \frac{\partial u}{\partial x_1}, \frac{\partial u}{\partial x_2}, \ldots, \frac{\partial^2 u}{\partial x_1^2}, \ldots, \frac{\partial^k u}{\partial x_1^k \partial x_2^l \cdots}\right) = 0
+\label{eq:general_pde}
+\end{equation}
+where:
+\begin{itemize}
+    \item \(u = u(x_1, x_2, \ldots, x_n, t)\) is the unknown field variable
+    \item \(x_1, x_2, \ldots, x_n\) are spatial coordinates
+    \item \(t\) is time
+    \item \(F\) is a functional relationship
+    \item \(k, l, \ldots\) denote the order of partial derivatives
+\end{itemize}
+
+\paragraph{Classification by Order.}
+The order of a PDE is determined by the highest derivative present. For a second-order PDE in two dimensions:
+\begin{equation}
+A\frac{\partial^2 u}{\partial x^2} + B\frac{\partial^2 u}{\partial x\partial y} + C\frac{\partial^2 u}{\partial y^2} + D\frac{\partial u}{\partial x} + E\frac{\partial u}{\partial y} + Fu + G = 0
+\label{eq:second_order_pde}
+\end{equation}
+
+The discriminant \(\Delta = B^2 - 4AC\) determines the PDE type:
+\begin{itemize}
+    \item \textbf{Elliptic} (\(\Delta < 0\)): Steady-state problems (Laplace, Poisson equations)
+    \item \textbf{Parabolic} (\(\Delta = 0\)): Diffusion processes (Heat equation)
+    \item \textbf{Hyperbolic} (\(\Delta > 0\)): Wave propagation (Wave equation)
+\end{itemize}
+
+%------------------------------------------------------------------------------
+\subsection{Fundamental PDEs in Physics}
+\label{subsec:fundamental_pdes}
+%------------------------------------------------------------------------------
+
+\paragraph{1. Conservation of Mass (Continuity Equation).}
+The principle that mass cannot be created or destroyed leads to:
+\begin{equation}
+\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{u}) = 0
+\label{eq:continuity}
+\end{equation}
+where \(\rho(x,y,z,t)\) is density and \(\mathbf{u}(x,y,z,t)\) is the velocity field.
+
+\paragraph{2. Conservation of Momentum (Navier-Stokes Equations).}
+Newton's second law applied to a fluid element yields:
+\begin{equation}
+\rho\left(\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla)\mathbf{u}\right) = -\nabla p + \mu\nabla^2\mathbf{u} + \rho\mathbf{g}
+\label{eq:navier_stokes}
+\end{equation}
+where:
+\begin{itemize}
+    \item \(p(x,y,z,t)\) is pressure [Pa]
+    \item \(\mu\) is dynamic viscosity [Pa·s]
+    \item \(\mathbf{g}\) is gravitational acceleration [m·s\(^{-2}\)]
+\end{itemize}
+
+\paragraph{3. Conservation of Energy (Heat Equation).}
+Fourier's law of heat conduction combined with energy balance gives:
+\begin{equation}
+\rho c_p \frac{\partial T}{\partial t} = \nabla \cdot (k \nabla T) + Q
+\label{eq:heat_equation}
+\end{equation}
+where:
+\begin{itemize}
+    \item \(T(x,y,z,t)\) is temperature [K]
+    \item \(c_p\) is specific heat capacity [J·kg\(^{-1}\)·K\(^{-1}\)]
+    \item \(k\) is thermal conductivity [W·m\(^{-1}\)·K\(^{-1}\)]
+    \item \(Q\) is heat source term [W·m\(^{-3}\)]
+\end{itemize}
+
+\paragraph{4. Wave Propagation.}
+The wave equation governing vibrations, acoustics, and electromagnetic radiation:
+\begin{equation}
+\frac{\partial^2 u}{\partial t^2} = c^2 \nabla^2 u
+\label{eq:wave_equation}
+\end{equation}
+where \(c\) is the wave speed [m·s\(^{-1}\)].
+
+%------------------------------------------------------------------------------
+\subsection{Challenges in Classical PDE Solving}
+\label{subsec:classical_challenges}
+%------------------------------------------------------------------------------
+
+Traditional numerical methods for solving PDEs face several fundamental limitations:
+
+\paragraph{Computational Complexity.}
+For a PDE discretized on an \(N\)-dimensional grid with \(M\) points per dimension and \(T\) time steps, the computational cost scales as:
+\begin{equation}
+\text{Cost} \sim \mathcal{O}(M^N \cdot T \cdot K)
+\label{eq:computational_cost}
+\end{equation}
+where \(K\) is the cost per grid point update. For 3D problems with \(M = 256\), this becomes prohibitive.
+
+\paragraph{Curse of Dimensionality.}
+The number of grid points grows exponentially with dimension:
+\begin{equation}
+\text{Grid points} = M^N
+\label{eq:curse_dimensionality}
+\end{equation}
+For \(N = 3\) dimensions and \(M = 100\) points per dimension: \(10^6\) grid points.
+
+\paragraph{Stability Constraints.}
+Explicit time-stepping schemes require timestep \(\Delta t\) to satisfy the CFL (Courant-Friedrichs-Lewy) condition:
+\begin{equation}
+\Delta t \leq C \cdot \frac{\Delta x}{|\mathbf{u}_{\text{max}}|}
+\label{eq:cfl_condition}
+\end{equation}
+where \(C \leq 1\) for stability. For fine grids (\(\Delta x \to 0\)), this forces \(\Delta t \to 0\), dramatically increasing computational cost.
+
+\paragraph{Stiffness.}
+Many physical systems exhibit stiffness, where multiple timescales coexist. The stiffness ratio:
+\begin{equation}
+S = \frac{\lambda_{\text{max}}}{\lambda_{\text{min}}}
+\label{eq:stiffness_ratio}
+\end{equation}
+where \(\lambda\) are eigenvalues of the system operator. For \(S \gg 1\), explicit methods require \(\Delta t \sim 1/\lambda_{\text{max}}\) even when dynamics of interest occur at timescale \(\sim 1/\lambda_{\text{min}}\).
+
+%==============================================================================
+\section{The Promise of Neural PDE Solvers}
+\label{sec:neural_pde_solvers}
+%==============================================================================
+
+%------------------------------------------------------------------------------
+\subsection{Mathematical Framework for Learning Solution Operators}
+\label{subsec:operator_learning}
+%------------------------------------------------------------------------------
+
+Rather than solving individual PDE instances, neural approaches learn \textbf{operators} that map between function spaces.
+
+\paragraph{Operator Learning Formulation.}
+Given a PDE of the form:
+\begin{equation}
+\mathcal{L}[u] = f
+\label{eq:pde_operator_form}
+\end{equation}
+where \(\mathcal{L}\) is a differential operator, we seek to learn the solution operator:
+\begin{equation}
+\mathcal{G}: f \mapsto u
+\label{eq:solution_operator}
+\end{equation}
+such that \(u = \mathcal{G}(f)\) satisfies \(\mathcal{L}[u] = f\).
+
+\paragraph{Universal Approximation for Operators.}
+The neural operator framework \cite{kovachki2023neural} proves that certain neural architectures can approximate continuous operators between Banach spaces to arbitrary accuracy:
+\begin{equation}
+\|\mathcal{G} - \mathcal{G}_{\theta}\|_{L^p(\mathcal{X}, \mathcal{Y})} < \epsilon
+\label{eq:universal_approximation}
+\end{equation}
+where:
+\begin{itemize}
+    \item \(\mathcal{G}_{\theta}\) is the neural operator with parameters \(\theta\)
+    \item \(\mathcal{X}\) is the input function space
+    \item \(\mathcal{Y}\) is the output function space
+    \item \(\epsilon\) is the approximation error
+\end{itemize}
+
+%------------------------------------------------------------------------------
+\subsection{Three Paradigms for Neural PDE Solving}
+\label{subsec:neural_paradigms}
+%------------------------------------------------------------------------------
+
+\paragraph{Paradigm 1: Physics-Informed Neural Networks (PINNs).}
+PINNs \cite{raissi2019physics} approximate the solution \(u(x,t)\) directly with a neural network \(u_{\theta}(x,t)\) by minimizing:
+\begin{equation}
+\mathcal{L}_{\text{PINN}} = \mathcal{L}_{\text{PDE}} + \mathcal{L}_{\text{IC}} + \mathcal{L}_{\text{BC}}
+\label{eq:pinn_loss}
+\end{equation}
+where:
+\begin{align}
+\mathcal{L}_{\text{PDE}} &= \frac{1}{N_{\text{col}}} \sum_{i=1}^{N_{\text{col}}} \left|\mathcal{L}[u_{\theta}](x_i, t_i) - f(x_i, t_i)\right|^2 \label{eq:pinn_pde_loss} \\
+\mathcal{L}_{\text{IC}} &= \frac{1}{N_{\text{IC}}} \sum_{j=1}^{N_{\text{IC}}} \left|u_{\theta}(x_j, t_0) - u_0(x_j)\right|^2 \label{eq:pinn_ic_loss} \\
+\mathcal{L}_{\text{BC}} &= \frac{1}{N_{\text{BC}}} \sum_{k=1}^{N_{\text{BC}}} \left|u_{\theta}(x_{\partial \Omega}, t_k) - g(x_{\partial \Omega}, t_k)\right|^2 \label{eq:pinn_bc_loss}
+\end{align}
+
+\paragraph{Automatic Differentiation for PDE Residuals.}
+The PDE residual is computed via automatic differentiation:
+\begin{equation}
+\frac{\partial u_{\theta}}{\partial t} = \frac{\partial}{\partial t}\left(\text{NeuralNet}_{\theta}(x, t)\right)
+\label{eq:autodiff_residual}
+\end{equation}
+computed exactly using the chain rule through the computational graph.
+
+\paragraph{Paradigm 2: Fourier Neural Operators (FNOs).}
+FNOs \cite{li2021fourier} learn in the Fourier domain, leveraging the convolution theorem. The operator layer is:
+\begin{equation}
+v_{\ell+1}(x) = \sigma\left(W_{\ell} v_{\ell}(x) + \mathcal{F}^{-1}\left(R_{\ell} \cdot \mathcal{F}(v_{\ell})\right)(x)\right)
+\label{eq:fno_layer}
+\end{equation}
+where:
+\begin{itemize}
+    \item \(\mathcal{F}\) denotes Fourier transform: \(\mathcal{F}(v)(k) = \int v(x) e^{-2\pi i k \cdot x} dx\)
+    \item \(R_{\ell}(k)\) is a learnable weight in Fourier space
+    \item \(W_{\ell}\) is a local linear transformation
+    \item \(\sigma\) is a nonlinear activation
+\end{itemize}
+
+\paragraph{Resolution Invariance.}
+FNOs satisfy:
+\begin{equation}
+\mathcal{G}_{\theta}(v)|_{M} \approx \mathcal{G}_{\theta}(v|_{M})
+\label{eq:resolution_invariance}
+\end{equation}
+meaning the operator learned at resolution \(M\) generalizes to different resolutions.
+
+\paragraph{Paradigm 3: Neural Field Turing Machines (NFTMs).}
+NFTMs employ an iterative refinement strategy inspired by classical solvers:
+\begin{equation}
+u^{n+1}(x) = u^n(x) + \text{Controller}_{\theta}\left(\text{Patch}(u^n, x)\right)
+\label{eq:nftm_update}
+\end{equation}
+where:
+\begin{itemize}
+    \item \(u^n\) is the field at iteration \(n\)
+    \item \(\text{Patch}(u^n, x)\) extracts a local neighborhood around \(x\)
+    \item \(\text{Controller}_{\theta}\) is a neural network applying learned update rules
+\end{itemize}
+
+This formulation mimics iterative methods like Jacobi or Gauss-Seidel.
+
+\paragraph{Classical Jacobi Iteration:}
+\begin{equation}
+u^{n+1}_i = \frac{1}{2a}\left(f_i - bu^n_{i-1} - cu^n_{i+1}\right)
+\label{eq:jacobi_iteration}
+\end{equation}
+
+\paragraph{NFTM Analog:}
+\begin{equation}
+u^{n+1}_i = u^n_i + \text{NN}_{\theta}\left([u^n_{i-k}, \ldots, u^n_i, \ldots, u^n_{i+k}]\right)
+\label{eq:nftm_analog}
+\end{equation}
+
+%==============================================================================
+\section{The Problem: Burgers Equation as a Test Case}
+\label{sec:burgers_equation}
+%==============================================================================
+
+%------------------------------------------------------------------------------
+\subsection{Mathematical Formulation}
+\label{subsec:burgers_formulation}
+%------------------------------------------------------------------------------
+
+The one-dimensional Burgers equation is a nonlinear PDE that serves as the simplest model capturing the essence of fluid dynamics:
+\begin{equation}
+\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} = \nu\frac{\partial^2 u}{\partial x^2}
+\label{eq:burgers_equation}
+\end{equation}
+with:
+\begin{itemize}
+    \item Domain: \(x \in [0, L]\), \(t \in [0, T]\)
+    \item Initial condition: \(u(x, 0) = u_0(x)\)
+    \item Boundary conditions: \(u(0, t) = u_L(t)\), \(u(L, t) = u_R(t)\)
+    \item Kinematic viscosity: \(\nu > 0\) [m\(^2\)·s\(^{-1}\)]
+\end{itemize}
+
+%------------------------------------------------------------------------------
+\subsection{Physical Interpretation}
+\label{subsec:physical_interpretation}
+%------------------------------------------------------------------------------
+
+\paragraph{Advection Term (\(u\frac{\partial u}{\partial x}\)).}
+This nonlinear term represents self-advection or transport. A fluid element at position \(x\) with velocity \(u(x,t)\) carries itself downstream. The nonlinearity leads to \textbf{wave steepening}.
+
+Consider a smooth initial profile \(u_0(x) = A\sin(kx)\) with \(k = 2\pi/L\).
+
+The characteristic curves along which information propagates satisfy:
+\begin{equation}
+\frac{dx}{dt} = u(x,t)
+\label{eq:characteristics}
+\end{equation}
+
+Since velocity varies spatially, different parts of the wave travel at different speeds, causing steepening and eventual shock formation.
+
+\paragraph{Diffusion Term (\(\nu\frac{\partial^2 u}{\partial x^2}\)).}
+This linear term represents viscous dissipation, smoothing gradients:
+\begin{equation}
+\frac{\partial u}{\partial t} = \nu\frac{\partial^2 u}{\partial x^2}
+\label{eq:pure_diffusion}
+\end{equation}
+has the fundamental solution (Green's function):
+\begin{equation}
+G(x, t) = \frac{1}{\sqrt{4\pi\nu t}} \exp\left(-\frac{x^2}{4\nu t}\right)
+\label{eq:greens_function}
+\end{equation}
+showing that initially sharp features spread with width \(\sigma \sim \sqrt{\nu t}\).
+
+%------------------------------------------------------------------------------
+\subsection{Dimensionless Analysis and Reynolds Number}
+\label{subsec:reynolds_number}
+%------------------------------------------------------------------------------
+
+Introduce characteristic scales:
+\begin{itemize}
+    \item Length: \(L\) [m]
+    \item Velocity: \(U\) [m·s\(^{-1}\)]
+    \item Time: \(T = L/U\) [s]
+\end{itemize}
+
+Define dimensionless variables:
+\begin{equation}
+x^* = \frac{x}{L}, \quad t^* = \frac{tU}{L}, \quad u^* = \frac{u}{U}
+\label{eq:dimensionless_vars}
+\end{equation}
+
+Substituting into Burgers equation:
+\begin{equation}
+\frac{U}{T}\frac{\partial u^*}{\partial t^*} + \frac{U^2}{L}u^*\frac{\partial u^*}{\partial x^*} = \frac{\nu U}{L^2}\frac{\partial^2 u^*}{\partial {x^*}^2}
+\label{eq:burgers_dimensional}
+\end{equation}
+
+Dividing by \(U^2/L\):
+\begin{equation}
+\frac{\partial u^*}{\partial t^*} + u^*\frac{\partial u^*}{\partial x^*} = \frac{1}{\text{Re}}\frac{\partial^2 u^*}{\partial {x^*}^2}
+\label{eq:burgers_dimensionless}
+\end{equation}
+where the \textbf{Reynolds number} is:
+\begin{equation}
+\text{Re} = \frac{UL}{\nu} = \frac{\text{inertial forces}}{\text{viscous forces}}
+\label{eq:reynolds_number}
+\end{equation}
+
+\paragraph{Physical Regimes.}
+\begin{enumerate}
+    \item \textbf{Low Reynolds Number} (\(\text{Re} \ll 1\), \(\nu\) large):
+    \begin{itemize}
+        \item Viscosity dominates
+        \item Smooth, diffusion-controlled solutions
+        \item No shock formation
+        \item Analytical solutions via similarity methods
+    \end{itemize}
+    
+    \item \textbf{Moderate Reynolds Number} (\(\text{Re} \sim 1\)):
+    \begin{itemize}
+        \item Balanced advection and diffusion
+        \item Weak shocks with finite width
+        \item Transition regime
+    \end{itemize}
+    
+    \item \textbf{High Reynolds Number} (\(\text{Re} \gg 1\), \(\nu\) small):
+    \begin{itemize}
+        \item Inertia dominates
+        \item Sharp shocks and discontinuities
+        \item Asymptotically approaches inviscid limit
+        \item Highly challenging for numerical methods
+    \end{itemize}
+\end{enumerate}
+
+%------------------------------------------------------------------------------
+\subsection{Shock Formation and the Inviscid Limit}
+\label{subsec:shock_formation}
+%------------------------------------------------------------------------------
+
+For the inviscid Burgers equation (\(\nu = 0\)):
+\begin{equation}
+\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} = 0
+\label{eq:inviscid_burgers}
+\end{equation}
+the method of characteristics gives:
+\begin{equation}
+\frac{dx}{dt} = u, \quad \frac{du}{dt} = 0
+\label{eq:method_characteristics}
+\end{equation}
+implying \(u\) is constant along characteristics: \(u = u_0(x_0)\) where \(x_0\) is the initial position.
+
+\paragraph{Shock Formation Time.}
+Consider initial condition \(u_0(x) = -\alpha x\) with \(\alpha > 0\). Characteristics satisfy:
+\begin{equation}
+x(t) = x_0 + u_0(x_0) t = x_0 - \alpha x_0 t = x_0(1 - \alpha t)
+\label{eq:characteristics_linear}
+\end{equation}
+
+Characteristics originating from different \(x_0\) intersect when:
+\begin{equation}
+t_{\text{shock}} = \frac{1}{\max\left(-\frac{du_0}{dx}\right)} = \frac{1}{\alpha}
+\label{eq:shock_time}
+\end{equation}
+
+At this time, \(u\) becomes multi-valued (unphysical), and a shock discontinuity forms.
+
+\paragraph{Rankine-Hugoniot Jump Condition.}
+Across a shock at position \(s(t)\), conservation laws require:
+\begin{equation}
+\frac{ds}{dt} = \frac{1}{2}(u_L + u_R)
+\label{eq:rankine_hugoniot}
+\end{equation}
+where \(u_L = u(s^-, t)\) and \(u_R = u(s^+, t)\) are velocities on left and right sides.
+
+For viscous Burgers with small \(\nu\), shocks have finite width:
+\begin{equation}
+\delta_{\text{shock}} \sim \frac{\nu}{u_L - u_R}
+\label{eq:shock_width}
+\end{equation}
+
+This rapid variation challenges numerical methods and provides an ideal test for neural solvers.
+
+%------------------------------------------------------------------------------
+\subsection{Cole-Hopf Transformation and Exact Solutions}
+\label{subsec:cole_hopf}
+%------------------------------------------------------------------------------
+
+The Cole-Hopf transformation \cite{cole1951quasi,hopf1950partial} linearizes Burgers equation:
+
+Let:
+\begin{equation}
+u(x,t) = -2\nu \frac{\partial}{\partial x} \ln \phi(x,t)
+\label{eq:cole_hopf_transform}
+\end{equation}
+
+Substituting into Burgers equation yields the \textbf{heat equation}:
+\begin{equation}
+\frac{\partial \phi}{\partial t} = \nu \frac{\partial^2 \phi}{\partial x^2}
+\label{eq:heat_from_burgers}
+\end{equation}
+
+\paragraph{Solution Procedure.}
+\begin{enumerate}
+    \item Given \(u_0(x)\), compute \(\phi_0(x) = \exp\left(-\frac{1}{2\nu}\int_0^x u_0(\xi) d\xi\right)\)
+    \item Solve heat equation: \(\phi(x,t) = \int_{-\infty}^{\infty} G(x-\xi, t) \phi_0(\xi) d\xi\)
+    \item Recover \(u(x,t) = -2\nu \frac{\partial \ln \phi}{\partial x}\)
+\end{enumerate}
+
+\paragraph{Example: Gaussian Initial Condition.}
+For \(u_0(x) = A \exp\left(-\frac{x^2}{2\sigma^2}\right)\), the exact solution is:
+\begin{equation}
+u(x,t) = \frac{Ax}{1 + \frac{At}{2\nu}\exp\left(-\frac{x^2}{2\sigma^2(1 + \frac{2\nu t}{\sigma^2})}\right)}
+\label{eq:exact_gaussian_solution}
+\end{equation}
+
+This provides ground truth for validation of neural solvers.
+
+%------------------------------------------------------------------------------
+\subsection{Why Burgers Equation for Neural PDE Research?}
+\label{subsec:why_burgers}
+%------------------------------------------------------------------------------
+
+The Burgers equation is ideal for benchmarking neural PDE solvers because it:
+
+\begin{enumerate}
+    \item \textbf{Captures essential physics:}
+    \begin{itemize}
+        \item Nonlinearity (wave steepening)
+        \item Dissipation (viscous damping)
+        \item Shock formation
+        \item Parameter dependence (Reynolds number)
+    \end{itemize}
+    
+    \item \textbf{Has analytical solutions:} Via Cole-Hopf, enabling exact validation
+    
+    \item \textbf{Computationally tractable:} 1D allows rapid iteration
+    
+    \item \textbf{Generalizes to Navier-Stokes:} The velocity components in 2D/3D Navier-Stokes satisfy coupled Burgers-like equations
+    
+    \item \textbf{Well-studied benchmark:} Extensive literature for comparison (PINNs, FNOs, classical methods)
+\end{enumerate}
+
+%==============================================================================
+\section{Challenges in Neural PDE Solving}
+\label{sec:challenges}
+%==============================================================================
+
+Despite the promise of neural approaches, several fundamental challenges persist.
+
+%------------------------------------------------------------------------------
+\subsection{Accuracy vs. Computational Efficiency Trade-off}
+\label{subsec:accuracy_efficiency}
+%------------------------------------------------------------------------------
+
+\paragraph{Quantitative Analysis.}
+Traditional finite difference methods achieve accuracy:
+\begin{equation}
+\|u_{\text{numerical}} - u_{\text{exact}}\|_{L^2} = \mathcal{O}(\Delta x^p + \Delta t^q)
+\label{eq:fd_accuracy}
+\end{equation}
+where \(p, q\) are the spatial and temporal orders of accuracy (typically 2-4).
+
+For \(\Delta x = 10^{-3}\), second-order method: error \(\sim 10^{-6}\).
+
+Neural methods currently achieve:
+\begin{equation}
+\|u_{\text{neural}} - u_{\text{exact}}\|_{L^2} \sim 10^{-3} \text{ to } 10^{-5}
+\label{eq:neural_accuracy}
+\end{equation}
+
+\paragraph{Computational Cost Comparison.}
+Finite Difference for Burgers 1D:
+\begin{itemize}
+    \item Grid points: \(N\)
+    \item Time steps: \(T\)
+    \item Operations per step: \(\mathcal{O}(N)\)
+    \item Total cost: \(\mathcal{O}(NT)\)
+\end{itemize}
+
+For \(N = 256\), \(T = 10^4\) steps: \(\sim 2.5 \times 10^6\) operations
+
+Neural Forward Pass:
+\begin{itemize}
+    \item Layer evaluations: \(L\) layers
+    \item Operations per layer: \(\mathcal{O}(D^2)\) where \(D\) is hidden dimension
+    \item Total cost: \(\mathcal{O}(LD^2)\)
+\end{itemize}
+
+For \(L = 5\), \(D = 64\): \(\sim 2 \times 10^4\) operations per prediction
+
+\paragraph{Speedup Potential.}
+Once trained, neural solver can be \(100\times\) faster per forward pass, but with 1-2 orders of magnitude lower accuracy.
+
+%------------------------------------------------------------------------------
+\subsection{Generalization to Unseen Parameter Regimes}
+\label{subsec:generalization}
+%------------------------------------------------------------------------------
+
+\paragraph{Statistical Learning Perspective.}
+Given training set \(\mathcal{D} = \{(\nu_i, u_0^{(i)}, u_{\text{target}}^{(i)})\}_{i=1}^N\), we learn mapping:
+\begin{equation}
+\mathcal{G}_{\theta}: (\nu, u_0) \mapsto u(t)
+\label{eq:parameter_mapping}
+\end{equation}
+
+\paragraph{Generalization Error.}
+\begin{equation}
+\mathbb{E}_{(\nu, u_0) \sim p_{\text{test}}} \left[\|u_{\text{pred}} - u_{\text{true}}\|^2\right]
+\label{eq:generalization_error}
+\end{equation}
+
+For parameter extrapolation (\(\nu_{\text{test}} \notin [\nu_{\text{min}}^{\text{train}}, \nu_{\text{max}}^{\text{train}}]\)), generalization degrades.
+
+Empirical observations show:
+\begin{equation}
+\text{Error}(\nu) \approx \text{Error}_{\text{train}} \cdot \left(1 + \alpha \cdot \frac{|\nu - \nu_{\text{train}}|}{\nu_{\text{train}}}\right)^{\beta}
+\label{eq:error_extrapolation}
+\end{equation}
+with \(\beta \approx 2-3\) for most neural solvers, indicating rapid degradation outside training distribution.
+
+%------------------------------------------------------------------------------
+\subsection{Long-Time Stability and Error Accumulation}
+\label{subsec:long_time_stability}
+%------------------------------------------------------------------------------
+
+\paragraph{Autoregressive Rollout.}
+For time-dependent PDEs, neural solvers predict iteratively:
+\begin{equation}
+u^{n+1} = \mathcal{G}_{\theta}(u^n)
+\label{eq:autoregressive}
+\end{equation}
+
+\paragraph{Error Propagation Analysis.}
+Let \(\epsilon^n = u^n_{\text{pred}} - u^n_{\text{true}}\) be the error at step \(n\).
+
+Linearizing around true trajectory:
+\begin{equation}
+\epsilon^{n+1} \approx J \epsilon^n + \eta^n
+\label{eq:error_propagation}
+\end{equation}
+where \(J = \frac{\partial \mathcal{G}_{\theta}}{\partial u}\Big|_{u^n_{\text{true}}}\) is the Jacobian and \(\eta^n\) is per-step error.
+
+\paragraph{Spectral Stability.}
+If eigenvalues of \(J\) satisfy \(|\lambda_i| \geq 1\), errors grow exponentially:
+\begin{equation}
+\|\epsilon^n\| \sim \|\epsilon^0\| \cdot \lambda_{\max}^n + \frac{\|\eta\|}{1-\lambda_{\max}}
+\label{eq:spectral_stability}
+\end{equation}
+
+For \(\lambda_{\max} = 1.01\) and \(n = 1000\) steps:
+\begin{equation}
+\text{Error growth} \sim (1.01)^{1000} \approx 20,000\times
+\label{eq:error_growth_example}
+\end{equation}
+
+\paragraph{Current State-of-the-Art.}
+Most neural solvers diverge after:
+\begin{equation}
+n_{\text{stable}} \approx 10-100 \times n_{\text{train}}
+\label{eq:stability_horizon}
+\end{equation}
+
+This limits practical applicability to short-horizon predictions.
+
+%------------------------------------------------------------------------------
+\subsection{Physical Consistency and Conservation Laws}
+\label{subsec:conservation_laws}
+%------------------------------------------------------------------------------
+
+\paragraph{Conservation Law Violation.}
+Consider mass conservation for Burgers:
+\begin{equation}
+M(t) = \int_0^L u(x,t) dx
+\label{eq:mass_integral}
+\end{equation}
+
+For periodic BCs, exact evolution satisfies:
+\begin{equation}
+\frac{dM}{dt} = -\nu\left[\frac{\partial u}{\partial x}\right]_0^L = 0
+\label{eq:mass_conservation}
+\end{equation}
+
+Neural solvers typically violate this:
+\begin{equation}
+\left|\frac{M^{\text{pred}}(t) - M(0)}{M(0)}\right| \sim 10^{-2} \text{ to } 10^{-1}
+\label{eq:mass_violation}
+\end{equation}
+after long rollouts.
+
+\paragraph{Energy Dissipation.}
+For Burgers, kinetic energy:
+\begin{equation}
+E(t) = \frac{1}{2}\int_0^L u^2(x,t) dx
+\label{eq:kinetic_energy}
+\end{equation}
+satisfies:
+\begin{equation}
+\frac{dE}{dt} = -\nu \int_0^L \left(\frac{\partial u}{\partial x}\right)^2 dx \leq 0
+\label{eq:energy_dissipation}
+\end{equation}
+
+Neural solvers often exhibit energy drift, with \(dE/dt\) fluctuating in sign, violating second law of thermodynamics.
+
+%==============================================================================
+\section{Project Objectives}
+\label{sec:objectives}
+%==============================================================================
+
+This thesis investigates the application of \textbf{Neural Field Turing Machines (NFTMs)} to solve the one-dimensional Burgers equation, with a focus on developing architectural innovations that address the challenges outlined above.
+
+%------------------------------------------------------------------------------
+\subsection{Primary Research Questions}
+\label{subsec:research_questions}
+%------------------------------------------------------------------------------
+
+\paragraph{RQ1: Architecture Design.}
+Can a hypernetwork-based NFTM controller, conditioned on problem parameters, achieve accuracy competitive with specialized neural operators while maintaining computational efficiency?
+
+\paragraph{Mathematical Formulation.}
+Design \(\text{Controller}_{\theta}: (\text{Patch}(u^n), \nu) \mapsto \Delta u\) where:
+\begin{itemize}
+    \item Hypernetwork generates weights: \(\theta = h_{\phi}(\nu)\)
+    \item Multi-scale processing: kernels \(k \in \{3, 7, 15\}\)
+    \item Target: \(\|u_{\text{NFTM}} - u_{\text{FD}}\|_{L^2} < 10^{-4}\)
+\end{itemize}
+
+\paragraph{RQ2: Parameter Generalization.}
+Does conditioning on viscosity \(\nu\) enable extrapolation to unseen parameter values, and what are the quantitative limits of this generalization?
+
+\paragraph{Experimental Protocol.}
+\begin{itemize}
+    \item Train: \(\nu \in [0.01, 0.05]\)
+    \item Test: \(\nu \in \{0.005, 0.075, 0.10\}\)
+    \item Measure: \(\text{Error}(\nu_{\text{test}}) / \text{Error}(\nu_{\text{train}})\)
+\end{itemize}
+
+\paragraph{RQ3: Long-Time Stability.}
+Can architectural choices (residual connections, normalization, multi-scale kernels) improve rollout stability beyond current state-of-the-art?
+
+\paragraph{Stability Metric.}
+\begin{equation}
+T_{\text{stable}} = \max\{t : \|u_{\text{pred}}(t) - u_{\text{true}}(t)\|_{L^2} < \epsilon_{\text{threshold}}\}
+\label{eq:stability_metric}
+\end{equation}
+
+Target: \(T_{\text{stable}} > 50 \times T_{\text{train}}\)
+
+\paragraph{RQ4: Computational Efficiency.}
+What is the accuracy-speed Pareto frontier for NFTM compared to classical solvers and alternative neural methods?
+
+\paragraph{Metrics.}
+\begin{itemize}
+    \item Forward pass time (ms)
+    \item Memory usage (GB)
+    \item Accuracy (\(L^2\) error)
+    \item Amortized cost for parameter sweeps
+\end{itemize}

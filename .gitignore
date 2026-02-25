@@ -25,9 +25,12 @@
 *.zip
 
 Data/
-video/
-Documentation/
 saved_dataset/
-saved_results/
-saved_models/
-
+saved_models/*
+!saved_models/TCAN_100epochs_Best/
+saved_results/*
+!saved_results/new_dataset_results/
+saved_results/new_dataset_results/*
+!saved_results/new_dataset_results/TCAN/
+saved_results/new_dataset_results/TCAN/*
+!saved_results/new_dataset_results/TCAN/100 epochs/

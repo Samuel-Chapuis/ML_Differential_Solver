@@ -1,0 +1,89 @@
+\section{Feedback}
+
+\begin{frame}{Feedback}
+    \small
+    \textcolor{red_unipd}{\Large Midterm Questions (1/2)}
+    \vspace{0.3em}
+
+    \scriptsize
+    \begin{enumerate}
+        \item \textbf{What papers are you referencing?}
+        \item What is Akash's physical theory/model?
+        \item \textbf{How do we generate the dataset?}
+        \item \textbf{Why are you choosing Burger's equation?}
+        \item What are we trying to simulate?
+        \item \textbf{What are the current limitations in related papers? What approaches are they trying?}
+        \item Related work - Any similar simulation?
+        \item What about accuracy benchmarks? (Note: Increase speed, decrease accuracy trade-off)
+        \item What kind of initial conditions are you using?
+        \item What distributions are you using?
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Feedback}
+    \small
+    \textcolor{red_unipd}{\Large Midterm Questions (2/2)}
+    \vspace{0.3em}
+
+    \scriptsize
+    \begin{enumerate}
+        \setcounter{enumi}{10}
+        \item Use the same notation for everything - Bigger figures
+        \item Compare your architecture vs NFTM
+        \item What is the main conclusion per model?
+        \item Show loss graphs
+        \item What is the absolute training error? Is it happening during training?
+        \item Akash - Show training error, should be almost perfect
+        \item Show the physical analogy
+        \item For the context window - 5 timesteps \& at least 2-3 viscosity values for training
+        \item Related work always - What is the current state of the art?
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Feedback}
+    \small
+    \textcolor{red_unipd}{\Large Answers to Key Questions (1/2)}
+    \vspace{0.3em}
+
+    \scriptsize
+    \textbf{1. What papers are you referencing?}
+    \begin{itemize}
+        \item Neural Turing Machines (Graves, Wayne, Danihelka, 2014)
+        \item Physics-Informed Neural Networks (Raissi, Perdikaris, Karniadakis, 2019)
+        \item Fourier Neural Operator (Li et al., 2021)
+        \item Neural Operator (Kovachki et al., 2023)
+        \item Spectral Bias work (Rahaman et al., 2019)
+        \item Neural Field Turing Machine (Malhotra \& Seghouani, 2025)
+    \end{itemize}
+
+    \vspace{0.5em}
+    \textbf{3. How do we generate the dataset?}
+    \begin{itemize}
+        \item Uniform mesh: N=128 spatial points, 256 time steps, $\Delta t=5\times10^{-3}$
+        \item Sample initial conditions (shock, rarefaction, sinusoidal, smoothed random)
+        \item Conservative flux integration (Rusanov) with diffusion term
+        \item CFL-safe time steps with stability checks; reject unstable trajectories
+        \item Store as .npz files with fields U, x, t, $\nu$, $\Delta x$, $\Delta t$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Feedback}
+    \small
+    \textcolor{red_unipd}{\Large Answers to Key Questions (2/2)}
+    \vspace{0.3em}
+
+    \scriptsize
+    \textbf{4. Why are you choosing Burger's equation?}
+    \begin{itemize}
+        \item Simple enough to learn with limited data/resources, yet rich enough to exhibit complex dynamics (shock formation, nonlinear advection)
+        \item 1D simplified version of Navier-Stokes that captures key fluid dynamics features
+    \end{itemize}
+
+    \vspace{0.5em}
+    \textbf{6. What are the current limitations in related papers?}
+    \begin{itemize}
+        \item \textbf{PINNs}: Spectral bias toward low frequencies, struggle with shocks, slow convergence ($>10^5$ iterations)
+        \item \textbf{NTMs}: Discrete memory unsuitable for continuous spatial fields, no spatial inductive biases
+        \item \textbf{FNO/Neural Operators}: Serve as reference benchmarks
+    \end{itemize}
+\end{frame}
