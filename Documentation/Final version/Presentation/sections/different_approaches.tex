@@ -1,4 +1,63 @@
 \section{Different Approaches}
-\begin{frame}
-\textbf{Different approaches to solving PDEs with ML}
+
+
+\begin{frame}{CNN/Transformer Controller Approach}
+\begin{columns}[T]
+
+\column{0.35\textwidth}
+\begin{block}{Key Points}
+\begin{itemize}
+    \item Training and rollout loop for patch-based controllers (Transformer/RNN/CNN). Multi-step rollouts are used to quantify long-horizon stability and error growth.
+\end{itemize}
+\end{block}
+
+\column{0.62\textwidth}
+\begin{center}
+    % Figure 4.2 from report (page 16) — General training and rollout loop
+    \includegraphics[width=\textwidth]{{images/different approaches/cnn_architecture}.png}
+\end{center}
+
+\end{columns}
+\end{frame}
+
+\begin{frame}{Model Comparison}
+\centering
+\vspace{1em}
+\begin{minipage}{0.88\textwidth}
+    \centering
+    \fontsize{6.5}{9}\selectfont
+    \begin{tabularx}{\textwidth}{|p{2.5cm}|X|X|}
+        \hline
+        \textbf{Model} & \textbf{Stays accurate over time?} & \textbf{Works at all resolutions?} \\
+        \hline
+        CNN          & Not for long  & No \\
+        \hline
+        Transformer  & Reasonably    & Yes \\
+        \hline
+        \textbf{TCAN} & \textbf{Yes, longest} & \textbf{Yes} \\
+        \hline
+    \end{tabularx}
+\end{minipage}
+
+\vspace{0.5em}
+\begin{columns}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Why not CNN?}
+        \begin{itemize}
+          \item Only looks at a small window of time
+          \item Misses what happened further in the past
+          \item Struggles when the wave gets sharp
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Why not Transformer?}
+        \begin{itemize}
+          \item Gets slow with long sequences
+          \item Needs more parameters to get the same accuracy
+          \item TCAN gives better results with less
+        \end{itemize}
+      \end{block}
+    \end{column}
+\end{columns}
 \end{frame}
