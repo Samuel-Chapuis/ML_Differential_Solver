@@ -24,7 +24,7 @@
 \scriptsize To predict $f_{t+1}$, the corresponding input and output of the model are:
 \begin{itemize}
     \item \scriptsize \textbf{Input 1}: \textbf{history window} (last $W$ fields): $[f_{t - W + 1}, \dots, f_{t}]$, size $(B, W, N)$.
-    \item \scriptsize \textbf{Input 2}: \textbf{viscosity} $\nu$ --- tells the model what kind of flow it is dealing with, size $(B, 1)$.
+    \item \scriptsize \textbf{Input 2}: \textbf{viscosity} $\nu$: tells the model what kind of flow it is dealing with.
     \item \scriptsize \textbf{Output}: \textbf{next field} $\hat{f}_{t+1}$, size $(B, 1, N)$.
 \end{itemize}
 
@@ -46,16 +46,10 @@
       minimum height=0.65cm] 
 (output) at (0, -3.5) {\scriptsize Next Field\\$(B,1,N)$};
 
-\node[rectangle, draw, fill=teal!20,
-      text width=1.4cm, align=center,
-      minimum height=0.65cm] 
-(nu) at (4.5, 5.5) {\scriptsize Viscosity\\$\nu$};
-
 \draw[->, thick] (input) -- (tcan);
 \draw[->, thick] (tcan) -- (output);
 \draw[->, thick, dashed, blue] (output.east)
       to[bend right=30] node[right, font=\tiny] {rollout} (input.east);
-      \draw[->, thick, teal!70!black] (nu.west) -- (tcan.east);
 
 \end{tikzpicture}
 \end{columns}
@@ -126,20 +120,20 @@
 \begin{frame}{\Large TCAN Architecture: Step by Step}
   \vspace{-0.4em}
 \begin{columns}[T]
-    \column{0.42\textwidth}
+    \column{0.38\textwidth}
     \begin{center}
-    \resizebox{1.1\textwidth}{!}{%
+    \resizebox{0.82\textwidth}{!}{%
     \begin{tikzpicture}[
         box/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
-                    minimum height=0.7cm, align=center, fill=blue!10, font=\small},
+                    minimum height=0.6cm, align=center, fill=blue!10, font=\small},
         op/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
-                   minimum height=0.7cm, align=center, fill=green!10, font=\small},
+                   minimum height=0.6cm, align=center, fill=green!10, font=\small},
         arrow/.style={->, thick, >=stealth},
         input/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
-                      minimum height=0.7cm, align=center, fill=orange!20, font=\small},
+                      minimum height=0.6cm, align=center, fill=orange!20, font=\small},
         output/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
-                       minimum height=0.7cm, align=center, fill=red!20, font=\small},
-        node distance=1.3cm and 1.4cm
+                       minimum height=0.6cm, align=center, fill=red!20, font=\small},
+        node distance=0.9cm and 1.4cm
     ]
     \node[input] (input) {INPUT $f_{\text{history}}$};
     \node[op, below=of input] (embed) {Embedding Conv1d+GELU};
@@ -152,7 +146,7 @@
     \node[box, below=of decoder] (corr) {Correction $\tanh(\times0.1)$};
     \node[output, below=of corr] (output) {OUTPUT $f_{\text{next}}$};
 
-    \node[input, right=2.0cm of cond, fill=teal!20] (nu) {INPUT $\nu$};
+    \node[input, right=1.8cm of cond, fill=teal!20] (nu) {INPUT $\nu$};
     \node[font=\scriptsize, align=center, right=0.15cm of attn, anchor=west] {$K,V$\\all frames};
 
     \draw[arrow] (input) -- (embed);
@@ -180,16 +174,16 @@
     }
     \end{center}
 
-    \column{0.55\textwidth}
+    \column{0.60\textwidth}
     \begin{itemize}
-      \item \scriptsize \textbf{$f_{\text{history}}$}: the last $W=4$ fields, size $(B,W,N)$.
+      \item \scriptsize \textbf{$f_{\text{history}}$}: the last $W$ fields, size $(B,W,N)$.
       \item \scriptsize \textbf{Conv1d+GELU}: each field is projected into 32 internal features.
-      \item \scriptsize \textbf{Query $Q$}: extracted from the most recent field only --- what we want to predict next.
-      \item \scriptsize $\mathbf{K},\mathbf{V}$: extracted from all $W$ fields --- the full history.
+      \item \scriptsize \textbf{Query $Q$}: extracted from the most recent field only: what we want to predict next.
+      \item \scriptsize $\mathbf{K},\mathbf{V}$: extracted from all $W$ fields: the full history.
       \item \scriptsize \textbf{Causal Attention}: for each spatial position, the model decides how much to look at each past step.
       \item \scriptsize \textbf{$\nu$ conditioning}: viscosity is given as input so the model behaves differently for smooth vs sharp flows.
-      \item \scriptsize \textbf{Decoder}: translates the conditioned features into a small correction $\Delta f$.
-      \item \scriptsize \textbf{$f_{\text{next}}$}: we add the correction to the last known field --- clipped with $\tanh$ so the model never makes a huge jump in one step.
+      \item \scriptsize \textbf{Decoder}: translates the conditioned features into the spatial update $\Delta f$.
+      \item \scriptsize \textbf{$f_{\text{next}}$}: we add the correction to the last known field.
     \end{itemize}
   \end{columns}
 \end{frame}
