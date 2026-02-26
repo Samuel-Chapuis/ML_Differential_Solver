@@ -1,4 +1,35 @@
+
 \section{Conclusions}
-\begin{frame}
-\textbf{Conclusions}
+\begin{frame}{Conclusions}
+
+\begin{columns}[T]
+
+\column{0.48\textwidth}
+\begin{block}{What We Achieved}
+\begin{itemize}
+    \item \scriptsize \textbf{TCAN outperforms CNN and Transformer} controllers on long-horizon 1D Burgers rollouts, combining spatial convolutions with causal attention
+    \item \scriptsize \textbf{Viscosity conditioning} ($\nu$ as explicit input) enables the model to handle both smooth and shock regimes without retraining
+
+    \item \scriptsize \textbf{Evaluation on FNO benchmark dataset} enables direct, fair comparison: TCAN achieves 0.30 rel.\ $L^2$ at $s{=}85$ vs FNO's 0.011
+\end{itemize}
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Limitations \& Next Steps}
+\begin{itemize}
+    \item \scriptsize \textbf{Gap vs FNO}: autoregressive error accumulation over 256 steps explains the performance gap — FNO predicts in one shot
+    \item \scriptsize \textbf{Boundary artifacts}: symmetric padding violates Burgers physics at domain edges; fix with zero or replication padding
+    \item \scriptsize \textbf{Resolution scaling}: error grows with finer grids ($s{=}421$ reaches 0.94) — more rollout steps means more compounding errors
+    \item \scriptsize \textbf{Future work}: extend to incompressible Navier-Stokes
+\end{itemize}
+\end{block}
+
+\end{columns}
+
+\vspace{0.3em}
+\begin{center}
+\fontsize{7}{9}\selectfont
+\textcolor{red_unipd}{\textbf{Key takeaway:}} NFTM with a TCAN controller successfully learns to simulate 1D Burgers dynamics in a data-driven, physics-aware manner — a promising foundation for scaling to full Navier-Stokes.
+\end{center}
+
 \end{frame}
