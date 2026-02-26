@@ -23,8 +23,9 @@
 \vspace{0.1cm}
 \scriptsize To predict $f_{t+1}$, the corresponding input and output of the model are:
 \begin{itemize}
-    \item \scriptsize \textbf{Input}: \textbf{history window} (chunk of $W$ previous fields): $[f_{t - W + 1}, f_{t - W + 2}, ..., f_{t}]$ with size $(B, W, N)$.
-    \item \scriptsize \textbf{Output}: \textbf{prediction of the field at next time step $t+1$}: $\hat{f}_{t+1}$, with size: $(B, 1, N)$.
+    \item \scriptsize \textbf{Input 1}: \textbf{history window} (last $W$ fields): $[f_{t - W + 1}, \dots, f_{t}]$, size $(B, W, N)$.
+    \item \scriptsize \textbf{Input 2}: \textbf{viscosity} $\nu$ --- tells the model what kind of flow it is dealing with, size $(B, 1)$.
+    \item \scriptsize \textbf{Output}: \textbf{next field} $\hat{f}_{t+1}$, size $(B, 1, N)$.
 \end{itemize}
 
 \column{0.3\textwidth}
@@ -45,10 +46,16 @@
       minimum height=0.65cm] 
 (output) at (0, -3.5) {\scriptsize Next Field\\$(B,1,N)$};
 
+\node[rectangle, draw, fill=teal!20,
+      text width=1.4cm, align=center,
+      minimum height=0.65cm] 
+(nu) at (4.5, 5.5) {\scriptsize Viscosity\\$\nu$};
+
 \draw[->, thick] (input) -- (tcan);
 \draw[->, thick] (tcan) -- (output);
 \draw[->, thick, dashed, blue] (output.east)
       to[bend right=30] node[right, font=\tiny] {rollout} (input.east);
+      \draw[->, thick, teal!70!black] (nu.west) -- (tcan.east);
 
 \end{tikzpicture}
 \end{columns}
@@ -119,81 +126,70 @@
 \begin{frame}{\Large TCAN Architecture: Step by Step}
   \vspace{-0.4em}
 \begin{columns}[T]
-    \column{0.3\textwidth}
+    \column{0.42\textwidth}
     \begin{center}
-    \resizebox{1.25\textwidth}{!}{%
+    \resizebox{1.1\textwidth}{!}{%
     \begin{tikzpicture}[
-        box/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=blue!10},
-        op/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=0.85cm, align=center, fill=green!10},
+        box/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
+                    minimum height=0.7cm, align=center, fill=blue!10, font=\small},
+        op/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
+                   minimum height=0.7cm, align=center, fill=green!10, font=\small},
         arrow/.style={->, thick, >=stealth},
-        input/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=orange!20},
-        output/.style={rectangle, draw, rounded corners, minimum width=2.4cm, minimum height=1.0cm, align=center, fill=red!20},
-        node distance=2.0cm and 1.6cm
+        input/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
+                      minimum height=0.7cm, align=center, fill=orange!20, font=\small},
+        output/.style={rectangle, draw, rounded corners, minimum width=2.2cm,
+                       minimum height=0.7cm, align=center, fill=red!20, font=\small},
+        node distance=1.3cm and 1.4cm
     ]
-    % Main flow - left column
-    \node[input] (input) {INPUT\\$f_{\text{history}}$};
-    \node[op, below=of input] (embed) {Embedding\\Conv1d+GELU};
-    \node[box, below=of embed] (features) {Features\\$(B,W,32,N)$};
+    \node[input] (input) {INPUT $f_{\text{history}}$};
+    \node[op, below=of input] (embed) {Embedding Conv1d+GELU};
+    \node[box, below=of embed] (features) {Features $(B,W,32,N)$};
+    \node[box, below=of features] (query) {Query $Q$ (last frame)};
+    \node[op, below=of query] (attn) {Causal Attention};
+    \node[box, below=of attn] (context) {Context $(B,32,N)$};
+    \node[op, below=of context, fill=purple!15] (cond) {$\nu$ conditioning};
+    \node[op, below=of cond] (decoder) {Decoder Conv1d};
+    \node[box, below=of decoder] (corr) {Correction $\tanh(\times0.1)$};
+    \node[output, below=of corr] (output) {OUTPUT $f_{\text{next}}$};
 
-    % Attention column - center-right
-    \node[box, right=1.8cm of features] (query) {Query $Q$\\(last frame)};
-    \node[op, below=of query] (attn) {Causal\\Attention};
-    \node[box, below=of attn] (context) {Context\\$(B,32,N)$};
+    \node[input, right=2.0cm of cond, fill=teal!20] (nu) {INPUT $\nu$};
+    \node[font=\scriptsize, align=center, right=0.15cm of attn, anchor=west] {$K,V$\\all frames};
 
-    % Viscosity conditioning node
-    \node[op, below=of context, fill=purple!15] (cond) {$\nu$ conditioning\\$\gamma \cdot h + \beta$};
-
-    % Viscosity input node
-    \node[input, right=1.8cm of cond, fill=teal!20] (nu) {INPUT\\$\nu$};
-
-    % Decoder/output column
-    \node[op, right=1.8cm of attn] (decoder) {Decoder\\Conv1d};
-    \node[box, below=of decoder] (corr) {Correction\\$\tanh(\times0.1)$};
-    \node[output, below=of corr] (output) {OUTPUT\\$f_{\text{next}}$};
-
-    % ARROWS
     \draw[arrow] (input) -- (embed);
     \draw[arrow] (embed) -- (features);
-    \draw[arrow] (features) -| ([xshift=-0.3cm]query.west) -- (query);
+    \draw[arrow] (features) -- (query);
     \draw[arrow] (query) -- (attn);
     \draw[arrow] (attn) -- (context);
     \draw[arrow] (context) -- (cond);
-    \draw[arrow] (cond) -| ([xshift=-0.3cm]decoder.west) -- (decoder);
+    \draw[arrow] (cond) -- (decoder);
     \draw[arrow] (decoder) -- (corr);
     \draw[arrow] (corr) -- (output);
 
-    % Nu -> conditioning arrow
-    \draw[arrow, teal!70!black, thick] (nu.west) -- (cond.east)
-        node[midway, above, font=\scriptsize, black]{$\nu$};
+    \draw[arrow, teal!70!black, thick] (nu.west) -- (cond.east);
 
-    % Residual from features to context
-    \draw[arrow, dashed, blue] (features.south)
-        to[out=-5,in=150] node[above, font=\footnotesize, black]{residual}
-        (context.west);
+    \draw[arrow, dashed, blue] (features.east)
+        to[out=0,in=0] node[right, font=\scriptsize, black]{residual}
+        (context.east);
 
-    % Residual from input to output
-    \draw[arrow, dashed, orange, thick] (input.south)
-        |- ++(-2,0)
-        |- ++(0,-24)
-        -| (output.west)
-        node[below, font=\scriptsize, pos=0.1]{$f_t$};
+    \draw[arrow, dashed, orange, thick] (input.west)
+        -- ++(-0.8,0)
+        |- (output.west)
+        node[near start, left, font=\scriptsize]{$f_t$};
 
-    % KV note
-    \node[font=\footnotesize, align=center, right=0.2cm of query, anchor=west] (kv) {$K,V$\\all frames};
     \end{tikzpicture}%
     }
     \end{center}
 
-    \column{0.58\textwidth}
+    \column{0.55\textwidth}
     \begin{itemize}
-      \item \scriptsize \textbf{$f_{\text{history}}$}: the last $W$ fields the model has seen, size $(B,W,N)$.
+      \item \scriptsize \textbf{$f_{\text{history}}$}: the last $W=4$ fields, size $(B,W,N)$.
       \item \scriptsize \textbf{Conv1d+GELU}: each field is projected into 32 internal features.
       \item \scriptsize \textbf{Query $Q$}: extracted from the most recent field only --- what we want to predict next.
-      \item \scriptsize $\mathbf{K},\mathbf{V}$: extracted from all $W$ fields --- the full history the model can look at.
-      \item \scriptsize \textbf{Causal Attention}: for each spatial position, the model decides how much to look at each past step: $\alpha_{w,n}=\text{softmax}_w(QK^T/\sqrt{32})$.
-      \item \scriptsize \textbf{$\nu$ conditioning}: viscosity is as input: so the model behaves differently for smooth vs sharp flows.
+      \item \scriptsize $\mathbf{K},\mathbf{V}$: extracted from all $W$ fields --- the full history.
+      \item \scriptsize \textbf{Causal Attention}: for each spatial position, the model decides how much to look at each past step.
+      \item \scriptsize \textbf{$\nu$ conditioning}: viscosity is given as input so the model behaves differently for smooth vs sharp flows.
       \item \scriptsize \textbf{Decoder}: translates the conditioned features into a small correction $\Delta f$.
-      \item \scriptsize \textbf{$f_{\text{next}}$}: we add the correction to the last known field.
+      \item \scriptsize \textbf{$f_{\text{next}}$}: we add the correction to the last known field --- clipped with $\tanh$ so the model never makes a huge jump in one step.
     \end{itemize}
   \end{columns}
 \end{frame}
