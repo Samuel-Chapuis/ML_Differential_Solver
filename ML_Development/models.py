@@ -119,7 +119,7 @@ class TemporalCNNAttention(nn.Module):
 
         # 3. Compute Attention Scores (Dot product Q * K^T)
         # Calculates relevance of each historical frame (W) for every spatial point (P)
-        scores = torch.einsum('bep,bwe p->bwp', Q, K) / (self.embed_dim ** 0.5)
+        scores = torch.einsum('bep,bwep->bwp', Q, K) / (self.embed_dim ** 0.5)
         attn_weights = torch.softmax(scores, dim=1) # Softmax ensures weights sum to 1 across the W dimension
 
         # 4. Context Vector: Weighted sum of V using attention weights
@@ -184,8 +184,8 @@ class RNNControllerPatch(nn.Module):
     patch: (B, seq_len, patch_size)
     nu   : (B, 1)
     """
-    def _init_(self, patch_size: int, hidden_size: int = 64, rnn_type: str = "LSTM"):
-        super()._init_()
+    def __init__(self, patch_size: int, hidden_size: int = 64, rnn_type: str = "LSTM"):
+        super().__init__()
         input_size = patch_size + 1  # patch + nu
         if rnn_type == "LSTM":
             self.rnn = nn.LSTM(input_size=input_size, hidden_size=hidden_size, batch_first=True)
@@ -416,10 +416,9 @@ class CausalTemporalAttention(nn.Module):
 #         return u_next
 
 
-class ImprovedBurgersNet(nn.Module):
+class TCAN1D(nn.Module):
     """
-    TCAN mejorado con condicionamiento en viscosidad.
-    Compatible con tu código de entrenamiento actual.
+    TCAN 1D with viscosity conditioning (FiLM).
     """
     def __init__(self, window_size=4, corr_clip=0.1, use_viscosity=True):
         super().__init__()
@@ -455,7 +454,7 @@ class ImprovedBurgersNet(nn.Module):
         """
         Args:
             u_history: (B, W, P) - History window
-            nu: (B, 1) - Viscosity [NUEVO parámetro opcional]
+            nu: (B, 1) - Viscosity (optional)
         """
         u_last = u_history[:, -1:, :]  # (B, 1, P)
         
@@ -476,3 +475,96 @@ class ImprovedBurgersNet(nn.Module):
         
         u_next = u_last + correction
         return u_next
+
+
+class CausalTemporalAttention2D(nn.Module):
+    """
+    Causal temporal attention over a history window for 2D fields.
+    """
+    def __init__(self, window_size, embed_dim, in_channels=1):
+        super().__init__()
+        self.embed_dim = embed_dim
+        self.embedding = nn.Sequential(
+            nn.Conv2d(in_channels, embed_dim, 3, padding=1),
+            nn.GELU(),
+        )
+        self.query_proj = nn.Conv2d(embed_dim, embed_dim, 1)
+        self.key_proj = nn.Conv2d(embed_dim, embed_dim, 1)
+        self.val_proj = nn.Conv2d(embed_dim, embed_dim, 1)
+        self.out_proj = nn.Conv2d(embed_dim, embed_dim, 1)
+        self.norm = nn.GroupNorm(4, embed_dim)
+
+    def forward(self, u_history):
+        # u_history: (B, W, C, H, W)
+        B, Wt, C, H, W = u_history.shape
+        flat_hist = u_history.contiguous().view(B * Wt, C, H, W)
+        features = self.embedding(flat_hist).view(B, Wt, self.embed_dim, H, W)
+
+        last_frame_feat = features[:, -1]  # (B, E, H, W)
+        Q = self.query_proj(last_frame_feat)
+
+        flat_feat = features.view(B * Wt, self.embed_dim, H, W)
+        K = self.key_proj(flat_feat).view(B, Wt, self.embed_dim, H, W)
+        V = self.val_proj(flat_feat).view(B, Wt, self.embed_dim, H, W)
+
+        scores = (K * Q.unsqueeze(1)).sum(dim=2) / (self.embed_dim ** 0.5)  # (B, Wt, H, W)
+        attn_weights = torch.softmax(scores, dim=1)
+
+        context = (V * attn_weights.unsqueeze(2)).sum(dim=1)  # (B, E, H, W)
+        out = self.out_proj(context)
+        return self.norm(out + last_frame_feat)
+
+
+class TCAN2D(nn.Module):
+    """
+    TCAN 2D with viscosity conditioning (FiLM).
+    """
+    def __init__(self, window_size=4, corr_clip=0.1, use_viscosity=True, in_channels=1):
+        super().__init__()
+        self.corr_clip = corr_clip
+        self.use_viscosity = use_viscosity
+        embed_dim = 32
+
+        self.attn = CausalTemporalAttention2D(window_size, embed_dim, in_channels=in_channels)
+
+        if use_viscosity:
+            self.nu_embed = nn.Sequential(
+                nn.Linear(1, 32),
+                nn.GELU(),
+                nn.Linear(32, embed_dim),
+            )
+            self.film_gamma = nn.Linear(embed_dim, embed_dim)
+            self.film_beta = nn.Linear(embed_dim, embed_dim)
+
+        self.decoder = nn.Sequential(
+            nn.Conv2d(embed_dim, 32, 3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.GELU(),
+            nn.Conv2d(32, in_channels, 3, padding=1),
+        )
+
+        nn.init.zeros_(self.decoder[-1].weight)
+        nn.init.zeros_(self.decoder[-1].bias)
+
+    def forward(self, u_history, nu=None):
+        # u_history: (B, W, C, H, W)
+        u_last = u_history[:, -1]  # (B, C, H, W)
+        context_features = self.attn(u_history)  # (B, E, H, W)
+
+        if self.use_viscosity and nu is not None:
+            nu_emb = self.nu_embed(nu)  # (B, E)
+            gamma = self.film_gamma(nu_emb).unsqueeze(-1).unsqueeze(-1)
+            beta = self.film_beta(nu_emb).unsqueeze(-1).unsqueeze(-1)
+            context_features = gamma * context_features + beta
+
+        raw_correction = self.decoder(context_features)  # (B, C, H, W)
+        correction = torch.tanh(raw_correction) * self.corr_clip
+        u_next = u_last + correction
+        return u_next
+
+
+class ImprovedBurgersNet(TCAN1D):
+    """
+    Backward-compatible alias for the 1D TCAN.
+    """
+    pass

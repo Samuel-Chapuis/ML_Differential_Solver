@@ -1,4 +1,98 @@
 \section{2D Model Approach}
+% ===== Slide 1 (Navier–Stokes) =====
 \begin{secframe}
-\textbf{2D model approach}
+\small
+\textcolor{red_unipd}{\Large Minium Viable Product}
+
+\vspace{0.6em}
+
+\begin{alertblock}{Equations}
+Ability to solve the 2D equation is a need to solve minimal realistic problems, such as flow over a wing, or around a car.
+\end{alertblock}
+
+\end{secframe}
+
+
+
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large Dataset}
+
+\vspace{0.6em}
+
+\begin{alertblock}{Equations}
+Generated dataset of 2D burgers equation, with varying viscosity $\nu$.
+\end{alertblock}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/2D/train_sample.png}
+\end{figure}
+
+\end{secframe}
+
+% ===== Slide 2 (Model architecture) =====
+
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large Model Architecture}
+
+\vspace{0.6em}
+
+\begin{alertblock}{Model}
+Model architecture inspired by TCAN, with 2D inputs.
+\end{alertblock}
+
+\vspace{0.6em}
+
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+	node distance=1.2em and 1.6em,
+	block/.style={draw, rounded corners, align=center, inner sep=4pt},
+	arrow/.style={-{Stealth[length=2.2mm]}, thick}
+]
+
+\node[block] (input) {History window $u_{t-W+1:t}$\\$B\times W\times C\times H\times W$};
+\node[block, right=of input] (attn) {Causal Temporal\\Attention (2D)};
+\node[block, right=of attn] (film) {FiLM conditioning\\from $\nu$};
+\node[block, right=of film] (decoder) {Conv2D decoder};
+\node[block, right=of decoder] (tanh) {Tanh clip\\$\Delta$};
+\node[block, right=of tanh] (output) {Next field\\$u_{t+1}$};
+
+\draw[arrow] (input) -- (attn);
+\draw[arrow] (attn) -- (film);
+\draw[arrow] (film) -- (decoder);
+\draw[arrow] (decoder) -- (tanh);
+\draw[arrow] (tanh) -- (output);
+
+\node[block, below=0.9em of film] (nu) {Viscosity $\nu$\\(scalar)};
+\draw[arrow] (nu) -- (film);
+
+\end{tikzpicture}%
+}
+
+\end{secframe}
+
+
+\begin{secframe}
+\small
+\textcolor{red_unipd}{\Large Results}
+
+\begin{alertblock}{Model}
+The models seems to train however the results are not good, and the model is not able to predict the correct field.
+\end{alertblock}
+
+\vspace{0.6em}
+
+\begin{columns}[c]
+    \begin{column}{0.49\textwidth}
+        \includegraphics[width=\linewidth, height=0.4\textheight, keepaspectratio]
+            {images/2D/loss.png}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+        \includegraphics[width=\linewidth, height=0.4\textheight, keepaspectratio]
+            {images/2D/output.png}
+    \end{column}
+\end{columns}
+
 \end{secframe}

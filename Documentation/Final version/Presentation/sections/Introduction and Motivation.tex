@@ -1,18 +1,59 @@
-\section{Introduction and Motivation}
+\section{Motivation}
 
 \begin{secframe}
-\small
-\vspace{-0.1cm}
-\begin{block}{Introduction}
-3 main neural architectures have emerged to approximate or simulate the behavior of PDEs derived from the \textbf{Navier–Stokes equations}: 
-\begin{itemize}
-  \item \textbf{PINNs:} include the physical equations directly in their training process so the model learns to follow the known physics (physics-informed training).
-  \item \textbf{FNOs:} learn how to map one physical state to the next using patterns in Fourier space.
-  \item \textbf{NFTM:} iteratively update predictions through neural “heads” and a controller.
-\end{itemize}
-\end{block}
-\vspace{0.1em}
-\begin{block}{Motivation}
-The development of NFTMs that combine the accuracy of physics-based learning and the flexibility of data-driven methods to simulate complex PDE systems.
-\end{block}
+
+  \vspace{-2.6mm}
+\begin{figure}[t]
+\centering
+
+\adjustbox{center}{%
+  \includegraphics[width=1.03\paperwidth, height=0.85\paperheight]{images/illustration/airbusVSboeing.jpg}
+}
+\end{figure}
+
+\end{secframe}
+
+\begin{secframe}
+  \textcolor{red_unipd}{\Large CFD over foil}
+
+  \begin{block}{Modern Computational Fluid Dynamics (CFD) simulations}
+    \begin{itemize}
+      \item Essential for aerospace design, weather forecasting, and more
+      \item Computationally expensive, especially for turbulent flows
+    \end{itemize}
+  \end{block}
+
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/illustration/foil.png}
+  \end{figure}
+
+\end{secframe}
+
+
+\begin{secframe}
+  \textcolor{red_unipd}{\Large Real thermal application}
+
+  \begin{block}{Real thermal application}
+    Thermal application from Samuel's master thesis
+  \end{block}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/illustration/BaseLine.png}
+  \end{figure}
+
+\end{secframe}
+
+
+\begin{secframe}
+  \textcolor{red_unipd}{\Large Kolmogorov energy cascade}
+  \vspace{0.6em}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/illustration/kolmogorov.png}
+  \end{figure}
+
 \end{secframe}

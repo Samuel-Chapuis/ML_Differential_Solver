@@ -14,7 +14,7 @@ import os
 from tqdm import tqdm
 import torch.optim as optim
 from typing import Dict, List
-from models import  CNNController,TemporalCNNAttention, TransformerController, RNNControllerPatch, CausalTemporalAttention, ImprovedBurgersNet
+from models import CNNController, TemporalCNNAttention, TransformerController, RNNControllerPatch, CausalTemporalAttention, TCAN1D, TCAN2D
 # from evaluation import BurgersMetrics
 
 
@@ -397,6 +397,134 @@ def build_patches_from_sequence_2d(seq, patch_radius: int):
     patches = patches.transpose(1, 2)                  # (B*L, H*W, P)
     patches = patches.view(B, L, H, W, C * k * k)      # (B, L, H, W, P)
     return patches
+
+
+def spatial_gradient_2d(u):
+    """
+    u: (B, C, H, W)
+    returns: (grad_x, grad_y)
+    """
+    u_right = torch.roll(u, -1, dims=-1)
+    u_left = torch.roll(u, 1, dims=-1)
+    u_down = torch.roll(u, -1, dims=-2)
+    u_up = torch.roll(u, 1, dims=-2)
+    grad_x = (u_right - u_left) * 0.5
+    grad_y = (u_down - u_up) * 0.5
+    return grad_x, grad_y
+
+
+def train_tcan_2d(
+    train_loader,
+    test_loader,
+    history_len=4,
+    num_epochs=100,
+    save_dir='training_plots_TCAN_2D',
+    model=None,
+    corr_clip=0.3,
+):
+    os.makedirs(save_dir, exist_ok=True)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    if model is None:
+        model = TCAN2D(window_size=history_len, corr_clip=corr_clip, use_viscosity=True).to(device)
+    model.to(device)
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
+    test_batch = next(iter(test_loader))
+
+    print("=" * 60)
+    print("TRAINING TCAN 2D")
+    print(f"History length: {history_len}")
+    print("=" * 60)
+
+    history = {'loss': []}
+    mse_loss = nn.MSELoss()
+
+    for epoch in tqdm(range(num_epochs), desc="Training TCAN 2D"):
+        model.train()
+        total_loss = 0.0
+        num_batches = 0
+
+        noise_scale = 0.01 * min(1.0, epoch / (num_epochs * 0.5))
+
+        for _, target_batch, nu_batch in train_loader:
+            target_batch = target_batch.to(device)  # (B, T, C, H, W)
+            nu_batch = nu_batch.to(device)          # (B, 1)
+
+            B, T_traj, C, H, W = target_batch.shape
+
+            eval_depth = T_traj - history_len
+            if epoch < num_epochs * 0.4:
+                rollout_depth = 4
+            elif epoch < num_epochs * 0.75:
+                rollout_depth = min(8, eval_depth)
+            else:
+                rollout_depth = eval_depth
+
+            optimizer.zero_grad()
+            batch_loss = 0.0
+
+            current_window = target_batch[:, :history_len].clone()
+
+            if epoch > num_epochs * 0.3 and noise_scale > 0:
+                current_window = current_window + torch.randn_like(current_window) * noise_scale
+
+            for k in range(rollout_depth):
+                target = target_batch[:, history_len + k]  # (B, C, H, W)
+                pred = model(current_window, nu_batch)     # (B, C, H, W)
+
+                diff = pred - target
+                denom = target.flatten(1).norm(p=2, dim=-1).clamp(min=1e-8)
+                rel_l2 = (diff.flatten(1).norm(p=2, dim=-1) / denom).mean()
+
+                pred_gx, pred_gy = spatial_gradient_2d(pred)
+                target_gx, target_gy = spatial_gradient_2d(target)
+                grad_loss = torch.mean((pred_gx - target_gx) ** 2) + torch.mean((pred_gy - target_gy) ** 2)
+
+                mse = mse_loss(pred, target)
+                step_loss = mse + 0.1 * rel_l2 + 0.1 * grad_loss
+                batch_loss += step_loss
+
+                if k < rollout_depth - 1:
+                    if np.random.random() < 0.1 and epoch < 400:
+                        next_state = target.unsqueeze(1)
+                    else:
+                        next_state = pred.unsqueeze(1)
+                    current_window = torch.cat([current_window[:, 1:], next_state], dim=1)
+
+            batch_loss = batch_loss / max(1, rollout_depth)
+            batch_loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            optimizer.step()
+
+            total_loss += batch_loss.item()
+            num_batches += 1
+
+        scheduler.step()
+        total_loss = total_loss / max(1, num_batches)
+
+        if epoch % 10 == 0:
+            history['loss'].append(total_loss)
+
+            fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+            epochs_so_far = [i * 10 for i in range(len(history['loss']))]
+            ax.plot(epochs_so_far, history['loss'], 'b-o', linewidth=2, markersize=4)
+            ax.set_xlabel('Epoch')
+            ax.set_ylabel('MSE + Rel-L2 + Grad Loss')
+            ax.set_title(f'Training Loss (Epoch {epoch})')
+            ax.grid(True, alpha=0.3)
+            ax.set_yscale('log')
+
+            plt.tight_layout()
+            plt.savefig(f'{save_dir}/loss_epoch_{epoch}.png', dpi=100, bbox_inches='tight')
+            plt.close()
+
+            print("=" * 50)
+            tqdm.write(f"Epoch {epoch}: Loss={total_loss:.4f}, Rollout={rollout_depth}")
+            print("=" * 50)
+
+    return model, history, history_len
 
 def train_transformer2d_patch(
     model,
@@ -917,12 +1045,21 @@ def compute_metrics(model, test_batch, history_len):
 
 #     return model, history, history_len
 
-def train_model_TCAN(train_loader, test_loader, history_len=20, num_epochs=100, save_dir='training_plots_TCAN', resolution=None, model=None):
+def train_model_TCAN(
+    train_loader,
+    test_loader,
+    history_len=20,
+    num_epochs=100,
+    save_dir='training_plots_TCAN',
+    resolution=None,
+    model=None,
+    corr_clip=0.3,
+):
 
     os.makedirs(save_dir, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if model is None:
-        model = ImprovedBurgersNet(window_size=history_len, corr_clip=0.1, use_viscosity=True).to(device)
+        model = TCAN1D(window_size=history_len, corr_clip=corr_clip, use_viscosity=True).to(device)
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
@@ -934,6 +1071,8 @@ def train_model_TCAN(train_loader, test_loader, history_len=20, num_epochs=100, 
     print("="*60)
 
     history = {'loss': []}  # ← removed 'energy_loss' (no longer tracked)
+
+    mse_loss = nn.MSELoss()
 
     for epoch in tqdm(range(num_epochs), desc="Training"):
         model.train()
@@ -971,19 +1110,19 @@ def train_model_TCAN(train_loader, test_loader, history_len=20, num_epochs=100, 
                 target = target_batch[:, history_len + k].unsqueeze(1)
                 pred = model(current_window, nu_batch)
 
-                # ── CHANGE 3: relative-L2 + gradient loss only ──────────────
-                pred_sq   = pred.squeeze(1)    # (B, P) whether pred is (B,P) or (B,1,P)
+                pred_sq = pred.squeeze(1)    # (B, P) whether pred is (B,P) or (B,1,P)
                 target_sq = target.squeeze(1)  # (B, P)
-                diff  = pred_sq - target_sq
+
+                diff = pred_sq - target_sq
                 denom = target_sq.norm(p=2, dim=-1).clamp(min=1e-8)
                 rel_l2 = (diff.norm(p=2, dim=-1) / denom).mean()
 
-                pred_grad   = spatial_gradient(pred_sq.unsqueeze(1), dx)
+                pred_grad = spatial_gradient(pred_sq.unsqueeze(1), dx)
                 target_grad = spatial_gradient(target_sq.unsqueeze(1), dx)
-                grad_loss   = torch.mean((pred_grad - target_grad)**2)
+                grad_loss = torch.mean((pred_grad - target_grad) ** 2)
 
-                step_loss   = rel_l2 + 0.1 * grad_loss
-                # ────────────────────────────────────────────────────────────
+                mse = mse_loss(pred_sq, target_sq)
+                step_loss = mse + 0.1 * rel_l2 + 0.1 * grad_loss
                 batch_loss += step_loss
 
                 if k < rollout_depth - 1:
