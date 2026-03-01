@@ -75,6 +75,13 @@ Furthermore, their memory locations possess no inherent geometric or spatial rel
 \paragraph{Relevance.}
 NTMs establish the foundational principle we coded, an external memory (the spatial field \(u(x,t)\)) combined with learned read/write operations (our controller implementation). However, we fundamentally adapt this paradigm from discrete memory slots to continuous spatial fields, replacing content-based addressing with local spatial convolutions.
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{images/Brain-architecture.png}
+  \caption{Overview of the Neural Field Turing Machine (NFTM) framework~\cite{malhotra2025neuralfieldturingmachine}. A neural controller reads from and writes to a continuous external spatial memory (the PDE field), analogous to the NTM's memory matrix but defined over a continuous spatial domain. This architecture forms the basis of all controllers developed in this work.}
+  \label{fig:nftm-overview}
+\end{figure}
+
 %==============================================================================
 \section{Physics-Informed Neural Networks}
 \label{sec:related_pinns}
@@ -165,3 +172,69 @@ Compared to recurrent alternatives, this architecture:
 \end{itemize}
 
 For these reasons, the TransformerController serves as a strong baseline for learning temporal dependencies in data-driven physical modeling.
+
+%==============================================================================
+\section{Neural Operators and Recent Extensions}
+\label{sec:related_neural_operators}
+%==============================================================================
+
+Beyond memory-augmented networks and PINNs, a parallel line of research has focused on learning \emph{operators} that map entire functions to functions—a formulation directly suited to PDE problems where the goal is to learn the solution map from initial conditions to future states.
+
+%------------------------------------------------------------------------------
+\subsection{Fourier Neural Operator}
+\label{subsec:fno}
+%------------------------------------------------------------------------------
+
+Li et al.~\cite{li2021fourier} introduced the Fourier Neural Operator (FNO), which learns the solution operator of a PDE by performing global convolution in Fourier space. A single forward pass maps an initial condition $u(\cdot, 0)$ directly to the solution at the target time $u(\cdot, T)$, achieving speedups of up to $1000\times$ over classical solvers. FNO is \emph{our primary benchmark}: we use the same dataset generator and compare all TCAN results against the reported FNO errors at four spatial resolutions ($s \in \{85, 141, 211, 421\}$).
+
+\paragraph{Key difference from our approach.}
+FNO is a \textbf{single-step operator}: it predicts the solution at $t=T$ in one shot without any temporal rollout. Our TCAN controller, by contrast, is \textbf{autoregressive}: it advances the field one step at a time over $T-1$ autoregressive calls. This fundamental difference explains the performance gap (TCAN achieves relative $L^2 \approx 0.30$ at $s=85$ vs.\ FNO's $0.011$) and motivates the mitigation strategies described in later chapters.
+
+%------------------------------------------------------------------------------
+\subsection{Physics-Informed Neural Operator}
+\label{subsec:pino}
+%------------------------------------------------------------------------------
+
+Wang et al.~\cite{wang2022physicsinformed} proposed the Physics-Informed Neural Operator (PINO), which combines the operator-learning framework with PDE residual constraints. This allows generalization to unseen PDE parameters (e.g.\ viscosity values not seen during training) without explicit conditioning, by enforcing the governing equations during training. This approach is relevant to our data-driven viscosity generalization, where we instead handle parameter variation through an explicit FiLM conditioning module.
+
+%------------------------------------------------------------------------------
+\subsection{Recurrent Neural Operators}
+\label{subsec:rno}
+%------------------------------------------------------------------------------
+
+Lippe et al.\ introduced Recurrent Neural Operators (RNO)~\cite{lippe2023pde}, which train neural operators \textbf{autoregressively}: at each training step the model is exposed to its own prediction errors rather than always using ground-truth inputs. This scheduled exposure strategy directly eliminates the train-test mismatch that arises in standard teacher-forcing regimes. RNO is directly relevant to our work, as autoregressive error accumulation across 256 rollout steps is the primary driver of TCAN's performance gap relative to FNO. Our progressive rollout training strategy is inspired by this line of work.
+
+%------------------------------------------------------------------------------
+\subsection{PDE-Refiner}
+\label{subsec:pde_refiner}
+%------------------------------------------------------------------------------
+
+Lippe et al.\ further proposed PDE-Refiner~\cite{lippe2023pde}, which applies a denoising-diffusion-inspired iterative refinement process to neural PDE predictions. By iteratively correcting predictions at multiple noise levels, PDE-Refiner recovers high-frequency content—most critically, sharp shock structures—that is progressively lost during long autoregressive rollouts. This is directly applicable to our setting, where shock sharpness degrades over the 256-step trajectory and relative $L^2$ error grows monotonically with resolution.
+
+%------------------------------------------------------------------------------
+\subsection{PhysicsCorrect}
+\label{subsec:physicscorrect}
+%------------------------------------------------------------------------------
+
+Han et al.~\cite{han2025physicscorrect} proposed a training-free correction approach that projects neural predictions onto physically consistent manifolds using PDE residual Jacobians at inference time. Because it requires no architectural modifications, it can be applied as a post-processing step on top of any trained model—including TCAN—to reduce PDE residual errors without retraining.
+
+%------------------------------------------------------------------------------
+\subsection{Transolver}
+\label{subsec:transolver}
+%------------------------------------------------------------------------------
+
+Wu et al.~\cite{wu2024transolver} introduced Transolver, which replaces standard spatial attention over individual mesh points with \textbf{Physics Attention}: mesh points are first grouped into a small set of learned physical states, and attention is computed between these higher-level states. This reduces complexity from $\mathcal{O}(N^2)$ to linear in $N$, while also capturing gradient structure and sharp feature boundaries more effectively than point-wise attention. Transolver is relevant as a spatial complement to our purely temporal attention mechanism.
+
+%------------------------------------------------------------------------------
+\subsection{Multi-Objective Loss Balancing}
+\label{subsec:loss_balancing}
+%------------------------------------------------------------------------------
+
+Wang et al.~\cite{wang2021understanding} proposed adaptive algorithms that automatically balance competing loss terms during training of physics-informed models. By dynamically adjusting the relative weights of, for example, data, PDE residual, and boundary condition losses, these methods prevent gradient pathologies (e.g.\ one loss dominating and suppressing the others) that frequently destabilize training. We draw on this principle when combining our data fidelity loss with energy dissipation and mass conservation regularizers.
+
+%------------------------------------------------------------------------------
+\subsection{Active Learning for Neural PDE Solvers}
+\label{subsec:active_learning}
+%------------------------------------------------------------------------------
+
+Musekamp et al.~\cite{musekamp2024active} presented a benchmark framework demonstrating that intelligent, uncertainty-guided selection of PDE parameters (e.g.\ viscosity values) for labelling can substantially reduce the dataset size required to reach a target accuracy. For our planned extension to 2D incompressible Navier-Stokes—where generating high-fidelity trajectories is computationally expensive—active learning provides a principled approach to data-efficient training.

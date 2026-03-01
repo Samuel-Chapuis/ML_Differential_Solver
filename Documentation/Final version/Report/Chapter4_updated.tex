@@ -7,7 +7,26 @@ The first model is a \textbf{patch-wise Transformer controller} that predicts th
 The second approach, corresponds to a \textbf{Causal Temporal Convolutional Attention Network (TCAN)} that combines attention with convolutional feature extraction, by restricting attention to past timesteps only and using 1D convolutions for spatial processing.\\
 Both approaches enforce physics-informed constraints. We detail their architectures, training procedures, and comprehensive evaluation metrics, highlighting respective strengths and limitations.
 
-% TABLE OF BURGER'S DATASET STATISTICS
+\begin{figure}[H]
+  \centering
+  \begin{minipage}[t]{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/cnn_architecture.png}
+    \caption*{CNN controller}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/transformer_architecture.png}
+    \caption*{Transformer controller}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/tcan_architecture.png}
+    \caption*{TCAN controller}
+  \end{minipage}
+  \caption{The three controller architectures evaluated as NFTM surrogates for 1D Burgers dynamics. From left to right: the CNN baseline, the Transformer-based controller (Approach~1), and the Causal Temporal Convolutional Attention Network (Approach~2). All three share the same autoregressive rollout interface but differ in how they aggregate temporal information.}
+  \label{fig:three-controllers}
+\end{figure}
 \begin{table}[H]
 \centering
 \begin{tabular}{cccc|ccc}
@@ -194,6 +213,13 @@ Qualitative rollouts show that spatial structures (shocks and rarefactions) are 
 
 These results highlight an unexpected and practically valuable property: a model trained on one viscosity can generalize robustly to many others, reducing data requirements when labeled trajectories are scarce.
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.65\textwidth]{images/transformer_architecture.png}
+  \caption{Schematic of the Transformer-based controller architecture. Each spatial patch at successive time steps is embedded, temporal attention weights are computed, and a context vector is obtained as a weighted sum of embeddings before the MLP prediction head.}
+  \label{fig:transformer-arch}
+\end{figure}
+
 
 
 
@@ -207,6 +233,14 @@ These results highlight an unexpected and practically valuable property: a model
 
 \section{Approach 2: TCAN based Model}
 \subsection{Model Architecture}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.70\textwidth]{images/tcan_architecture.png}
+  \caption{Overview of the TCAN (Temporal Convolutional Attention Network) architecture. The model combines 1D convolutional feature extraction along the spatial dimension with a causal temporal attention mechanism over the history window, plus FiLM conditioning on viscosity $\nu$.}
+  \label{fig:tcan-arch}
+\end{figure}
+
 Our second approach uses a Temporal Convolutional Attention Network (TCAN) controller. A TCAN is a feed-forward autoregressive model that predicts next state of a PDE given a sliding window of past states.\\
 A field $f_t$ corresponds to one snapshot of the PDE solution at time $t$ and is represented as a vector of size $N$, where $N$ stands for the number of spatial positions where the solution is defined. Therefore, the continuous field at time $t$ is given by: $$f_t = [u(x_1, t), u(x_2, t),..., u(x_N,t)] \in \mathbb{R}^{1 \times N}.$$
 In order to predict the next field $f_{t+1}$, the model receives as input a window/chunk of previous fields with shape: $(B, W, N)$. This is defined as: $$\text{window} = [f_{t - W + 1}, f_{t - W + 2}, ..., f_{t}],$$ where $B$ is the batch size, $W$ is the history length (number of previous fields in the window), and $N$ is the number of spatial points.\\
@@ -413,6 +447,35 @@ Figure~\ref{fig:loss-curve} displays the composite loss over the evaluation loop
 \label{fig:loss-curve}
 \end{figure}
 
+
+\paragraph{Full-trajectory results at all resolutions.}
+Figure~\ref{fig:tcan-trajectories} shows TCAN autoregressive rollout predictions (after 100 training epochs) compared to ground truth for all four spatial resolutions.
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/full_trajectory_sample_0_85x85.png}
+    \caption*{$s=85$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/full_trajectory_sample_0_141x141.png}
+    \caption*{$s=141$}
+  \end{minipage}\\[6pt]
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/full_trajectory_sample_0_211x211.png}
+    \caption*{$s=211$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/full_trajectory_sample_0_421x421.png}
+    \caption*{$s=421$}
+  \end{minipage}
+  \caption{TCAN full autoregressive trajectory predictions (100 epochs) vs.~ground truth for all four spatial resolutions. Each panel shows the space-time heatmap: top half is ground truth, bottom half is the TCAN prediction. Prediction quality degrades at finer resolutions due to the longer rollout horizon.}
+  \label{fig:tcan-trajectories}
+\end{figure}
 
 \subsubsection{Evaluation Metrics}
 % ---------- RESULTS + EVALUATION METRICS --------------------

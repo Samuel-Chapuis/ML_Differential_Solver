@@ -26,6 +26,13 @@ with initial/boundary conditions. Here $u$ is a scalar or vector field; $\mathca
 \subsection{Why Navier--Stokes?}
 	Navier--Stokes models is a canonical set of nonlinear PDEs governing fluid flow, encompassing a wide range of phenomena from laminar to turbulent regimes. Their complexity and multi-scale nature make them an ideal testbed for evaluating the capabilities of neural architectures in learning physical dynamics. Successfully modeling Navier--Stokes would demonstrate the potential of AI-driven approaches in computational fluid dynamics (CFD) and beyond.
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.80\textwidth]{images/foil.png}
+  \caption{Computational fluid dynamics simulation of flow over an airfoil. Accurately resolving the velocity and pressure fields requires solving the Navier--Stokes equations at high resolution, which is computationally expensive. Neural surrogates aim to replicate such simulations at a fraction of the cost.}
+  \label{fig:cfd-foil}
+\end{figure}
+
 \subsection{Governing equations}
 The Navier--Stokes equations describe the motion of fluid substances and are derived from fundamental conservation laws: mass, momentum, and energy. They can be expressed as follows:
 
@@ -67,6 +74,13 @@ Where all the variables are defined as:
 
 These equations require a viscosity model (e.g., Newtonian fluid) and an equation of state (e.g., ideal gas law or van der Waals equation) to close the system. They form the foundation for simulating fluid dynamics in various applications, from aerodynamics to weather forecasting.
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.65\textwidth]{images/kolmogorov.png}
+  \caption{The Kolmogorov energy cascade: turbulent kinetic energy is injected at large scales and transferred to progressively smaller eddies until it is dissipated by viscosity. Capturing this multi-scale process is a key challenge for neural PDE solvers.}
+  \label{fig:kolmogorov}
+\end{figure}
+
 \begin{align}
     \text{Newtonian fluid model}:& \quad
     \begin{cases}
@@ -82,7 +96,24 @@ These equations require a viscosity model (e.g., Newtonian fluid) and an equatio
 \end{align}
 
 \subsection{Burger's equation as a starting point}
-As the project starts, we focus the goal was to use a model simple enough to be learned with limited data and computational resources, yet rich enough to exhibit complex dynamics. Thus, we begin with the burger s equation, a simplified 1D version of the Navier--Stokes equations that captures some features of fluid dynamics, such as shock formation and nonlinear advection.
+As the project starts, we focus the goal was to use a model simple enough to be learned with limited data and computational resources, yet rich enough to exhibit complex dynamics. Thus, we begin with the Burgers equation, a simplified 1D version of the Navier--Stokes equations that captures some features of fluid dynamics, such as shock formation and nonlinear advection.
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/advection.png}
+    \caption{Pure advection: the wave translates without deformation. In the Burgers equation this term causes self-steepening and eventual shock formation.}
+    \label{fig:advection}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/diffusion.png}
+    \caption{Pure diffusion: the wave smooths over time. In the Burgers equation the viscous term $\nu\,u_{xx}$ counteracts shock steepening.}
+    \label{fig:diffusion}
+  \end{minipage}
+  \label{fig:advection-diffusion}
+\end{figure}
 The viscous Burger's equation in 1D is given by:
 \begin{equation}
     \dfrac{\partial u}{\partial t} + u \dfrac{\partial u}{\partial x} = \nu \dfrac{\partial^2 u}{\partial x^2}, \quad x \in [0,L],\; t>0,

@@ -146,35 +146,81 @@ rather than just the endpoint, handles arbitrary intermediate query
 times, and its architecture is naturally extensible to longer
 prediction horizons and other PDE families.
 
-\section{Placeholders for figures}
-\section{Visual examples}
+\section{Visual Examples and Regime Illustrations}
+\label{sec:visual-examples}
 
-\begin{figure}[h]
+\paragraph{Effect of viscosity on trajectory shape.}
+Figure~\ref{fig:heatmaps-viscosity} shows full space-time heatmaps of the Burgers solution for four viscosity values spanning the training range. Low viscosity ($\nu=0.001$) produces a sharp diagonal shock front; increasing $\nu$ progressively smooths the gradient until fully diffusive behaviour dominates at $\nu=0.5$.
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}[t]{0.23\textwidth}
     \centering
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/smooth.png}
-        \caption{Shock initial condition}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/sin.png}
-        \caption{Rarefaction initial condition}
-    \end{minipage}
-    \\[0.5cm]
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/hyperbolic_tangeante.png}
-        \caption{Sinusoidal initial condition}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/smooth.png}
-        \caption{Smoothed random field initial condition}
-    \end{minipage}
-    \label{fig:initial_conditions}
+    \includegraphics[width=\linewidth]{images/Heatmap_1DBurgers_visc_0001.png}
+    \caption*{$\nu=0.001$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/Heatmap_1DBurgers_visc_001.png}
+    \caption*{$\nu=0.01$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/Heatmap_1DBurgers_visc_01.png}
+    \caption*{$\nu=0.1$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/Heatmap_1DBurgers_visc_05.png}
+    \caption*{$\nu=0.5$}
+  \end{minipage}
+  \caption{Space-time heatmaps of the 1D Burgers solution at four viscosity values. Horizontal axis: spatial coordinate $x\in[0,1]$; vertical axis: time $t\in[0,1]$. The sharp shock front visible at $\nu=0.001$ progressively diffuses as $\nu$ increases.}
+  \label{fig:heatmaps-viscosity}
 \end{figure}
 
-\noindent Insert the actual plots produced by the notebook (e.g., \texttt{visualization.py} helpers) in place of the placeholders above.
+\paragraph{Trajectory samples at two resolutions.}
+Figure~\ref{fig:samples-2x2} shows trajectory samples from the FNO dataset at resolutions $s=85$ and $s=421$ for a near-inviscid case ($\nu=0.001$, sharp shock) and a smooth case ($\nu=0.3$). The finer grid ($s=421$) reveals sharper structure and requires more autoregressive steps, explaining the harder prediction task at high resolution.
+
+\begin{figure}[h!]
+  \centering
+  \begin{tabular}{ccc}
+    & $\nu=0.001$ (sharp shock) & $\nu=0.3$ (smooth) \\[4pt]
+    $s=85$  &
+      \includegraphics[width=0.40\textwidth]{images/sample_85x85_nu0001.png} &
+      \includegraphics[width=0.40\textwidth]{images/sample_85x85_nu03.png} \\[6pt]
+    $s=421$ &
+      \includegraphics[width=0.40\textwidth]{images/sample_421x421_nu0001.png} &
+      \includegraphics[width=0.40\textwidth]{images/sample_421x421_nu03.png}
+  \end{tabular}
+  \caption{Space-time heatmaps of representative FNO dataset trajectories. Rows: spatial grid size. Columns: viscosity regime. At low viscosity the wave steepens into a sharp discontinuity; at high viscosity the solution remains smooth throughout.}
+  \label{fig:samples-2x2}
+\end{figure}
+
+\paragraph{Graphical trajectory visualizations.}
+Figure~\ref{fig:graphical-viz} shows line plots of the field $u(x,t)$ at successive time steps for the same four viscosity values, giving an intuitive view of wave steepening and diffusion dynamics.
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/graphical_visualization_1DBurgers_visc_0001.png}
+    \caption*{$\nu=0.001$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/graphical_visualization_1DBurgers_visc_001.png}
+    \caption*{$\nu=0.01$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/graphical_visualization_1DBurgers_visc_01.png}
+    \caption*{$\nu=0.1$}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/graphical_visualization_1DBurgers_visc_05.png}
+    \caption*{$\nu=0.5$}
+  \end{minipage}
+  \caption{Successive snapshots $u(x,t)$ at 16 evenly spaced times for four viscosity values. The profile is shown at each time step; the rightward shift and progressive steepening/smoothing are clearly visible.}
+  \label{fig:graphical-viz}
+\end{figure}
