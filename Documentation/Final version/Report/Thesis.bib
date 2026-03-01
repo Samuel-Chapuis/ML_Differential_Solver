@@ -1,6 +1,6 @@
 %% Bibliography for NFTM Burgers Equation Solver Thesis
-%% Generated: December 2025
-%% Contains only cited references
+%% Updated: March 2026
+%% All entries verified against arXiv / published sources
 
 %% ========================================
 %% FOUNDATIONAL MEMORY-AUGMENTED ARCHITECTURES
@@ -20,7 +20,7 @@
 
 @article{raissi2019physics,
   author    = {Maziar Raissi and Paris Perdikaris and George E. Karniadakis},
-  title     = {Physics-Informed Neural Networks: A Deep Learning Framework for Solving 
+  title     = {Physics-Informed Neural Networks: A Deep Learning Framework for Solving
                Forward and Inverse Problems Involving Nonlinear Partial Differential Equations},
   journal   = {Journal of Computational Physics},
   volume    = {378},
@@ -30,7 +30,7 @@
 }
 
 @inproceedings{rahaman2019spectral,
-  author    = {Nasim Rahaman and Aristide Baratin and Devansh Arpit and Felix Draxler and 
+  author    = {Nasim Rahaman and Aristide Baratin and Devansh Arpit and Felix Draxler and
                Min Lin and Fred A. Hamprecht and Yoshua Bengio and Aaron Courville},
   title     = {On the Spectral Bias of Neural Networks},
   booktitle = {Proceedings of the 36th International Conference on Machine Learning (ICML)},
@@ -41,12 +41,24 @@
   publisher = {PMLR}
 }
 
+@article{wang2021understanding,
+  author    = {Sifan Wang and Yujun Teng and Paris Perdikaris},
+  title     = {Understanding and Mitigating Gradient Flow Pathologies in
+               Physics-Informed Neural Networks},
+  journal   = {SIAM Journal on Scientific Computing},
+  volume    = {43},
+  number    = {5},
+  pages     = {A3055--A3081},
+  year      = {2021},
+  doi       = {10.1137/20M1318043}
+}
+
 %% ========================================
 %% NEURAL OPERATOR LEARNING
 %% ========================================
 
 @inproceedings{li2021fourier,
-  author    = {Zongyi Li and Nikola Kovachki and Kamyar Azizzadenesheli and Burigede Liu and 
+  author    = {Zongyi Li and Nikola Kovachki and Kamyar Azizzadenesheli and Burigede Liu and
                Kaushik Bhattacharya and Andrew Stuart and Anima Anandkumar},
   title     = {Fourier Neural Operator for Parametric Partial Differential Equations},
   booktitle = {Proceedings of the International Conference on Learning Representations (ICLR)},
@@ -54,8 +66,16 @@
   note      = {arXiv:2010.08895}
 }
 
+@article{li2020fourier,
+  author    = {Zongyi Li and Nikola Kovachki and Kamyar Azizzadenesheli and Burigede Liu and
+               Kaushik Bhattacharya and Andrew Stuart and Anima Anandkumar},
+  title     = {Fourier Neural Operator for Parametric Partial Differential Equations},
+  journal   = {arXiv preprint arXiv:2010.08895},
+  year      = {2020}
+}
+
 @article{kovachki2023neural,
-  author    = {Nikola Kovachki and Zongyi Li and Burigede Liu and Kamyar Azizzadenesheli and 
+  author    = {Nikola Kovachki and Zongyi Li and Burigede Liu and Kamyar Azizzadenesheli and
                Kaushik Bhattacharya and Andrew Stuart and Anima Anandkumar},
   title     = {Neural Operator: Learning Maps Between Function Spaces with Applications to {PDE}s},
   journal   = {Journal of Machine Learning Research},
@@ -63,6 +83,77 @@
   number    = {89},
   pages     = {1--97},
   year      = {2023}
+}
+
+@article{li2021pino,
+  author    = {Zongyi Li and Hongkai Zheng and Nikola Kovachki and David Jin and
+               Haoxuan Chen and Burigede Liu and Kamyar Azizzadenesheli and Anima Anandkumar},
+  title     = {Physics-Informed Neural Operator for Learning Partial Differential Equations},
+  journal   = {{ACM/IMS} Journal of Data Science},
+  year      = {2024},
+  doi       = {10.1145/3648506},
+  note      = {First submitted November 2021; arXiv:2111.03794}
+}
+
+%% ========================================
+%% ROLLOUT STABILITY AND ERROR ACCUMULATION
+%% ========================================
+
+@article{ye2025rno,
+  author    = {Zaijun Ye and Chen-Song Zhang and Wansheng Wang},
+  title     = {Recurrent Neural Operators: Stable Long-Term {PDE} Prediction},
+  journal   = {arXiv preprint arXiv:2505.20721},
+  year      = {2025},
+  note      = {arXiv:2505.20721 [cs.LG]}
+}
+
+@inproceedings{lippe2023pderefiner,
+  author    = {Phillip Lippe and Bastiaan S. Veeling and Paris Perdikaris and
+               Richard E. Turner and Johannes Brandstetter},
+  title     = {{PDE-Refiner}: Achieving Accurate Long Rollouts with Neural {PDE} Solvers},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023},
+  note      = {arXiv:2308.05732}
+}
+
+%% ========================================
+%% INFERENCE-TIME CORRECTION
+%% ========================================
+
+@article{huang2025physicscorrect,
+  author    = {Xinquan Huang and Paris Perdikaris},
+  title     = {{PhysicsCorrect}: A Training-Free Approach for Stable Neural {PDE} Simulations},
+  journal   = {arXiv preprint arXiv:2507.02227},
+  year      = {2025},
+  note      = {arXiv:2507.02227 [cs.LG]}
+}
+
+%% ========================================
+%% SPATIAL ATTENTION FOR PDES
+%% ========================================
+
+@inproceedings{wu2024transolver,
+  author    = {Haixu Wu and Huakun Luo and Haowen Wang and Jianmin Wang and Mingsheng Long},
+  title     = {Transolver: A Fast Transformer Solver for {PDE}s on General Geometries},
+  booktitle = {Proceedings of the 41st International Conference on Machine Learning (ICML)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {235},
+  pages     = {53681--53705},
+  year      = {2024},
+  note      = {arXiv:2402.02366}
+}
+
+%% ========================================
+%% DATA EFFICIENCY
+%% ========================================
+
+@inproceedings{musekamp2025activelearning,
+  author    = {Daniel Musekamp and Marimuthu Kalimuthu and David Holzm{\"u}ller and
+               Makoto Takamoto and Mathias Niepert},
+  title     = {Active Learning for Neural {PDE} Solvers},
+  booktitle = {The Thirteenth International Conference on Learning Representations (ICLR)},
+  year      = {2025},
+  note      = {arXiv:2408.01536}
 }
 
 %% ========================================
@@ -89,78 +180,16 @@
   doi       = {10.1002/cpa.3160030302}
 }
 
+%% ========================================
+%% NEURAL FIELD TURING MACHINE
+%% ========================================
 
 @misc{malhotra2025neuralfieldturingmachine,
-      title={Neural Field Turing Machine: A Differentiable Spatial Computer}, 
-      author={Akash Malhotra and Nacéra Seghouani},
-      year={2025},
-      eprint={2509.03370},
-      archivePrefix={arXiv},
-      primaryClass={cs.NE},
-      url={https://arxiv.org/abs/2509.03370}, 
-}
-
-% FNO Paper Dataset Generation Code
-@article{li2020fourier,
-  title={Fourier neural operator for parametric partial differential equations},
-  author={Li, Zongyi and Kovachki, Nikola and Azizzadenesheli, Kamyar and Liu, Burigede and Bhattacharya, Kaushik and Stuart, Andrew and Anandkumar, Anima},
-  journal={arXiv preprint arXiv:2010.08895},
-  year={2020}
-}
-
-%% ========================================
-%% RECENT EXTENSIONS AND BENCHMARKS
-%% ========================================
-
-@article{wang2022physicsinformed,
-  author    = {Sifan Wang and Hanwen Wang and Paris Perdikaris},
-  title     = {Improved Architectures and Training Algorithms for Deep Operator Networks Applied to Nonlinear Problems},
-  journal   = {Journal of Scientific Computing},
-  volume    = {92},
-  pages     = {35},
-  year      = {2022},
-  note      = {See also: PINO, arXiv:2111.03794}
-}
-
-@article{lippe2023pde,
-  author    = {Phillip Lippe and Bastiaan S. Veeling and Paris Perdikaris and Richard E. Turner and Efstratios Gavves},
-  title     = {{PDE}-Refiner: Achieving Accurate Long Rollouts with Neural {PDE} Solvers},
-  journal   = {arXiv preprint arXiv:2308.05732},
-  year      = {2023},
-  note      = {arXiv:2308.05732; also introduces Recurrent Neural Operators (RNO), arXiv:2505.20721}
-}
-
-@article{han2025physicscorrect,
-  author    = {Han, Xiang and others},
-  title     = {{PhysicsCorrect}: A Training-Free Approach to Physics-Consistent Neural {PDE} Solvers},
-  journal   = {arXiv preprint arXiv:2507.02227},
-  year      = {2025},
-  note      = {arXiv:2507.02227}
-}
-
-@article{wu2024transolver,
-  author    = {Haixu Wu and Huakun Luo and Haowen Wang and Jianmin Wang and Mingsheng Long},
-  title     = {Transolver: A Fast Transformer Solver for {PDE}s on General Geometries},
-  journal   = {arXiv preprint arXiv:2402.02366},
-  year      = {2024},
-  note      = {arXiv:2402.02366}
-}
-
-@inproceedings{wang2021understanding,
-  author    = {Sifan Wang and Yujun Teng and Paris Perdikaris},
-  title     = {Understanding and Mitigating Gradient Flow Pathologies in Physics-Informed Neural Networks},
-  journal   = {SIAM Journal on Scientific Computing},
-  volume    = {43},
-  number    = {5},
-  pages     = {A3055--A3081},
-  year      = {2021},
-  note      = {See also loss-balancing survey, arXiv:2110.09813}
-}
-
-@article{musekamp2024active,
-  author    = {Daniel Musekamp and Marimuthu Kalimuthu and David Holzm{\"u}ller and Makoto Takamoto and Mathias Niepert},
-  title     = {Active Learning for Neural {PDE} Solvers},
-  journal   = {arXiv preprint arXiv:2408.01536},
-  year      = {2024},
-  note      = {arXiv:2408.01536}
+  author        = {Akash Malhotra and Nac{\'e}ra Seghouani},
+  title         = {Neural Field Turing Machine: A Differentiable Spatial Computer},
+  year          = {2025},
+  eprint        = {2509.03370},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.NE},
+  url           = {https://arxiv.org/abs/2509.03370}
 }

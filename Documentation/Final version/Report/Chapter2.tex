@@ -1,240 +1,163 @@
-\chapter{Related Work}
+\chapter{ Related Work}
 \label{chap:related_work}
-%It is expected to find:
 
-%\begin{itemize}
-%\item The research articles  related to your defined problem/objective 
-%\item Try to present them by category, the main ideas behind and their limitations
-%\item Justify your directions/choices. This part should make a link with the next chapter.
+This chapter introduces the key concepts, prior architectures, and existing approaches that form the intellectual foundation of our work. We survey the literature across four interconnected axes: memory-augmented neural architectures, physics-informed learning, operator-based surrogate models, and training and data-efficiency strategies for neural PDE solvers. For each strand we explain the core idea, its empirical track record, its limitations when applied to convection-dominated PDEs such as the viscous Burgers equation, and how it shapes the design choices made in this project. Publication years and venues are indicated throughout so the reader can place each contribution in the chronology of the field.
 
-%\end{itemize}
+% ===================================================================
+\section{Memory-Augmented Neural Architectures}
+\label{sec:bg:memory}
 
-%==============================================================================
-\section{Memory Architectures}
-\label{sec:related_memory}
-%==============================================================================
+% -------------------------------------------------------------------
+\subsection{Neural Turing Machines (2014)}
+\label{sec:bg:ntm}
 
-The foundation of Neural Field Turing Machine approach lies in architectures that augment neural networks with external memory and sophisticated attention mechanisms.
-
-%------------------------------------------------------------------------------
-\subsection{Neural Turing Machines}
-\label{subsec:ntm}
-%------------------------------------------------------------------------------
-
-Graves, Wayne, and Danihelka~\cite{graves2014neural} introduced Neural Turing Machines (NTMs) as differentiable analogues of classical Turing machines. The key innovation is coupling a neural network controller with an external memory matrix that can be read from and written to via learned attention mechanisms, all while remaining end-to-end differentiable~\cite{graves2014neural}.
-
-\paragraph{Architecture.}
-An NTM~\cite{graves2014neural} consists of:
-\begin{itemize}
-    \item \textbf{Controller}: A recurrent or feedforward network that processes inputs and emits control signals
-    \item \textbf{Memory matrix}: \(\mathbf{M}_t \in \mathbb{R}^{N \times M}\) with \(N\) addressable locations of size \(M\)
-    \item \textbf{Read/Write heads}: Attention-based addressing mechanisms
-\end{itemize}
-
-%The controller interacts with memory through two complementary addressing modes:
-
-%\textit{Content-based addressing} uses similarity to focus on relevant memory locations:
-%\begin{equation}
-%w_t^c(i) = \frac{\exp\left(\beta_t \cdot K[\mathbf{k}_t, \mathbf{M}_t(i)]\right)}{\sum_j \exp\left(\beta_t \cdot K[\mathbf{k}_t, \mathbf{M}_t(j)]\right)}
-%\label{eq:ntm_content_addressing}
-%\end{equation}
-%where \(K[\mathbf{u}, \mathbf{v}] = \frac{\mathbf{u}^T\mathbf{v}}{\|\mathbf{u}\|\|\mathbf{v}\|}\) is cosine similarity and \(\beta_t\) controls focus sharpness.
-
-%\textit{Location-based addressing} enables algorithmic operations via shifting and sharpening:
-%\begin{align}
-%\tilde{w}_t &= s_t \circledast w_t^g \quad \text{(convolutional shift)} \label{eq:ntm_shift} \\
-%w_t(i) &= \frac{[\tilde{w}_t(i)]^{\gamma_t}}{\sum_j [\tilde{w}_t(j)]^{\gamma_t}} \quad \text{(sharpening)} \label{eq:ntm_sharpen}
-%\end{align}
-
-While \textbf{Reading}~\cite{graves2014neural} extracts information via weighted average:
+The idea of equipping a neural network with an explicit, externally addressable memory was introduced in 2014 by Graves, Wayne, and Danihelka in the preprint \emph{Neural Turing Machines}~\cite{graves2014neural}, which later served as the conceptual blueprint for a line of differentiable computing research. The central insight of the NTM is to decouple the network's parametric knowledge, stored in its weights, from its working memory, stored in a separate matrix $M_t \in \mathbb{R}^{N \times M}$ that holds $N$ addressable locations each of size $M$. A neural controller (either recurrent or feedforward) processes inputs and emits control signals that govern two differentiable operations. Reading extracts information as the weighted average
 \begin{equation}
-\mathbf{r}_t = \sum_{i=1}^N w_t^r(i) \mathbf{M}_t(i)
-\label{eq:ntm_read}
+  r_t = \sum_{i=1}^{N} w_t^r(i)\, M_t(i),
 \end{equation}
-
-\textbf{Writing}~\cite{graves2014neural} combines selective erasure and addition:
+where the attention weights $w_t^r$ are computed by a combination of content-based lookup and location-based shifting. Writing updates the memory through selective erasure followed by an additive correction:
 \begin{equation}
-\mathbf{M}_t(i) = \mathbf{M}_{t-1}(i) \odot [\mathbf{1} - w_t^w(i)\mathbf{e}_t] + w_t^w(i)\mathbf{a}_t
-\label{eq:ntm_write}
+  M_t(i) \leftarrow M_{t-1}(i)\,\bigl[1 - w_t^w(i)\, e_t\bigr] + w_t^w(i)\, a_t,
 \end{equation}
+where $e_t$ is an erase vector and $a_t$ an add vector produced by the controller. Because every step is differentiable with respect to all parameters, the full system is trained end-to-end by backpropagation through time. On benchmark tasks such as sequence copying, associative recall, and sorting, the NTM substantially outperforms vanilla LSTMs, demonstrating that explicit memory enables a qualitatively different class of algorithmic generalisation~\cite{graves2014neural}.
 
-%\paragraph{Limitations for PDEs.}
-%While groundbreaking for discrete algorithmic tasks, NTMs face fundamental obstacles for PDE solving:
-%\begin{enumerate}
-%    \item \textbf{Discrete memory structure}: The tabular format \(\mathbf{M} \in \mathbb{R}^{N \times M}\) is designed for discrete symbols, not continuous spatial fields
-%    \item \textbf{No geometric structure}: Memory locations lack inherent spatial relationships critical for PDEs
-%    \item \textbf{Scalability}: Content-based addressing costs \(\mathcal{O}(N \times M)\) per timestep
-%    \item \textbf{Lack of spatial inductive bias}: No assumptions about locality or translation invariance
-%\end{enumerate}
+Despite this conceptual breakthrough, the NTM presents fundamental obstacles when applied to PDE solving. Its memory is a flat, geometry-free table: the $N$ slots have no notion of spatial adjacency, physical distance, or coordinate system, so the architecture cannot exploit the locality and translation invariance that are essential for representing solution fields defined over a continuous spatial domain. The content-based addressing mechanism, which computes a cosine similarity between a query vector and every memory row, incurs $\mathcal{O}(N \times M)$ operations per timestep, making fine spatial resolution prohibitively expensive. Moreover, NTMs use discrete, finite memory slots optimised for storing and retrieving symbolic tokens rather than the smooth, high-dimensional fields that arise in fluid dynamics. Taken together, these properties motivated the fundamental paradigm shift embodied in the Neural Field Turing Machine of Malhotra and Seghouani~\cite{malhotra2025neuralfieldturingmachine}, where the continuous solution field $u(x,t)$ itself serves as a spatially structured memory and local spatial convolutions replace content-based addressing.
 
-\paragraph{Limitations for PDEs.}
-While groundbreaking for discrete algorithmic tasks~\cite{graves2014neural}, Neural Turing Machines face fundamental obstacles for Partial Differential Equation 
-solving due to their discrete memory structure, which uses a tabular format \(\mathbf{M} \in \mathbb{R}^{N \times M}\) designed for discrete symbols rather than continuous spatial fields. 
-Furthermore, their memory locations possess no inherent geometric or spatial relationships, which are critical for representing PDE domains. This design also leads to scalability issues, as content-based addressing incurs a cost of \(\mathcal{O}(N \times M)\) per timestep~\cite{graves2014neural}. Ultimately, the architecture lacks the necessary spatial inductive biases—such as assumptions about locality or translation invariance—that are essential for efficiently learning and solving PDEs.
+% -------------------------------------------------------------------
+\subsection{Neural Field Turing Machine (2025)}
+\label{sec:bg:nftm}
 
-\paragraph{Relevance.}
-NTMs establish the foundational principle we coded, an external memory (the spatial field \(u(x,t)\)) combined with learned read/write operations (our controller implementation). However, we fundamentally adapt this paradigm from discrete memory slots to continuous spatial fields, replacing content-based addressing with local spatial convolutions.
+Building directly on the NTM blueprint, Malhotra and Seghouani introduced the Neural Field Turing Machine (NFTM) in 2025~\cite{malhotra2025neuralfieldturingmachine} as a differentiable spatial computer. The key architectural innovation is to replace the discrete memory matrix with a continuous spatial field $u(x,t)$ defined over a spatial domain $\Omega$, effectively treating the PDE solution itself as the working memory of the machine. Read and write operations are implemented through local spatial convolutions rather than global content-based attention, which preserves spatial inductive biases (locality, translation invariance) and avoids the $\mathcal{O}(N \times M)$ complexity of the original NTM. The neural controller, which can be instantiated as a CNN, RNN, or Transformer, processes local patches of the field and emits incremental update signals that modify the memory field at each timestep, producing a computation pattern analogous to an explicit numerical scheme: local read, compute an increment, local write.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.78\textwidth]{images/Brain-architecture.png}
-  \caption{Overview of the Neural Field Turing Machine (NFTM) framework~\cite{malhotra2025neuralfieldturingmachine}. A neural controller reads from and writes to a continuous external spatial memory (the PDE field), analogous to the NTM's memory matrix but defined over a continuous spatial domain. This architecture forms the basis of all controllers developed in this work.}
-  \label{fig:nftm-overview}
-\end{figure}
+This architecture is the direct foundation of the two approaches developed in the present thesis. We adopt the NFTM's read-compute-write paradigm and instantiate the controller as a temporal attention pooling network (Approach 1) and a causal convolutional attention network (Approach 2), both operating on local patches of the spatial field and producing bounded incremental corrections. Our training dataset of 724 Burgers trajectories across 13 viscosity values was designed specifically to stress-test the generalisation capacity of this NFTM-inspired framework.
 
-%==============================================================================
+% ===================================================================
 \section{Physics-Informed Neural Networks}
-\label{sec:related_pinns}
-%==============================================================================
+\label{sec:bg:pinns}
 
-Physics-Informed Neural Networks represent a fundamentally different paradigm: instead of learning from data, they embed physical laws directly into the loss function.
+% -------------------------------------------------------------------
+\subsection{PINN Framework (2019)}
+\label{sec:bg:pinn-framework}
 
-%------------------------------------------------------------------------------
-\subsection{PINN Framework}
-\label{subsec:pinn_framework}
-%------------------------------------------------------------------------------
+A fundamentally different paradigm for solving PDEs was introduced in 2019 by Raissi, Perdikaris, and Karniadakis in the landmark paper \emph{Physics-Informed Neural Networks: A Deep Learning Framework for Solving Forward and Inverse Problems Involving Nonlinear Partial Differential Equations}, published in the \emph{Journal of Computational Physics}~\cite{raissi2019physics}. Rather than learning from data, PINNs embed the governing equations directly into the training loss, making the neural network seek a solution that simultaneously satisfies the PDE, the initial condition, and the boundary conditions.
 
-Raissi, Perdikaris, and Karniadakis~\cite{raissi2019physics} introduced PINNs as a method for solving forward and inverse PDE problems by incorporating the governing equations as soft constraints during training.
-
-For the Burgers equation~\cite{raissi2019physics}:
+For the viscous Burgers equation $\partial_t u + u\,\partial_x u = \nu\,\partial_{xx} u$ on domain $\Omega \times [0,T]$, a PINN approximates the solution with a deep network $u_\theta(x,t)$ and minimises a composite loss
 \begin{equation}
-\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} = \nu\frac{\partial^2 u}{\partial x^2}, \quad (x,t) \in \Omega \times [0,T]
-\label{eq:burgers_pinn_pde}
+  \mathcal{L}_{\mathrm{PINN}} = \lambda_f \mathcal{L}_f + \lambda_u \mathcal{L}_u + \lambda_b \mathcal{L}_b,
 \end{equation}
+where $\mathcal{L}_f$ penalises the PDE residual $f_\theta = \partial_t u_\theta + u_\theta\,\partial_x u_\theta - \nu\,\partial_{xx} u_\theta$ at a set of $N_f$ interior collocation points, $\mathcal{L}_u$ enforces agreement with any available measurements at $N_u$ sensor locations, and $\mathcal{L}_b$ imposes the boundary conditions~\cite{raissi2019physics}. The spatial and temporal derivatives appearing in $\mathcal{L}_f$ are computed exactly through automatic differentiation, without any spatial grid. The resulting framework is entirely mesh-free and produces a continuous representation evaluable at arbitrary $(x,t)$ points, which is a substantial advantage over classical grid-based discretisations.
 
-A PINN approximates \(u(x,t) \approx u_{\theta}(x,t)\) using a deep neural network and minimizes~\cite{raissi2019physics}:
-\begin{equation}
-\mathcal{L}_{\text{PINN}} = \lambda_f \mathcal{L}_f + \lambda_u \mathcal{L}_u + \lambda_b \mathcal{L}_b
-\label{eq:pinn_total_loss}
-\end{equation}
+The paper demonstrated successful solutions to several canonical nonlinear PDEs including Burgers, Schrödinger, Allen-Cahn, and incompressible Navier-Stokes, validating PINNs on both forward and inverse problems. In the inverse setting, unknown physical parameters such as the viscosity $\nu$ are included as additional learnable scalars and are inferred jointly with the solution field, from sparse and potentially noisy observation data. This capability for data-assimilation-style parameter identification is a unique strength of PINNs that distinguishes them from supervised operator-learning approaches~\cite{raissi2019physics}.
 
-%where:
-%\begin{align}
-%\mathcal{L}_f &= \frac{1}{N_f}\sum_{i=1}^{N_f} \left|f_{\theta}(x_i^f, t_i^f)\right|^2 \label{eq:pinn_physics_loss} \\
-%f_{\theta} &= \frac{\partial u_{\theta}}{\partial t} + u_{\theta}\frac{\partial u_{\theta}}{\partial x} - \nu\frac{\partial^2 u_{\theta}}{\partial x^2} \label{eq:pinn_residual} \\
-%\mathcal{L}_u &= \frac{1}{N_u}\sum_{j=1}^{N_u} \left|u_{\theta}(x_j^u, t_j^u) - u_j\right|^2 \label{eq:pinn_data_loss} \\
-%\mathcal{L}_b &= \frac{1}{N_b}\sum_{k=1}^{N_b} \left|u_{\theta}(x_k^b, t_k^b) - u_k^b\right|^2 \label{eq:pinn_boundary_loss}
-%\end{align}
+% -------------------------------------------------------------------
+\subsection{Spectral Bias (2019)}
+\label{sec:bg:spectral-bias}
 
-\paragraph{Advantages.}
-The approach~\cite{raissi2019physics} is fundamentally \textbf{mesh-free}, eliminating the need for spatial discretization of the domain. This framework is naturally suited for \textbf{inverse problems}, as it can infer unknown physical parameters, such as the viscosity coefficient \(\nu\), directly from sparse and noisy observational data. Furthermore, it provides a \textbf{continuous solution} across space and time, allowing for evaluation at arbitrary query points \((x, t)\). Finally, it is effective in a \textbf{low data regime}, capable of producing accurate solutions with few or even no traditional high-fidelity training measurements~\cite{raissi2019physics}.
+A critical limitation of PINNs for convection-dominated problems was elucidated by Rahaman, Baratin, Arpit, and colleagues in the 2019 ICML paper \emph{On the Spectral Bias of Neural Networks}~\cite{rahaman2019spectral}. Through both theoretical analysis and controlled experiments, Rahaman et al.\ showed that standard multi-layer perceptrons exhibit a strong frequency-ordering in their learning dynamics: low-frequency components of the target function are fitted rapidly during early training, while high-frequency components are absorbed much more slowly, often requiring orders of magnitude more gradient steps. This phenomenon arises from the eigenvalue structure of the neural tangent kernel, whose spectrum is biased towards low frequencies.
 
-\paragraph{Limitations for Burgers Equation.}
-Despite their theoretical elegance, Physics-Informed Neural Networks (PINNs) face severe challenges for convection-dominated PDEs such as Burgers' equation. A primary issue is the \textbf{spectral bias toward low frequencies}, where neural networks, as demonstrated by Rahaman et al.~\cite{rahaman2019spectral}, preferentially learn low-frequency components of a solution. For shock-forming solutions rich in high-frequency content, this inherent bias manifests as an inability to accurately represent sharp gradients, leads to oscillatory artifacts (Gibbs phenomenon) near discontinuities, and results in extremely slow convergence, often requiring over \(10^5\) training iterations~\cite{rahaman2019spectral}. This limitation is compounded by a significant \textbf{computational cost}. Training a PINN requires a dense set of collocation points (\(N_f \sim 10^4\) for 1D problems), the computation of high-order derivatives via expensive automatic differentiation, and a lengthy optimization process typically spanning \(50{,}000\) to \(200{,}000\) iterations for convergence~\cite{raissi2019physics}. These factors together present substantial practical barriers for solving convection-dominated flows.
+For the Burgers equation, which forms sharp shock discontinuities containing significant high-frequency energy, the spectral bias has severe practical consequences. The network is initially unable to represent the steep gradients near a shock front, leading to Gibbs-like oscillatory artefacts in the predicted solution. Even after the low-frequency regime is well-fitted, convergence to the high-frequency components may require more than $10^5$ gradient steps~\cite{rahaman2019spectral}, and in many cases the optimisation stalls in a local minimum where the shock is perpetually smeared. This publication directly contextualises why pure PINNs are not a viable baseline for our Burgers shock experiments, and motivates our shift to a data-driven training regime.
 
-\paragraph{Relevance to Our Work.}
-Rather than minimizing PDE residuals, we learn from pre-computed high-fidelity trajectories. However, we retain physics-informed \textit{regularization} without requiring it as the primary loss.
+% -------------------------------------------------------------------
+\subsection{Gradient Pathologies in PINNs (2021)}
+\label{sec:bg:gradient-pathologies}
 
-%------------------------------------------------------------------------------
+Wang, Teng, and Perdikaris deepened the understanding of PINN failure modes in their 2021 paper \emph{Understanding and Mitigating Gradient Flow Pathologies in Physics-Informed Neural Networks}, published in the \emph{SIAM Journal on Scientific Computing}~\cite{wang2021understanding}. Their analysis reveals that the composite PINN loss $\mathcal{L}_{\mathrm{PINN}}$ causes the back-propagated gradients from different terms (residual, data, boundary) to exhibit wildly different magnitudes during training. When the physics residual term dominates the gradient norm, the data-fitting and boundary terms effectively receive negligible gradient signal, causing the network to prioritise PDE satisfaction at the expense of matching the correct solution. Conversely, when the data term dominates, the PDE constraint is poorly enforced. This imbalance is not merely an inconvenience: Wang et al.\ prove that, for stiff PDEs, the gradient norms can differ by several orders of magnitude, making uniform convergence impossible without explicit reweighting.
 
-\section{Transformer-based Temporal Modeling}
+To address this, the authors proposed a learning-rate annealing algorithm that monitors the statistics of back-propagated gradients from each loss term and automatically adjusts the weighting coefficients $\lambda_f$, $\lambda_u$, $\lambda_b$ during training so that their gradient contributions remain balanced. The algorithm was validated on Klein-Gordon equations, incompressible Navier-Stokes, and lid-driven cavity flow, demonstrating that adaptive loss weighting can recover convergence in regimes where fixed-weight PINNs fail entirely. This work directly informs our own training strategy: the weighting coefficients in our composite loss (MSE term at weight 1.0, gradient penalty at 0.1, energy dissipation penalty at 0.05) were set based on gradient magnitude monitoring, and gradient clipping is applied throughout TCAN training to prevent the physics terms from destabilising the optimisation.
 
-This section explains the role and functioning of Transformer-inspired models used in this work for temporal prediction tasks.
+% ===================================================================
+\section{Neural Operators and Frequency-Domain Methods}
+\label{sec:bg:operators}
 
-\subsection{Motivation}
+% -------------------------------------------------------------------
+\subsection{Neural Operator Theory (2023)}
+\label{sec:bg:no-theory}
 
-Classical recurrent models (RNN, LSTM, GRU) process temporal information sequentially, which can limit their ability to capture long-range dependencies and makes training unstable for long sequences. Transformers address this limitation by replacing recurrence with an attention mechanism, allowing the model to directly weight the importance of each past time step when making a prediction.
+The theoretical framework for operator learning was consolidated by Kovachki, Li, Liu, and collaborators in the 2023 \emph{Journal of Machine Learning Research} paper \emph{Neural Operator: Learning Maps Between Function Spaces with Applications to PDEs}~\cite{kovachki2023neural}. Classical supervised learning maps finite-dimensional vectors to finite-dimensional vectors; neural operators instead learn mappings $\mathcal{G}: \mathcal{A} \to \mathcal{U}$ between Banach spaces of functions, where $\mathcal{A}$ might be the space of PDE coefficient functions or initial conditions and $\mathcal{U}$ the space of corresponding solutions. A universal approximation theorem for such mappings was established, showing that a wide class of architectures based on iterated integral transforms can approximate any continuous operator to arbitrary accuracy, subject to mild regularity assumptions~\cite{kovachki2023neural}.
 
-In the context of physical systems such as the Burgers equation, this property is particularly relevant: the future state may depend more strongly on specific past configurations (e.g. shocks or gradients) than on the immediately preceding state alone.
+Crucially, neural operators are \emph{discretisation-invariant}: a trained model can be evaluated at any spatial resolution, not just the grid on which it was trained. This contrasts sharply with classical numerical surrogates that are tied to a specific mesh, and with PINNs that require re-training whenever the domain changes. The paper presents a general framework encompassing Graph Neural Operators, Low-Rank Neural Operators, and the Fourier Neural Operator as special cases, providing a unifying theoretical lens through which all subsequent operator-learning architectures can be understood.
 
-\subsection{General Principle of Transformers}
+% -------------------------------------------------------------------
+\subsection{Fourier Neural Operator (2021)}
+\label{sec:bg:fno}
 
-A Transformer operates on a sequence of inputs by mapping each element into a latent representation (embedding), then computing attention weights that quantify how relevant each time step is with respect to the prediction objective. Formally, attention can be interpreted as a learned weighted average over time, where the weights are data-dependent and normalized using a softmax function.
+The most practically influential instantiation of the neural operator framework is the Fourier Neural Operator (FNO)~\cite{li2021fourier}, which serves as the primary benchmark baseline for this project. Its architecture, benchmark results on the 1D viscous Burgers equation, and direct comparison against our TCAN model are described in full detail in Chapter~\ref{chap:fno}.
 
-Unlike full self-attention Transformers used in NLP, the architecture employed here focuses on temporal attention only, which is sufficient for short-to-medium temporal windows and significantly reduces computational cost.
+% -------------------------------------------------------------------
+\subsection{Physics-Informed Neural Operator (2024)}
+\label{sec:bg:pino}
 
-\subsection{TransformerController Architecture}
+Li, Zheng, Kovachki, and colleagues proposed a hybrid approach that bridges the supervised operator-learning paradigm of FNO and the physics-constrained training of PINNs. The resulting model, the Physics-Informed Neural Operator (PINO), was first submitted to arXiv in November 2021 and published in the \emph{ACM/IMS Journal of Data Science} in 2024~\cite{li2021pino}. The core idea is to incorporate PDE residual constraints at a \emph{higher} spatial resolution than the training data during the operator-learning phase, and then to fine-tune the pre-trained operator on a specific PDE instance using only physics constraints (no data) at test time.
 
-The \texttt{TransformerController} implemented in this work takes as input a temporal sequence of spatial patches and a physical parameter (the viscosity $\nu$). Each time step is processed independently by a shared encoder, then aggregated using attention.
+This two-stage strategy offers substantial advantages over both FNO and pure PINNs. During the operator-learning phase, coarse-resolution training data and fine-resolution physics constraints complement each other: data provides a ground-truth supervision signal that PINNs lack, while the physics constraints at high resolution force the operator to learn a solution that is consistent with the governing equations even between the training-data grid points. During the test-time fine-tuning phase, the pre-trained operator provides a warm initialisation that makes the residual-minimisation problem much more tractable than training a PINN from scratch, avoiding the convergence difficulties documented in~\cite{raissi2019physics, rahaman2019spectral}. PINO was shown to successfully solve long-temporal Kolmogorov flows where standard FNO predictions drift and pure PINNs fail to converge. These results are particularly pertinent to our cross-viscosity generalisation goal, as PINO's physics constraints allow it to generalise to unseen parameter regimes without additional labelled data.
 
-\paragraph{Input encoding}
-At each time step, the spatial patch and the viscosity are concatenated and passed through a multi-layer perceptron to produce a hidden embedding. This step lifts the raw physical variables into a higher-dimensional latent space where nonlinear relationships can be represented.
+% ===================================================================
+\section{Rollout Stability and Error Accumulation}
+\label{sec:bg:rollout}
 
-\paragraph{Temporal attention}
-For a sequence of length $L$, the model computes a scalar attention score for each time step. These scores are normalized across time using a softmax function, producing attention weights that sum to one. The final temporal context vector is obtained as a weighted sum of the embeddings:
-\[
-\mathbf{c} = \sum_{t=1}^{L} \alpha_t , \mathbf{h}_t
-\]
-where $\alpha_t$ denotes the learned attention weight and $\mathbf{h}_t$ the embedding at time $t$.
+When a neural surrogate is deployed autoregressively, the prediction at each timestep is fed as input to the next, so that small one-step errors compound over hundreds of timesteps. This \emph{exposure bias} or \emph{train-test mismatch} is one of the most practically significant barriers to deploying neural PDE solvers in long-horizon simulation tasks.
 
-\paragraph{Prediction head}
-The aggregated context vector is then passed through a fully connected prediction head to output a scalar value. In this application, this scalar corresponds to the predicted value of the field at the center of the spatial patch at the next time step.
+% -------------------------------------------------------------------
+\subsection{Recurrent Neural Operators (2025)}
+\label{sec:bg:rno}
 
-\subsection{Interpretability and Advantages}
+Ye, Zhang, and Wang addressed exposure bias directly in their May 2025 preprint \emph{Recurrent Neural Operators: Stable Long-Term PDE Prediction}~\cite{ye2025rno}. Their key observation is that teacher forcing, the standard training strategy in which each training step receives the ground-truth field rather than the model's previous prediction, creates a systematic mismatch between training and inference dynamics. When the model is evaluated autoregressively, it encounters its own imperfect predictions as inputs, a distribution it has never seen during training, and prediction errors grow unchecked.
 
-A key advantage of this Transformer-based controller is interpretability. The attention weights provide direct insight into which past time steps are most influential for a given prediction. This is particularly useful in a physical setting, where one may want to verify whether the model focuses on physically meaningful events (e.g. shock formation).
+Recurrent Neural Operators (RNOs) resolve this by replacing teacher-forced training with a recurrent regime: over a temporal window, the operator is recursively applied to its own predictions, so that each training step exposes the model to the same error distributions it will encounter at inference time. Theoretically, the authors prove through an error propagation analysis that teacher forcing leads to worst-case error growth that is \emph{exponential} in the number of timesteps, while recurrent training reduces this to \emph{linear} growth under the same assumptions, a qualitative improvement of practical importance for long rollouts~\cite{ye2025rno}. Empirically, RNO variants based on the Multigrid Neural Operator (r-MgNO) surpass teacher-forced baselines in long-term accuracy on Burgers, Navier-Stokes, and advection-diffusion benchmarks, while using fewer parameters than post-hoc correction approaches. Our curriculum learning strategy in the TCAN architecture (progressively increasing the rollout depth from $D=8$ to $D=16$ to $D=64$ steps) is philosophically aligned with the RNO philosophy of exposing the model to its own prediction errors during training.
 
-Compared to recurrent alternatives, this architecture:
-\begin{itemize}
-\item avoids vanishing or exploding gradients caused by long recursions,
-\item enables parallel processing over the temporal dimension,
-\item and provides explicit, learnable temporal importance weights.
-\end{itemize}
+% -------------------------------------------------------------------
+\subsection{PDE-Refiner (2023)}
+\label{sec:bg:pde-refiner}
 
-For these reasons, the TransformerController serves as a strong baseline for learning temporal dependencies in data-driven physical modeling.
+Lippe, Veeling, Perdikaris, Turner, and Brandstetter proposed a complementary perspective on rollout instability in the NeurIPS 2023 paper \emph{PDE-Refiner: Achieving Accurate Long Rollouts with Neural PDE Solvers}~\cite{lippe2023pderefiner}. Through a large-scale empirical analysis of autoregressive rollout strategies across multiple architectures and PDE families, the authors identified the root cause of accuracy degradation: standard surrogates trained with mean-squared error objectives progressively neglect high-frequency spatial content, as the MSE loss is dominated by the low-frequency modes that carry most of the signal energy. Over many rollout steps, this neglect of high frequencies accumulates into visible smoothing artefacts and, eventually, loss of shock sharpness or instability.
 
-%==============================================================================
-\section{Neural Operators and Recent Extensions}
-\label{sec:related_neural_operators}
-%==============================================================================
+PDE-Refiner addresses this through a diffusion-model-inspired multistep refinement process. After an initial coarse prediction is produced by a standard neural operator, a sequence of denoising steps iteratively recovers the high-frequency components of the solution, with each step targeting a progressively finer frequency band. This design explicitly forces the model to allocate capacity to high-frequency content rather than treating it as negligible noise. On Kolmogorov turbulence and 2D compressible Euler benchmarks, PDE-Refiner achieves stable and accurate rollouts over time horizons where all baseline models (FNO, UNet, and hybrid neural-numerical approaches) diverge or produce unphysical solutions~\cite{lippe2023pderefiner}. An additional benefit is that the denoising objective induces a form of spectral data augmentation, improving data efficiency. For our 1D Burgers setting, PDE-Refiner points to a practical post-processing strategy for recovering shock sharpness that is degraded during long autoregressive rollout, complementing the bounded residual updates and energy-dissipation penalties we already employ.
 
-Beyond memory-augmented networks and PINNs, a parallel line of research has focused on learning \emph{operators} that map entire functions to functions—a formulation directly suited to PDE problems where the goal is to learn the solution map from initial conditions to future states.
+% ===================================================================
+\section{Inference-Time Physical Correction}
+\label{sec:bg:correction}
 
-%------------------------------------------------------------------------------
-\subsection{Fourier Neural Operator}
-\label{subsec:fno}
-%------------------------------------------------------------------------------
+% -------------------------------------------------------------------
+\subsection{PhysicsCorrect (2025)}
+\label{sec:bg:physicscorrect}
 
-Li et al.~\cite{li2021fourier} introduced the Fourier Neural Operator (FNO), which learns the solution operator of a PDE by performing global convolution in Fourier space. A single forward pass maps an initial condition $u(\cdot, 0)$ directly to the solution at the target time $u(\cdot, T)$, achieving speedups of up to $1000\times$ over classical solvers. FNO is \emph{our primary benchmark}: we use the same dataset generator and compare all TCAN results against the reported FNO errors at four spatial resolutions ($s \in \{85, 141, 211, 421\}$).
+Huang and Perdikaris introduced PhysicsCorrect in a July 2025 preprint~\cite{huang2025physicscorrect}, offering a training-free strategy for enforcing physical consistency at each prediction step of any pretrained neural surrogate. The central idea is to formulate the correction of each autoregressive prediction as a \emph{linearised inverse problem}: given a predicted field $\hat{u}$ that does not exactly satisfy the PDE, find the minimal perturbation $\delta$ such that $\hat{u} + \delta$ satisfies the discrete PDE residual to first order. Solving this problem requires the Jacobian $J$ of the PDE residual operator with respect to the field values and its Moore-Penrose pseudoinverse $J^\dagger$. The correction is then $\delta = -J^\dagger F(\hat{u})$, where $F(\hat{u})$ is the PDE residual evaluated at the predicted field.
 
-\paragraph{Key difference from our approach.}
-FNO is a \textbf{single-step operator}: it predicts the solution at $t=T$ in one shot without any temporal rollout. Our TCAN controller, by contrast, is \textbf{autoregressive}: it advances the field one step at a time over $T-1$ autoregressive calls. This fundamental difference explains the performance gap (TCAN achieves relative $L^2 \approx 0.30$ at $s=85$ vs.\ FNO's $0.011$) and motivates the mitigation strategies described in later chapters.
+The practical challenge with this formulation is that computing $J$ and $J^\dagger$ from scratch at every timestep is prohibitively expensive. PhysicsCorrect resolves this through a caching strategy: during an offline warm-up phase over a small set of initial conditions, the Jacobian and its pseudoinverse are pre-computed and stored. At inference time, the cached $J^\dagger$ is reused for all subsequent corrections, reducing the per-step overhead by two orders of magnitude compared to naive real-time computation. Across three PDE benchmarks, namely 2D incompressible Navier-Stokes, 2D wave equation, and the 1D chaotic Kuramoto-Sivashinsky equation, PhysicsCorrect reduces relative prediction errors by up to 100$\times$ while adding less than 5\% to the total inference time~\cite{huang2025physicscorrect}. Importantly, the framework is architecture-agnostic and was validated with FNO, UNet, and Vision Transformer backbones, demonstrating that it can be applied directly to our trained TransformerController and TCAN models as a post-hoc improvement without any retraining or architectural modification.
 
-%------------------------------------------------------------------------------
-\subsection{Physics-Informed Neural Operator}
-\label{subsec:pino}
-%------------------------------------------------------------------------------
+% ===================================================================
+\section{Transformer-Based and Attention-Based Solvers}
+\label{sec:bg:transformers}
 
-Wang et al.~\cite{wang2022physicsinformed} proposed the Physics-Informed Neural Operator (PINO), which combines the operator-learning framework with PDE residual constraints. This allows generalization to unseen PDE parameters (e.g.\ viscosity values not seen during training) without explicit conditioning, by enforcing the governing equations during training. This approach is relevant to our data-driven viscosity generalization, where we instead handle parameter variation through an explicit FiLM conditioning module.
+Transformers, introduced by Vaswani et al.\ in 2017, replace recurrent sequential processing with a self-attention mechanism that directly computes a weighted combination of all input positions in parallel. This is particularly valuable for physical systems such as the Burgers equation, where the future evolution of a shock may depend on specific past configurations rather than just the immediately preceding timestep. Several works have applied this paradigm to PDE surrogate modelling, with attention applied along both the temporal and spatial dimensions.
 
-%------------------------------------------------------------------------------
-\subsection{Recurrent Neural Operators}
-\label{subsec:rno}
-%------------------------------------------------------------------------------
+% -------------------------------------------------------------------
+\subsection{Transolver: Spatial Attention for PDEs (2024)}
+\label{sec:bg:transolver}
 
-Lippe et al.\ introduced Recurrent Neural Operators (RNO)~\cite{lippe2023pde}, which train neural operators \textbf{autoregressively}: at each training step the model is exposed to its own prediction errors rather than always using ground-truth inputs. This scheduled exposure strategy directly eliminates the train-test mismatch that arises in standard teacher-forcing regimes. RNO is directly relevant to our work, as autoregressive error accumulation across 256 rollout steps is the primary driver of TCAN's performance gap relative to FNO. Our progressive rollout training strategy is inspired by this line of work.
+While our controllers apply attention along the \emph{temporal} dimension, Wu, Luo, Wang, Wang, and Long addressed the orthogonal challenge of applying attention along the \emph{spatial} dimension efficiently in their ICML 2024 Spotlight paper \emph{Transolver: A Fast Transformer Solver for PDEs on General Geometries}~\cite{wu2024transolver}. Applying standard self-attention directly to the mesh points of a PDE discretisation is computationally infeasible for practical geometries, which can contain millions of points; moreover, treating every mesh point as an independent token ignores the rich physical structure of the solution field.
 
-%------------------------------------------------------------------------------
-\subsection{PDE-Refiner}
-\label{subsec:pde_refiner}
-%------------------------------------------------------------------------------
+Transolver overcomes both difficulties through its \emph{Physics-Attention} mechanism. Rather than computing attention among mesh points, Physics-Attention first learns to group the $N$ mesh points into a small set of $S$ latent slices, where each slice aggregates points that share similar physical states (e.g.\ all points in the shock region, all points in the rarefaction fan, all points in the laminar zone). A physics-aware token is then computed for each slice by averaging the features of its constituent mesh points, and standard multi-head attention is applied among these $S$ tokens rather than among the $N$ mesh points. This reduces the attention complexity from $\mathcal{O}(N^2)$ to $\mathcal{O}(S^2)$ where $S \ll N$, achieving effectively linear complexity in the number of mesh points while capturing intrinsic physical correlations more faithfully than point-wise attention. The learned slices are interpretable: on Darcy flow, they correspond to fluid-structure interaction regions; on airfoil simulations, they separate the shock wave from the wake and the far field.
 
-Lippe et al.\ further proposed PDE-Refiner~\cite{lippe2023pde}, which applies a denoising-diffusion-inspired iterative refinement process to neural PDE predictions. By iteratively correcting predictions at multiple noise levels, PDE-Refiner recovers high-frequency content—most critically, sharp shock structures—that is progressively lost during long autoregressive rollouts. This is directly applicable to our setting, where shock sharpness degrades over the 256-step trajectory and relative $L^2$ error grows monotonically with resolution.
+Validated on six standard PDE benchmarks (including Darcy flow, Navier-Stokes, and structural mechanics), Transolver achieves a 22\% error reduction over the previous state-of-the-art and successfully scales to industrial-scale airfoil and car-body simulations~\cite{wu2024transolver}. Although the current work focuses on 1D temporal attention for Burgers dynamics, Transolver's Physics-Attention mechanism motivates incorporating spatially-aware grouping in the planned extension to 2D Burgers and incompressible Navier-Stokes, where identifying physically homogeneous regions of the spatial field could substantially improve the quality of learned representations.
 
-%------------------------------------------------------------------------------
-\subsection{PhysicsCorrect}
-\label{subsec:physicscorrect}
-%------------------------------------------------------------------------------
+% ===================================================================
+\section{Training Stability and Data Efficiency}
+\label{sec:bg:training}
 
-Han et al.~\cite{han2025physicscorrect} proposed a training-free correction approach that projects neural predictions onto physically consistent manifolds using PDE residual Jacobians at inference time. Because it requires no architectural modifications, it can be applied as a post-processing step on top of any trained model—including TCAN—to reduce PDE residual errors without retraining.
+% -------------------------------------------------------------------
+\subsection{Gradient Flow Pathologies and Loss Balancing (2021)}
+\label{sec:bg:loss-balancing}
 
-%------------------------------------------------------------------------------
-\subsection{Transolver}
-\label{subsec:transolver}
-%------------------------------------------------------------------------------
+As discussed in Section~\ref{sec:bg:gradient-pathologies}, Wang, Teng, and Perdikaris~\cite{wang2021understanding} published in the \emph{SIAM Journal on Scientific Computing} in 2021 a systematic analysis of why multi-objective physics-informed losses destabilise training. The authors demonstrated that when different loss terms produce back-propagated gradients of widely differing magnitudes, optimisation is effectively controlled by whichever term happens to dominate the gradient norm, while the other terms receive negligible update signals. For composite losses that include a physics residual term, a data-fitting term, and a boundary condition term, this imbalance can be extreme: the residual term alone may produce gradients 10 to 100 times larger than the data term, causing the network to ``memorise'' the PDE structure while failing to match the observations.
 
-Wu et al.~\cite{wu2024transolver} introduced Transolver, which replaces standard spatial attention over individual mesh points with \textbf{Physics Attention}: mesh points are first grouped into a small set of learned physical states, and attention is computed between these higher-level states. This reduces complexity from $\mathcal{O}(N^2)$ to linear in $N$, while also capturing gradient structure and sharp feature boundaries more effectively than point-wise attention. Transolver is relevant as a spatial complement to our purely temporal attention mechanism.
+The proposed remedy, learning-rate annealing, tracks a running estimate of the maximum gradient magnitude produced by each loss term and adjusts the per-term weight $\lambda_i$ inversely proportional to this estimate at each iteration, so that all terms contribute equally to the total gradient norm. This adaptive reweighting was validated on multiple PDE benchmarks, including lid-driven cavity flow and the Klein-Gordon equation, and was shown to reliably recover convergence in regimes where fixed-weight PINNs stall~\cite{wang2021understanding}. Our own training procedure internalises this lesson: the coefficients 1.0 (MSE), 0.1 (gradient penalty), and 0.05 (energy penalty) in the TCAN loss were chosen after gradient-norm monitoring during initial experiments, and gradient clipping with AdamW further prevents any single loss term from monopolising the gradient signal.
 
-%------------------------------------------------------------------------------
-\subsection{Multi-Objective Loss Balancing}
-\label{subsec:loss_balancing}
-%------------------------------------------------------------------------------
+% -------------------------------------------------------------------
+\subsection{Active Learning for Neural PDE Solvers (2025)}
+\label{sec:bg:active-learning}
 
-Wang et al.~\cite{wang2021understanding} proposed adaptive algorithms that automatically balance competing loss terms during training of physics-informed models. By dynamically adjusting the relative weights of, for example, data, PDE residual, and boundary condition losses, these methods prevent gradient pathologies (e.g.\ one loss dominating and suppressing the others) that frequently destabilize training. We draw on this principle when combining our data fidelity loss with energy dissipation and mass conservation regularizers.
+Training accurate neural PDE solvers requires large collections of high-fidelity reference trajectories, each of which must be generated by running an expensive classical numerical solver. For our Burgers experiments, generating the 724 training trajectories (128 spatial points, 256 timesteps, 13 viscosity values) is manageable, but scaling to 2D Navier-Stokes or to regimes requiring very small timesteps will multiply the data generation cost by orders of magnitude. Musekamp, Kalimuthu, Holzmüller, Takamoto, and Niepert addressed this bottleneck systematically in the paper \emph{Active Learning for Neural PDE Solvers}, which was first posted on arXiv in August 2024 and accepted at ICLR 2025~\cite{musekamp2025activelearning}.
 
-%------------------------------------------------------------------------------
-\subsection{Active Learning for Neural PDE Solvers}
-\label{subsec:active_learning}
-%------------------------------------------------------------------------------
+The paper introduces AL4PDE, a modular benchmark framework that enables the systematic evaluation of active learning (AL) strategies for neural PDE solvers in the solver-in-the-loop setting. In this setting, the surrogate is allowed to iteratively query the classical solver at adaptively chosen initial conditions and PDE parameter values, rather than passively consuming a fixed pre-generated dataset. The benchmark includes multiple parametric PDE families, multiple neural operator architectures (FNO, UNet, convolutional operators), and a suite of batch active learning algorithms spanning uncertainty-based, feature-based, and random selection strategies. The main empirical finding is that intelligent data acquisition can match the accuracy of passively trained models using substantially smaller training sets, with the best AL strategies reducing the number of required solver queries by a factor of 2 to 4 on several benchmarks~\cite{musekamp2025activelearning}. For our planned extension to 2D Burgers and incompressible Navier-Stokes, where each high-fidelity trajectory requires significantly more compute to generate, an active learning data acquisition strategy could translate directly into reduced total generation cost while maintaining generalisation performance across unseen viscosity and forcing regimes.
 
-Musekamp et al.~\cite{musekamp2024active} presented a benchmark framework demonstrating that intelligent, uncertainty-guided selection of PDE parameters (e.g.\ viscosity values) for labelling can substantially reduce the dataset size required to reach a target accuracy. For our planned extension to 2D incompressible Navier-Stokes—where generating high-fidelity trajectories is computationally expensive—active learning provides a principled approach to data-efficient training.

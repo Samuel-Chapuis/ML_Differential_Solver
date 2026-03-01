@@ -118,10 +118,10 @@ Based on the analysis of the preliminary 2D results and the lessons from 1D TCAN
 Replace symmetric (reflect) padding with circular padding in all convolutional layers, which is the physically correct choice for a periodic domain.
 
 \paragraph{Progressive rollout training.}
-Apply the same progressive rollout curriculum used in 1D to stabilize training in the harder 2D regime. Scheduling exposure to the model's own prediction errors during training~\cite{lippe2023pde} is particularly relevant here.
+Apply the same progressive rollout curriculum used in 1D to stabilize training in the harder 2D regime. Scheduling exposure to the model's own prediction errors during training~\cite{lippe2023pderefiner} is particularly relevant here.
 
 \paragraph{Larger and more diverse 2D dataset.}
-Scale up data generation using a pseudo-spectral solver at multiple resolutions, mirroring the 1D strategy. Active learning~\cite{musekamp2024active} can guide selection of the most informative samples.
+Scale up data generation using a pseudo-spectral solver at multiple resolutions, mirroring the 1D strategy. Active learning~\cite{musekamp2025activelearning} can guide selection of the most informative samples.
 
 \paragraph{Extension to incompressible Navier-Stokes.}
 The incompressible Navier-Stokes equations extend the 2D Burgers system with a pressure term and an incompressibility constraint:
